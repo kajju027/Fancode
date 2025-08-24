@@ -4,32 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <link rel="shortcut icon" href="https://drmlive.in/sports/fancode.png" />
-<title>CNP FANCODE MATCH - SAYAN 1.0.2</title>
+<title>Cnp Fancode Live | 1.0.4</title>
 <link
   rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap"
 />
 <style>
-  /* উজ্জ্বল ফন্টের জন্য গ্লো ইফেক্ট */
+  /* Font glow effect with CSS variables */
   body, h1, h2, h3, h4, h5, h6, p, a, button {
-    color: #e0e7ff;
+    color: var(--text-color);
     text-shadow:
-      0 0 5px #a0c4ff,
-      0 0 10px #80b1ff,
-      0 0 15px #5f9eff,
-      0 0 20px #3f8aff,
-      0 0 30px #1f7aff;
+      0 0 5px var(--text-shadow-color),
+      0 0 10px var(--text-shadow-color),
+      0 0 15px var(--text-shadow-color),
+      0 0 20px var(--text-shadow-color),
+      0 0 30px var(--text-shadow-color);
     transition: color 0.3s ease, text-shadow 0.3s ease;
-  }
-
-  :root {
-    --bg-color: #001f3f; /* DEEP-BLUE default background */
-    --text-color: #e0e7ff;
-    --match-bg: #002951;
-    --btn-primary-bg: #0056b3;
-    --btn-primary-hover-bg: #003a75;
-    --status-live-color: #ff4c4c;
-    --status-upcoming-color: #999;
   }
 
   body {
@@ -40,6 +30,7 @@
     color: var(--text-color);
     transition: background-color 0.4s, color 0.4s;
   }
+
   .file-container {
     display: flex;
     flex-wrap: wrap;
@@ -47,6 +38,7 @@
     justify-content: center;
     padding: 10px;
   }
+
   .match-item {
     margin: 10px;
     text-align: center;
@@ -58,7 +50,9 @@
     width: calc(25% - 20px);
     box-sizing: border-box;
     cursor: pointer;
+    position: relative;
   }
+
   .match-item img {
     max-width: 100%;
     height: auto;
@@ -66,44 +60,53 @@
     margin: 0 auto 10px auto;
     transition: box-shadow 0.3s ease;
   }
+
   .match-item h3,
   .match-item p {
     font-family: 'Montserrat', sans-serif;
     margin: 0;
     text-transform: uppercase;
   }
+
   .match-item h3 {
     font-weight: 700;
     margin-bottom: 15px;
   }
+
   .match-item p {
     font-weight: 400;
     margin-bottom: 15px;
   }
+
   .match-item p:last-of-type {
     margin-bottom: 0;
   }
+
   .match-item a {
     text-decoration: none;
-    color: #00bfff;
+    color: var(--link-color);
     font-weight: 700;
     display: block;
     margin-top: 5px;
     transition: color 0.3s ease;
   }
+
   .match-item:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 10px rgba(255, 72, 0, 0.7);
+    box-shadow: 0 0 10px var(--hover-shadow-color);
   }
+
   .match-item:hover img {
-    box-shadow: 0 0 15px rgba(255, 72, 0, 0.7);
+    box-shadow: 0 0 15px var(--hover-shadow-color);
   }
+
   .match-item a:hover {
-    color: #ff6600;
+    color: var(--link-hover-color);
   }
+
   h1 {
     text-align: center;
-    color: #00bfff;
+    color: var(--title-color);
     margin-bottom: 10px;
     font-family: 'Montserrat', sans-serif;
   }
@@ -112,20 +115,20 @@
     position: fixed;
     top: 15px;
     right: 15px;
-    background-color: var(--btn-primary-bg);
-    color: var(--text-color);
-    padding: 10px 15px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-family: 'Montserrat', sans-serif;
+    background-color: transparent;
     border: none;
     cursor: pointer;
-    box-shadow: 0 0 8px var(--btn-primary-bg);
-    transition: background-color 0.3s ease;
     z-index: 1000;
+    width: 48px;
+    height: 48px;
   }
-  #theme-toggle:hover {
-    background-color: var(--btn-primary-hover-bg);
+  #theme-toggle img {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease;
+  }
+  #theme-toggle:hover img {
+    transform: rotate(20deg);
   }
 
   .status-live {
@@ -159,94 +162,171 @@
     .match-item {
       width: calc(100% - 20px);
     }
-    #theme-toggle {
-      font-size: 14px;
-      padding: 8px 12px;
-    }
   }
+
   .button-container {
     margin-top: 10px;
   }
+
   .stream-button {
     padding: 10px 15px;
-    margin-right: 5px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     color: white;
+    background-color: var(--btn-primary-bg);
+    transition: background-color 0.3s ease;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
   }
-  .dai-button {
-    background-color: #007bff;
+  .stream-button:hover {
+    background-color: var(--btn-primary-hover-bg);
   }
-  .adfree-button {
-    background-color: #28a745;
+
+  /* Green glowing live dot animation */
+  .live-dot {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    background: #0f0;
+    border-radius: 50%;
+    box-shadow:
+      0 0 5px #0f0,
+      0 0 10px #0f0;
+    animation: pulseGreen 2s infinite;
+  }
+  @keyframes pulseGreen {
+    0% {
+      box-shadow:
+        0 0 5px #0f0,
+        0 0 10px #0f0;
+    }
+    50% {
+      box-shadow:
+        0 0 15px #00ff00,
+        0 0 30px #00ff00;
+    }
+    100% {
+      box-shadow:
+        0 0 5px #0f0,
+        0 0 10px #0f0;
+    }
   }
 
   footer {
     text-align: center;
-    padding: 15px 0 50px 0;
+    padding: 20px 0 50px 0;
     color: #fff;
     background-color: #111;
     font-family: 'Montserrat', sans-serif;
     position: relative;
   }
 
-  /* ফুটারে ভিজিটর কাউন্টার এবং সোশ্যাল আইকন */
   #footer-social {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-top: 10px;
+    gap: 25px;
+    margin-top: 15px;
   }
+
   #footer-social img.visitor-counter {
     height: 30px;
     user-select: none;
   }
+
   #footer-social a.social-icon {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
     filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%);
     transition: filter 0.3s ease;
+    align-items: center;
+    justify-content: center;
   }
+
+  #footer-social a.social-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
   #footer-social a.social-icon:hover {
     filter: invert(54%) sepia(97%) saturate(610%) hue-rotate(160deg) brightness(96%) contrast(95%);
   }
 </style>
 </head>
 <body>
-  <h1>CNP FANCODE TV</h1>
-  <button id="theme-toggle" title="Change Theme">Toggle Theme</button>
+  <h1>CNP FANCODE LIVE</h1>
+  <button id="theme-toggle" title="Change Theme" aria-label="Toggle Theme" >
+    <img id="theme-icon" src="https://i.imgur.com/8O6YJzI.png" alt="Sun Icon" />
+  </button>
   <div class="file-container" id="matches"></div>
 
 <script>
   const playerBaseURL = 'https://fancodez.kajju3864.workers.dev/ios=';
   const apiURL = 'https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json';
 
+  // Three themes: 1-Black & White, 2-Orange & Black (default), 3-Dark Blue & Dark Black
   const themes = [
-    { '--bg-color': '#001f3f', '--text-color': '#e0e7ff', '--match-bg': '#002951', '--btn-primary-bg': '#0056b3', '--btn-primary-hover-bg': '#003a75', '--status-live-color': '#ff4c4c', '--status-upcoming-color': '#999' }, // DEEP-BLUE
-    { '--bg-color': '#0d1b2a', '--text-color': '#bbe1fa', '--match-bg': '#1b263b', '--btn-primary-bg': '#415a77', '--btn-primary-hover-bg': '#778da9', '--status-live-color': '#ff6b6b', '--status-upcoming-color': '#a0a0a0' }, // NIGHT BLUE
-    { '--bg-color': '#0a0a0a', '--text-color': '#f0f0f0', '--match-bg': '#222222', '--btn-primary-bg': '#555555', '--btn-primary-hover-bg': '#888888', '--status-live-color': '#ff4444', '--status-upcoming-color': '#999999' }, // DARK GRAY
-    { '--bg-color': '#f0f4f8', '--text-color': '#2d2d2d', '--match-bg': '#ffffff', '--btn-primary-bg': '#007bff', '--btn-primary-hover-bg': '#0056b3', '--status-live-color': '#d9534f', '--status-upcoming-color': '#777777' }, // LIGHT BLUE
-    { '--bg-color': '#2e3a59', '--text-color': '#dce3f2', '--match-bg': '#465a83', '--btn-primary-bg': '#6b7dad', '--btn-primary-hover-bg': '#4b5d8e', '--status-live-color': '#ff5c57', '--status-upcoming-color': '#a4a4a4' }, // SLATE BLUE
-    { '--bg-color': '#121212', '--text-color': '#e0e0e0', '--match-bg': '#1e1e1e', '--btn-primary-bg': '#bb86fc', '--btn-primary-hover-bg': '#9a67ea', '--status-live-color': '#ff6b6b', '--status-upcoming-color': '#888888' }, // PURPLE DARK
-    { '--bg-color': '#fffbf0', '--text-color': '#5a463a', '--match-bg': '#fff5e1', '--btn-primary-bg': '#d4ba7d', '--btn-primary-hover-bg': '#b79f57', '--status-live-color': '#c94c4c', '--status-upcoming-color': '#a1978a' }, // WARM BEIGE
-    { '--bg-color': '#073b4c', '--text-color': '#e0f7fa', '--match-bg': '#118ab2', '--btn-primary-bg': '#06d6a0', '--btn-primary-hover-bg': '#028090', '--status-live-color': '#ff5252', '--status-upcoming-color': '#88c0d0' }, // CYAN BLUE
-    { '--bg-color': '#202020', '--text-color': '#f0f0f0', '--match-bg': '#303030', '--btn-primary-bg': '#009688', '--btn-primary-hover-bg': '#00796b', '--status-live-color': '#ff4444', '--status-upcoming-color': '#a0a0a0' }, // TEAL DARK
-    { '--bg-color': '#282c34', '--text-color': '#abb2bf', '--match-bg': '#3a3f4b', '--btn-primary-bg': '#61dafb', '--btn-primary-hover-bg': '#21a1f1', '--status-live-color': '#e06c75', '--status-upcoming-color': '#7f848e' }, // REACT BLUE
-    { '--bg-color': '#001514', '--text-color': '#b2f7ef', '--match-bg': '#004d40', '--btn-primary-bg': '#26a69a', '--btn-primary-hover-bg': '#00796b', '--status-live-color': '#ff6b6b', '--status-upcoming-color': '#8fbcbb' }, // DARK TEAL
-    { '--bg-color': '#1f1f2e', '--text-color': '#c7c7d9', '--match-bg': '#2f2f45', '--btn-primary-bg': '#5656aa', '--btn-primary-hover-bg': '#464674', '--status-live-color': '#ff5c57', '--status-upcoming-color': '#9f9fbf' }, // MIDNIGHT PURPLE
-    { '--bg-color': '#3e2723', '--text-color': '#fbe9e7', '--match-bg': '#5d4037', '--btn-primary-bg': '#8d6e63', '--btn-primary-hover-bg': '#6d4c41', '--status-live-color': '#e57373', '--status-upcoming-color': '#bcaaa4' }, // BROWN
-    { '--bg-color': '#0a192f', '--text-color': '#ccd6f6', '--match-bg': '#112240', '--btn-primary-bg': '#64ffda', '--btn-primary-hover-bg': '#1de9b6', '--status-live-color': '#ff5c57', '--status-upcoming-color': '#8892b0' }, // NAVY BLUE
-    { '--bg-color': '#1b262c', '--text-color': '#bbe1fa', '--match-bg': '#0f4c75', '--btn-primary-bg': '#3282b8', '--btn-primary-hover-bg': '#1b262c', '--status-live-color': '#ff4c4c', '--status-upcoming-color': '#81a4cd' }, // BLUE OCEAN
-    { '--bg-color': '#20232a', '--text-color': '#61dafb', '--match-bg': '#282c34', '--btn-primary-bg': '#61dafb', '--btn-primary-hover-bg': '#21a1f1', '--status-live-color': '#ff6b6b', '--status-upcoming-color': '#7f848e' }, // DARK REACT
-    { '--bg-color': '#fdf6e3', '--text-color': '#657b83', '--match-bg': '#eee8d5', '--btn-primary-bg': '#b58900', '--btn-primary-hover-bg': '#7b6000', '--status-live-color': '#dc322f', '--status-upcoming-color': '#93a1a1' }, // SOLARIZED LIGHT
-    { '--bg-color': '#002b36', '--text-color': '#839496', '--match-bg': '#073642', '--btn-primary-bg': '#268bd2', '--btn-primary-hover-bg': '#005f87', '--status-live-color': '#dc322f', '--status-upcoming-color': '#586e75' }, // SOLARIZED DARK
-    { '--bg-color': '#121212', '--text-color': '#e0e0e0', '--match-bg': '#1e1e1e', '--btn-primary-bg': '#bb86fc', '--btn-primary-hover-bg': '#9a67ea', '--status-live-color': '#ff6b6b', '--status-upcoming-color': '#888888' }, // PURPLE DARK
-    { '--bg-color': '#282828', '--text-color': '#ebdbb2', '--match-bg': '#3c3836', '--btn-primary-bg': '#bdae93', '--btn-primary-hover-bg': '#a89984', '--status-live-color': '#fb4934', '--status-upcoming-color': '#7c6f64' } // DRACULA
+    {
+      name: 'Black & White',
+      icon: 'https://i.imgur.com/8O6YJzI.png', // sun icon (white)
+      '--bg-color': '#ffffff',
+      '--text-color': '#000000',
+      '--text-shadow-color': '#444444',
+      '--match-bg': '#f0f0f0',
+      '--btn-primary-bg': '#000000',
+      '--btn-primary-hover-bg': '#222222',
+      '--btn-primary-text': '#ffffff',
+      '--status-live-color': '#ff0000',
+      '--status-upcoming-color': '#555555',
+      '--hover-shadow-color': 'rgba(0,0,0,0.5)',
+      '--link-color': '#0000ee',
+      '--link-hover-color': '#551a8b',
+      '--title-color': '#000000'
+    },
+    {
+      name: 'Orange & Black',
+      icon: 'https://i.imgur.com/Oq1vMNu.png', // orange moon icon
+      '--bg-color': '#000000',
+      '--text-color': '#ff9c33',
+      '--text-shadow-color': '#ff7700',
+      '--match-bg': '#180900',
+      '--btn-primary-bg': '#ff6600',
+      '--btn-primary-hover-bg': '#cc5500',
+      '--btn-primary-text': '#000000',
+      '--status-live-color': '#ff3300',
+      '--status-upcoming-color': '#cc6600',
+      '--hover-shadow-color': 'rgba(255,102,0,0.7)',
+      '--link-color': '#ff9c33',
+      '--link-hover-color': '#ffcc66',
+      '--title-color': '#ff9c33'
+    },
+    {
+      name: 'Dark Blue & Dark Black',
+      icon: 'https://i.imgur.com/8O6YJzI.png', // sun icon again for simplicity
+      '--bg-color': '#001f3f',
+      '--text-color': '#e0e7ff',
+      '--text-shadow-color': '#80aaff',
+      '--match-bg': '#000511',
+      '--btn-primary-bg': '#004080',
+      '--btn-primary-hover-bg': '#002050',
+      '--btn-primary-text': '#e0e7ff',
+      '--status-live-color': '#00ff00',
+      '--status-upcoming-color': '#999999',
+      '--hover-shadow-color': 'rgba(0,72,255,0.7)',
+      '--link-color': '#00bfff',
+      '--link-hover-color': '#66ccff',
+      '--title-color': '#00bfff'
+    }
   ];
+
+  let currentThemeIndex = 1; // default theme: Orange & Black
 
   function applyTheme(index) {
     const theme = themes[index];
@@ -254,97 +334,96 @@
     Object.entries(theme).forEach(([key, value]) => {
       document.documentElement.style.setProperty(key, value);
     });
+    // Update icon
+    const themeIcon = document.getElementById('theme-icon');
+    if(themeIcon && theme.icon) themeIcon.src = theme.icon;
+    // Update button text title
+    const toggleBtn = document.getElementById('theme-toggle');
+    if(toggleBtn) toggleBtn.title = `Toggle Theme (Current: ${theme.name})`;
   }
-
-  let currentThemeIndex = 0;
   applyTheme(currentThemeIndex);
 
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  themeToggleBtn.textContent = "Toggle Theme";
-  themeToggleBtn.title = "Click to cycle themes";
-  themeToggleBtn.onclick = () => {
+  document.getElementById('theme-toggle').addEventListener('click', () => {
     currentThemeIndex = (currentThemeIndex + 1) % themes.length;
     applyTheme(currentThemeIndex);
-  };
+  });
 
   function cleanAdfreeUrl(url) {
-    if(!url) return '';
-    if(url.includes('in-mc-fdlive.fancode.com') || url.includes('dai.fancode.com'))
-      return url.replace('28XmZCsE','').replace('dai.fancode.com','').replace('/mumbai/','/primary/');
+    if (!url) return '';
+    if (url.includes('in-mc-fdlive.fancode.com') || url.includes('dai.fancode.com'))
+      return url.replace('28XmZCsE', '').replace('dai.fancode.com', '').replace('/mumbai/', '/primary/');
     return url;
   }
 
   function getImageUrl(match) {
-    if(match.src) return match.src;
+    if (match.src) return match.src;
     return 'https://via.placeholder.com/300x200?text=No+Image';
   }
 
   fetch(apiURL)
-  .then(response => response.json())
-  .then(data => {
-    data.matches.sort((a, b) => {
-      if(a.status.toLowerCase() === 'live' && b.status.toLowerCase() !== 'live') return -1;
-      if(a.status.toLowerCase() !== 'live' && b.status.toLowerCase() === 'live') return 1;
-      return 0;
-    });
-    const container = document.getElementById('matches');
-    data.matches.forEach(match => {
-      const div = document.createElement('div');
-      div.className = 'match-item';
-
-      const statusText = match.status.toLowerCase() === 'live' ? 'Live' : 'Upcoming';
-      const statusClass = match.status.toLowerCase() === 'live' ? 'status-live' : 'status-upcoming';
-      const startTimeText = match.status.toLowerCase() === 'upcoming' ? '<p>Start Time: '+match.startTime+'</p>' : '';
-      const adfreeUrl = cleanAdfreeUrl(match.adfree_url);
-
-      div.innerHTML =
-        '<img src="'+getImageUrl(match)+'" alt="'+match.title+'">' +
-        '<h3>'+match.team_1+' vs '+match.team_2+'</h3>' +
-        '<p class="'+statusClass+'">'+statusText+'</p>' +
-        startTimeText +
-        '<div class="button-container">' +
-        '<button class="stream-button dai-button">Watch Normal</button>' +
-        '<button class="stream-button adfree-button">Watch Ad-Free</button>' +
-        '</div>';
-
-      const watchNormalBtn = div.querySelector('.dai-button');
-      const watchAdFreeBtn = div.querySelector('.adfree-button');
-
-      watchNormalBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        if(match.dai_url){
-          window.location.href = playerBaseURL + match.dai_url;
-        } else {
-          alert('No Normal stream available.');
-        }
+    .then(response => response.json())
+    .then(data => {
+      data.matches.sort((a, b) => {
+        if (a.status.toLowerCase() === 'live' && b.status.toLowerCase() !== 'live') return -1;
+        if (a.status.toLowerCase() !== 'live' && b.status.toLowerCase() === 'live') return 1;
+        return 0;
       });
+      const container = document.getElementById('matches');
+      data.matches.forEach(match => {
+        const div = document.createElement('div');
+        div.className = 'match-item';
 
-      watchAdFreeBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        if(adfreeUrl){
-          window.location.href = playerBaseURL + adfreeUrl;
-        } else {
-          alert('No Ad-Free stream available.');
+        const statusText = match.status.toLowerCase() === 'live' ? 'Live' : 'Upcoming';
+        const statusClass = match.status.toLowerCase() === 'live' ? 'status-live' : 'status-upcoming';
+        const startTimeText = match.status.toLowerCase() === 'upcoming' ? '<p>Start Time: ' + match.startTime + '</p>' : '';
+        const adfreeUrl = cleanAdfreeUrl(match.adfree_url);
+
+        // Live indicator green dot for live matches only
+        let liveDotHTML = '';
+        let buttonLabel = 'Watch Live';
+        if (match.status.toLowerCase() === 'live') {
+          liveDotHTML = '<span class="live-dot" aria-label="Live Now"></span>';
         }
-      });
 
-      div.addEventListener('click', () => {
-        if(match.status.toLowerCase() === 'live'){
-          alert('This match is live. Click a button to watch.');
-        } else if(match.status.toLowerCase() === 'upcoming'){
-          alert('This match is upcoming.');
-        }
-      });
+        div.innerHTML =
+          '<img src="' + getImageUrl(match) + '" alt="' + match.title + '">' +
+          '<h3>' + match.team_1 + ' vs ' + match.team_2 + '</h3>' +
+          '<p class="' + statusClass + '">' + statusText + '</p>' +
+          startTimeText +
+          '<div class="button-container">' +
+          '<button class="stream-button dai-button" aria-label="Watch ' + buttonLabel + '">' +
+          liveDotHTML + buttonLabel +
+          '</button>' +
+          '</div>';
 
-      container.appendChild(div);
-    });
-  })
-  .catch(err => console.error('Error fetching data:', err));
+        const watchNormalBtn = div.querySelector('.dai-button');
+
+        watchNormalBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          if (match.dai_url) {
+            window.location.href = playerBaseURL + match.dai_url;
+          } else {
+            alert('No Normal stream available.');
+          }
+        });
+
+        div.addEventListener('click', () => {
+          if (match.status.toLowerCase() === 'live') {
+            alert('This match is live. Click the button to watch.');
+          } else if (match.status.toLowerCase() === 'upcoming') {
+            alert('This match is upcoming.');
+          }
+        });
+
+        container.appendChild(div);
+      });
+    })
+    .catch(err => console.error('Error fetching data:', err));
 </script>
 
 <footer>
-  ©Sayan 2023 - <span id="current-year"></span> | All Rights Reserved ।
-  <div id="footer-social">
+  ©Sayan 2023 - <span id="current-year"></span> | All Rights Reserved
+  <div id="footer-social" role="contentinfo">
     <img class="visitor-counter" src="https://visit-counter.vercel.app/counter.png?page=https%3A%2F%2Fjio-fancode.pages.dev%2F&s=55&c=ff00d9&bg=00000000&no=8&ff=digi&tb=&ta=" alt="Visitor Counter" />
     <a href="https://whatsapp.com/channel/0029Va9UKhEL7UVN6cfr8a16" target="_blank" rel="noopener noreferrer" class="social-icon" title="WhatsApp Channel" aria-label="WhatsApp Channel">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width: 100%; height: 100%;">
