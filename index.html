@@ -4,13 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <link rel="shortcut icon" href="https://drmlive.in/sports/fancode.png" />
-<title>Cnp Fancode Live | 1.0.4</title>
+<title>CNP FANCODE LIVE - 1.0.5</title>
 <link
   rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap"
 />
 <style>
-  /* Font glow effect with CSS variables */
   body, h1, h2, h3, h4, h5, h6, p, a, button {
     color: var(--text-color);
     text-shadow:
@@ -115,20 +114,21 @@
     position: fixed;
     top: 15px;
     right: 15px;
-    background-color: transparent;
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-family: 'Montserrat', sans-serif;
     border: none;
     cursor: pointer;
+    box-shadow: 0 0 8px var(--btn-primary-bg);
+    transition: background-color 0.3s ease;
     z-index: 1000;
-    width: 48px;
-    height: 48px;
+    user-select: none;
   }
-  #theme-toggle img {
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease;
-  }
-  #theme-toggle:hover img {
-    transform: rotate(20deg);
+  #theme-toggle:hover {
+    background-color: var(--btn-primary-hover-bg);
   }
 
   .status-live {
@@ -180,40 +180,48 @@
     font-family: 'Montserrat', sans-serif;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 14px;
   }
   .stream-button:hover {
     background-color: var(--btn-primary-hover-bg);
   }
 
-  /* Green glowing live dot animation */
+  /* Enhanced Green glowing live dot animation */
   .live-dot {
     position: relative;
-    width: 12px;
-    height: 12px;
-    background: #0f0;
+    width: 14px;
+    height: 14px;
+    background: #00ff00;
     border-radius: 50%;
     box-shadow:
-      0 0 5px #0f0,
-      0 0 10px #0f0;
-    animation: pulseGreen 2s infinite;
+      0 0 10px #00ff00,
+      0 0 20px #00ff00,
+      0 0 30px #00ff00,
+      0 0 40px #00ff00;
+    animation: pulseGreen 1.5s infinite;
   }
   @keyframes pulseGreen {
     0% {
       box-shadow:
-        0 0 5px #0f0,
-        0 0 10px #0f0;
+        0 0 10px #00ff00,
+        0 0 20px #00ff00,
+        0 0 30px #00ff00,
+        0 0 40px #00ff00;
     }
     50% {
       box-shadow:
-        0 0 15px #00ff00,
-        0 0 30px #00ff00;
+        0 0 20px #00ff00,
+        0 0 40px #00ff00,
+        0 0 60px #00ff00,
+        0 0 80px #00ff00;
     }
     100% {
       box-shadow:
-        0 0 5px #0f0,
-        0 0 10px #0f0;
+        0 0 10px #00ff00,
+        0 0 20px #00ff00,
+        0 0 30px #00ff00,
+        0 0 40px #00ff00;
     }
   }
 
@@ -262,20 +270,16 @@
 </head>
 <body>
   <h1>CNP FANCODE LIVE</h1>
-  <button id="theme-toggle" title="Change Theme" aria-label="Toggle Theme" >
-    <img id="theme-icon" src="https://i.imgur.com/8O6YJzI.png" alt="Sun Icon" />
-  </button>
+  <button id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">Themes</button>
   <div class="file-container" id="matches"></div>
 
 <script>
   const playerBaseURL = 'https://fancodez.kajju3864.workers.dev/ios=';
   const apiURL = 'https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json';
 
-  // Three themes: 1-Black & White, 2-Orange & Black (default), 3-Dark Blue & Dark Black
   const themes = [
     {
       name: 'Black & White',
-      icon: 'https://i.imgur.com/8O6YJzI.png', // sun icon (white)
       '--bg-color': '#ffffff',
       '--text-color': '#000000',
       '--text-shadow-color': '#444444',
@@ -292,7 +296,6 @@
     },
     {
       name: 'Orange & Black',
-      icon: 'https://i.imgur.com/Oq1vMNu.png', // orange moon icon
       '--bg-color': '#000000',
       '--text-color': '#ff9c33',
       '--text-shadow-color': '#ff7700',
@@ -309,7 +312,6 @@
     },
     {
       name: 'Dark Blue & Dark Black',
-      icon: 'https://i.imgur.com/8O6YJzI.png', // sun icon again for simplicity
       '--bg-color': '#001f3f',
       '--text-color': '#e0e7ff',
       '--text-shadow-color': '#80aaff',
@@ -326,7 +328,7 @@
     }
   ];
 
-  let currentThemeIndex = 1; // default theme: Orange & Black
+  let currentThemeIndex = 1; // Default Orange & Black
 
   function applyTheme(index) {
     const theme = themes[index];
@@ -334,18 +336,17 @@
     Object.entries(theme).forEach(([key, value]) => {
       document.documentElement.style.setProperty(key, value);
     });
-    // Update icon
-    const themeIcon = document.getElementById('theme-icon');
-    if(themeIcon && theme.icon) themeIcon.src = theme.icon;
-    // Update button text title
-    const toggleBtn = document.getElementById('theme-toggle');
-    if(toggleBtn) toggleBtn.title = `Toggle Theme (Current: ${theme.name})`;
   }
+
   applyTheme(currentThemeIndex);
 
-  document.getElementById('theme-toggle').addEventListener('click', () => {
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  themeToggleBtn.textContent = `Themes (${themes[currentThemeIndex].name})`;
+
+  themeToggleBtn.addEventListener('click', () => {
     currentThemeIndex = (currentThemeIndex + 1) % themes.length;
     applyTheme(currentThemeIndex);
+    themeToggleBtn.textContent = `Themes (${themes[currentThemeIndex].name})`;
   });
 
   function cleanAdfreeUrl(url) {
@@ -378,7 +379,6 @@
         const startTimeText = match.status.toLowerCase() === 'upcoming' ? '<p>Start Time: ' + match.startTime + '</p>' : '';
         const adfreeUrl = cleanAdfreeUrl(match.adfree_url);
 
-        // Live indicator green dot for live matches only
         let liveDotHTML = '';
         let buttonLabel = 'Watch Live';
         if (match.status.toLowerCase() === 'live') {
