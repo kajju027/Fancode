@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CNP FANCODE LIVE - 1.0.5</title>
+<!-- Google Fonts -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap" />
+
+<style>
+  :root {
+    --bg-color: #222;
+    --text-color: #fff;
+    --text-shadow-color: #444;
+    --match-bg: #333;
+    --btn-primary-bg: #ff6600;
+    --btn-primary-hover-bg: #cc5500;
+    --btn-primary-text: #fff;
+    --status-live-color: #00ff00;
+    --status-upcoming-color: #888;
+    --hover-shadow-color: rgba(0,0,0,0.7);
+    --link-color: #66ccff;
+    --link-hover-color: #3399ff;
+    --title-color: #ff6600;
+  }
+
+  #particles-js {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+  }
+
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.4s, color 0.4s;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: var(--title-color);
+  }
+
+  @media(max-width: 768px){
+    h1 {
+      font-size: 1.5em;
+    }
+  }
+
+  #whatsapp-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 12px 20px;
+    background-color: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 0 8px rgba(37, 211, 102, 0.8);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+  }
+  #whatsapp-btn:hover {
+    background-color: #1DA851;
+  }
+
+  .file-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .match-item {
+    background-color: var(--match-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    width: calc(25% - 20px);
+    min-width: 250px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.4s;
+    position: relative;
+  }
+
+  @media(max-width: 1024px){
+    .match-item {
+      width: calc(33.333% - 20px);
+    }
+  }
+  @media(max-width: 768px){
+    .match-item {
+      width: calc(50% - 20px);
+    }
+  }
+  @media(max-width: 480px){
+    .match-item {
+      width: 100%;
+    }
+  }
+
+  .match-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .match-details {
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .match-details h3 {
+    margin: 5px 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1.2em;
+  }
+
+  .status {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0;
+  }
+
+  .live-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 1.5s infinite;
+  }
+
+  /* Green & red dots */
+  .live-dot-green { background-color: #00ff00; }
+  .live-dot-red   { background-color: #ff0000; }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .status-upcoming {
+    color: var(--status-upcoming-color);
+  }
+
+  .stream-button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .stream-button:hover {
+    background-color: var(--btn-primary-hover-bg);
+  }
+
+  footer {
+    width: 100%;
+    text-align: center;
+    padding: 20px 10px 24px 10px;
+    background-color: #111;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    margin-top: 40px;
+    position: relative;
+    left: 0;
+    bottom: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>CNP FANCODE LIVE</h1>
+<!-- ওয়াটসঅ্যাপ বোতাম -->
+<button id="whatsapp-btn" aria-label="Join WhatsApp Channel" title="Join WhatsApp Channel">
+  WhatsApp Channel
+</button>
+
+<!-- পার্টিকল -->
+<div id="particles-js"></div>
+
+<!-- ম্যাচের তালিকা -->
+<div class="file-container" id="matches"></div>
+
+<!-- পার্টিকল লাইব্রেরি -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+<script>
+  // পার্টিকল কনফিগারেশন
+  particlesJS('particles-js', {
+    "particles": {
+      "number": {
+        "value": 80,
+        "density": {
+          "enable": true,
+          "value_area": 800
+        }
+      },
+      "color": {
+        "value": "#ffffff"
+      },
+      "shape": {
+        "type": "circle"
+      },
+      "opacity": {
+        "value": 0.5
+      },
+      "size": {
+        "value": 5,
+        "random": true
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#ffffff",
+        "opacity": 0.4,
+        "width": 1
+      },
+      "move": {
+        "enable": true,
+        "speed": 8
+      }
+    },
+    "interactivity": {
+      "detect_on": "canvas",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "grab"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "push"
+        }
+      },
+      "modes": {
+        "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
+        "push": { "particles_nb": 4 }
+      }
+    },
+    "retina_detect": true
+  });
+
+  // ওয়াটসঅ্যাপ চ্যানেল লিঙ্ক
+  document.getElementById('whatsapp-btn').addEventListener('click', () => {
+    window.open('https://wa.me/?text=Join%20my%20WhatsApp%20Channel:%20https://whatsapp.com/channel/0029Va9UKhEL7UVN6cfr8a16', '_blank');
+  });
+
+  // ম্যাচ ডেটা
+  const apiURL = 'https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json';
+  const playerBaseURL = 'https://fancodez.kajju3864.workers.dev/ios=';
+
+  // কালার থিম
+  const themes = [
+    {
+      name: 'প্রিয় নীল ব্লু',
+      '--bg-color': '#0d1b2a',
+      '--text-color': '#ffffff',
+      '--text-shadow-color': '#222',
+      '--match-bg': '#1b263b',
+      '--btn-primary-bg': '#1f4068',
+      '--btn-primary-hover-bg': '#16315f',
+      '--btn-primary-text': '#fff',
+      '--status-live-color': '#00ff00',
+      '--status-upcoming-color': '#888',
+      '--hover-shadow-color': 'rgba(0,255,0,0.7)',
+      '--link-color': '#66ccff',
+      '--link-hover-color': '#3399ff',
+      '--title-color': '#00ffcc'
+    }
+  ];
+
+  let currentThemeIndex = 0;
+  function applyTheme(index) {
+    const theme = themes[index];
+    if (!theme) return;
+    Object.entries(theme).forEach(([k,v]) => {
+      if(k.startsWith('--')){
+        document.documentElement.style.setProperty(k, v);
+      }
+    });
+  }
+  applyTheme(currentThemeIndex);
+
+  // Helper: ওয়াজ লাইভ কিনা চেক করা
+  function isWazLive(match) {
+    // ধরলাম title, team_1, team_2, অথবা অন্য কোথাও 'ওয়াজ লাইভ' আছে কি না!
+    // তুমি চাইলে এখানে কাস্টমাইজ করতে পারো
+    const t = (match.title || "").trim().toLowerCase();
+    return t.includes('ওয়াজ লাইভ') || t.includes('waz live');
+  }
+
+  // ম্যাচ ডেটা দেখানো
+  fetch(apiURL)
+    .then(res => res.json())
+    .then(data => {
+      data.matches.sort((a, b) => {
+        if (a.status.toLowerCase() === 'live' && b.status.toLowerCase() !== 'live') return -1;
+        if (a.status.toLowerCase() !== 'live' && b.status.toLowerCase() === 'live') return 1;
+        return 0;
+      });
+      const container = document.getElementById('matches');
+      data.matches.forEach(match => {
+        const div = document.createElement('div');
+        div.className = 'match-item';
+
+        // Determine dot color
+        let dotClass = 'live-dot-red';
+        if (match.status && match.status.toLowerCase() === 'live' && isWazLive(match)) dotClass = 'live-dot-green';
+
+        const statusText = match.status && match.status.toLowerCase() === 'live' ? 'Live' : 'Upcoming';
+        const statusClass = match.status && match.status.toLowerCase() === 'live' ? 'status-live' : 'status-upcoming';
+
+        const startTimeDisplay = match.status && match.status.toLowerCase() === 'upcoming' ? `<p>Start Time: ${match.startTime}</p>` : '';
+
+        const imageUrl = match.src || 'https://via.placeholder.com/300x200?text=No+Image';
+
+        div.innerHTML = `
+          <img src="${imageUrl}" alt="${match.title}">
+          <div class="match-details">
+            <h3>${match.team_1} vs ${match.team_2}</h3>
+            <div class="${statusClass}">
+              <div class="live-dot ${dotClass}"></div> ${statusText}
+            </div>
+            ${startTimeDisplay}
+            <button class="stream-button">
+              ${match.status && match.status.toLowerCase() === 'live' ? '<div class="live-dot '+dotClass+'"></div>' : ''}
+              Watch ${match.status && match.status.toLowerCase() === 'live' ? 'Now' : match.startTime}
+            </button>
+          </div>
+        `;
+        div.querySelector('.stream-button').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (match.dai_url) {
+            window.location.href = playerBaseURL + match.dai_url;
+          } else {
+            alert('No stream available.');
+          }
+        });
+        div.addEventListener('click', () => {
+          if (match.status && match.status.toLowerCase() === 'live') {
+            alert('This match is live. Click the button to watch.');
+          } else {
+            alert('Upcoming match at: ' + match.startTime);
+          }
+        });
+        container.appendChild(div);
+      });
+    })
+    .catch(console.error);
+</script>
+
+<footer>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:15px;">
+    <span>©Sayan 2025 | All Rights Reserved</span>
+    <img src="https://visit-counter.vercel.app/counter.png?page=https%3A%2F%2Ffamcode.onrender.com%2F&s=55&c=ffffff&bg=00000000&no=1&ff=digii&tb=&ta=" alt="visits" style="vertical-align:middle;height:28px;">
+    <a href="https://t.me/sayan_xyz" target="_blank" title="@sayan_xyz" style="display:inline-flex;align-items:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="#229ED9" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9.6,17.37a1,1,0,0,0,.95.67h.11a1,1,0,0,0,.91-.79l1.29-5.17,4.24-3.85A1,1,0,0,0,16,6.27l-12,4A1,1,0,0,0,4,12.23l3.08,1.12,1.23,4.07Zm1.58-1.34-1.23-4.08a1,1,0,0,0-.67-.68L6,10.61l8.77-2.91-3.62,3.28a1,1,0,0,0-.31.52Z"/>
+      </svg>
+    </a>
+  </div>
+</footer>
+
+</body>
+</html>
