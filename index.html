@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CNP FANCODE LIVE - 1.0.5</title>
-<!-- Google Fonts -->
+<title>CNP FANCODE LIVE - by SAYAN</title>
+<!--Teri maa ke chud 360km/h-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap" />
 
 <style>
@@ -210,22 +210,22 @@
 <body>
 
 <h1>CNP FANCODE LIVE</h1>
-<!-- ওয়াটসঅ্যাপ বোতাম -->
+<!--dubara Teri maa ke chud 370km/h-->
 <button id="whatsapp-btn" aria-label="Join WhatsApp Channel" title="Join WhatsApp Channel">
   WhatsApp Channel
 </button>
 
-<!-- পার্টিকল -->
+<!-- Tishri barTeri maa ke chud 380km/h-->
 <div id="particles-js"></div>
 
-<!-- ম্যাচের তালিকা -->
+<!-- Teri maa ke chud 390km/h -->
 <div class="file-container" id="matches"></div>
 
-<!-- পার্টিকল লাইব্রেরি -->
+<!-- particle -->
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
 <script>
-  // পার্টিকল কনফিগারেশন
+  // Teri maa ke chud 399km/h
   particlesJS('particles-js', {
     "particles": {
       "number": {
@@ -280,16 +280,16 @@
     "retina_detect": true
   });
 
-  // ওয়াটসঅ্যাপ চ্যানেল লিঙ্ক
+  // Teri maa ke chud 330km/h
   document.getElementById('whatsapp-btn').addEventListener('click', () => {
     window.open('https://wa.me/?text=Join%20my%20WhatsApp%20Channel:%20https://whatsapp.com/channel/0029Va9UKhEL7UVN6cfr8a16', '_blank');
   });
 
-  // ম্যাচ ডেটা
+  // Teri maa ke chud 290km/h
   const apiURL = 'https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json';
   const playerBaseURL = 'https://fancodez.kajju3864.workers.dev/ios=';
 
-  // কালার থিম
+  // Teri maa ke chud 360km/h
   const themes = [
     {
       name: 'প্রিয় নীল ব্লু',
@@ -321,15 +321,15 @@
   }
   applyTheme(currentThemeIndex);
 
-  // Helper: ওয়াজ লাইভ কিনা চেক করা
+  // 
   function isWazLive(match) {
-    // ধরলাম title, team_1, team_2, অথবা অন্য কোথাও 'ওয়াজ লাইভ' আছে কি না!
-    // তুমি চাইলে এখানে কাস্টমাইজ করতে পারো
+    // 
+    // 
     const t = (match.title || "").trim().toLowerCase();
     return t.includes('ওয়াজ লাইভ') || t.includes('waz live');
   }
 
-  // ম্যাচ ডেটা দেখানো
+  // Teri maa ke chud 360km/h
   fetch(apiURL)
     .then(res => res.json())
     .then(data => {
@@ -404,3 +404,4 @@
 </body>
 
 </html>
+
