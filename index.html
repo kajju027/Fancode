@@ -1,295 +1,330 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CNP FANCODE LIVE - BY SAYAN</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title> CRICKET NEWS POINT </title>
 
-<style>
-  :root {
-    --bg-color: #222;
-    --text-color: #fff;
-    --match-bg: #333;
-    --btn-primary-bg: #ff6600;
-    --btn-primary-hover-bg: #cc5500;
-    --btn-primary-text: #fff;
-    --status-live-color: #00ff00;     /* সবুজ (Live) */
-    --status-upcoming-color: #ff0000; /* লাল (Upcoming) */
-    --title-color: #ff6600;
-  }
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
-  body {
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    position: relative;
-    overflow-x: hidden;
-  }
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#0f1720;
+      --muted:#9aa6b2;
+      --accent:#00FF00;
+      --accent-2:#ff4b4b;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
+      background:linear-gradient(180deg,#07111a 0%, #071722 100%);
+      color:#e6eef6;
+    }
+    #particles-js{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      opacity:0.45;
+    }
 
-  /* Particle Background */
-  #particles-js {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-  }
+    .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 18px;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      backdrop-filter:blur(4px);
+      flex-wrap:wrap;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{width:72px;height:52px;object-fit:cover;border-radius:8px}
+    .title{font-size:20px;font-weight:700;color:#ff2b7a}
+    .last-update{font-size:13px;color:var(--muted)}
+    .join-btn{
+      background:#0b84ff;
+      color:#fff;
+      padding:8px 14px;
+      border-radius:9999px;
+      border:0;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(11,132,255,0.16);
+    }
 
-  /* HEADER */
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 15px 30px;
-    background: #111;
-    border-bottom: 2px solid #333;
-    position: relative;
-    z-index: 10;
-  }
-  header h1 {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 2.2em;
-    color: var(--title-color);
-    margin: 0;
-  }
-  .header-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  #whatsapp-btn, #telegram-btn {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 40px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  #whatsapp-btn {
-    background-color: #25D366;
-    color: #fff;
-    box-shadow: 0 0 6px rgba(37, 211, 102, 0.8);
-  }
-  #whatsapp-btn:hover { background-color: #1DA851; }
-  #telegram-btn {
-    background-color: #229ED9;
-    color: #fff;
-    box-shadow: 0 0 6px rgba(34, 158, 217, 0.8);
-  }
-  #telegram-btn:hover { background-color: #1A80B9; }
+    main{
+      flex:1;
+      padding:18px;
+      max-width:1300px;
+      margin:0 auto;
+      width:100%;
+    }
 
-  /* Last update */
-  #last-update {
-    text-align: center;
-    font-size: 14px;
-    margin: 10px 0;
-    color: #ccc;
-    position: relative;
-    z-index: 5;
-  }
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .controls .search{
+      margin-left:auto;
+      min-width:220px;
+      max-width:360px;
+      width:100%;
+    }
+    .controls input{
+      width:100%;
+      padding:8px;
+      border-radius:10px;
+      border:0;
+      background:rgba(255,255,255,0.03);
+      color:inherit;
+    }
 
-  /* Matches */
-  .file-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    padding: 10px 20px;
-    position: relative;
-    z-index: 5;
-  }
-  .match-item {
-    background-color: var(--match-bg);
-    border-radius: 10px;
-    width: calc(25% - 20px);
-    min-width: 250px;
-    padding: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    transition: 0.3s;
-  }
-  .match-item img {
-    width: 100%; border-radius: 8px;
-  }
-  .match-details { margin-top: 10px; text-align: center; }
-  .match-details h3 {
-    margin: 5px 0; font-family: 'Montserrat', sans-serif;
-    font-weight: 700; font-size: 1.2em;
-  }
-  .status { display: flex; align-items: center; justify-content: center; margin: 5px 0; font-weight: bold; }
-  .status-live { color: var(--status-live-color); }
-  .status-upcoming { color: var(--status-upcoming-color); }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:18px;
+    }
+    @media (min-width:700px){ .grid{grid-template-columns:repeat(3,1fr);} }
+    @media (min-width:1100px){ .grid{grid-template-columns:repeat(4,1fr);} }
 
-  .live-dot {
-    width: 14px; height: 14px;
-    border-radius: 50%; margin-right: 8px;
-    animation: pulse 1.5s infinite;
-  }
-  .live-dot-green { background: var(--status-live-color); }
-  .live-dot-red { background: var(--status-upcoming-color); }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:14px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    }
 
-  @keyframes pulse {
-    0%{transform:scale(1);}
-    50%{transform:scale(1.3);}
-    100%{transform:scale(1);}
-  }
+    .thumb{width:100%;height:220px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,0.03)}
+    @media (max-width:900px){ .thumb{height:180px} }
+    @media (max-width:600px){ .thumb{height:140px} }
 
-  .stream-button {
-    margin-top: 10px;
-    padding: 10px 15px;
-    border: none; border-radius: 8px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700; cursor: pointer;
-    width: 100%;
-    background-color: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    transition: 0.3s;
-  }
-  .stream-button:hover { background-color: var(--btn-primary-hover-bg); }
-  .stream-button.live { background: #28a745; }
-  .stream-button.live:hover { background: #218838; }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 
-  /* FOOTER */
-  footer {
-    background: #111;
-    color: #fff;
-    text-align: center;
-    padding: 40px 20px;
-    margin-top: 40px;
-    position: relative;
-    z-index: 5;
-  }
-  footer .links {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-  footer a { color: #66ccff; text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
-  footer small { display: block; margin-top: 12px; color: #aaa; }
-  footer .visitor {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #ccc;
-  }
-</style>
+    .meta{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+      text-align:center;
+    }
+    .teams{font-weight:800;font-size:16px;line-height:1.2}
+    .event{font-size:13px;color:var(--muted)}
+    .status{display:inline-block;padding:6px 10px;border-radius:9999px;font-weight:800;font-size:12px;margin-top:4px}
+    .status.live{background:linear-gradient(90deg,var(--accent-2),#ff7a4b);color:#fff}
+    .status.upcoming{background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
+
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-top:8px;
+    }
+    .btn{
+      padding:8px 14px;
+      border-radius:9999px;
+      border:0;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .btn-free{
+      background:linear-gradient(180deg,var(--accent),#00d600);
+      color:#052000;
+      box-shadow:0 8px 24px rgba(0,255,0,0.08);
+    }
+    .btn-adfree{
+      background:linear-gradient(180deg,#ffd700,#ffea00);
+      color:#2c2c00;
+      box-shadow:0 8px 24px rgba(255,230,0,0.08);
+    }
+    .btn-up{background:#ff4b4b;color:#fff}
+
+    footer{
+      padding:14px 18px;
+      border-top:1px solid rgba(255,255,255,0.03);
+      text-align:center;
+      color:var(--muted);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+    }
+    .note{font-size:13px;color:var(--muted)}
+    .visitor-counter{height:34px;border-radius:8px;overflow:hidden}
+  </style>
 </head>
 <body>
+  <div id="particles-js"></div>
 
-<header>
-  <h1 id="typed-title"></h1>
-  <div class="header-buttons">
-    <button id="whatsapp-btn">WhatsApp</button>
-    <button id="telegram-btn">Feedback Now</button>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <img src="https://files.catbox.moe/eu7lyx.jpeg" alt="Header image">
+        <div>
+          <div class="title">FREE LIV TV FANCODE</div>
+          <div class="last-update" id="lastUpdate">Last Update: —</div>
+        </div>
+      </div>
+      <button class="join-btn" id="joinTelegram" title="Join our Telegram">Join Our WhatsApp</button>
+    </header>
+
+    <main>
+      <div class="controls">
+        <div>
+          <button id="btnAll" class="btn">All</button>
+          <button id="btnUpcoming" class="btn btn-up">Upcoming</button>
+        </div>
+        <div class="search"><input id="q" placeholder="Search team or event..." aria-label="Search"></div>
+      </div>
+
+      <div id="matchesGrid" class="grid" aria-live="polite"></div>
+    </main>
+
+    <footer>
+      <div class="note">SAYAN OAI | ALL RIGHT RECEIVED</div>
+      <img class="visitor-counter" alt="visitor counter"
+           src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj">
+    </footer>
   </div>
-</header>
 
-<div id="last-update">Last Update: Loading...</div>
-<div class="file-container" id="matches"></div>
+  <script>
+    const JSON_URL = 'https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json';
+    const playerBaseURL = 'https://sports.sonuxcricket.workers.dev/ios=';
 
-<div id="particles-js"></div>
-
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-<script>
-  // Typing animation
-  new Typed('#typed-title', {
-    strings: ["CNP FANCODE"],
-    typeSpeed: 70,
-    backSpeed: 40,
-    backDelay: 2000,
-    loop: true
-  });
-
-  // Particle bg
-  particlesJS('particles-js', {
-    "particles": {
-      "number": { "value": 70 },
-      "color": { "value": "#fff" },
-      "size": { "value": 4, "random": true },
-      "line_linked": { "enable": true, "color": "#fff" },
-      "move": { "enable": true, "speed": 4 }
-    },
-    "retina_detect": true
-  });
-
-  // Buttons
-  document.getElementById('whatsapp-btn').onclick = () => window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');
-  document.getElementById('telegram-btn').onclick = () => window.open('https://t.me/sayan_xyz','_blank');
-
-  const apiURL = 'https://raw.githubusercontent.com/drmlive/fancode-live-events/main/fancode.json';
-  const playerBaseURL = 'https://sports.sonuxcricket.workers.dev/ios=';
-
-  function isWazLive(match){
-    const t = (match.title||"").toLowerCase();
-    return t.includes("ওয়াজ লাইভ") || t.includes("waz live");
-  }
-
-  fetch(apiURL).then(r=>r.json()).then(data=>{
-    document.getElementById('last-update').textContent = "Last Update: " + data["last update time"];
-
-    const container=document.getElementById('matches');
-    data.matches.sort((a,b)=>{
-      if(a.status.toLowerCase()==="live" && b.status.toLowerCase()!=="live") return -1;
-      if(a.status.toLowerCase()!=="live" && b.status.toLowerCase()==="live") return 1;
-      return 0;
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 60, density: { enable: false } },
+        color: { value: "#ffffff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.9 },
+        size: { value: 3, random: true },
+        line_linked: { enable: true, distance: 160, color: "#ffffff", opacity: 0.08, width: 1 },
+        move: { enable: true, speed: 2.2, random: true }
+      },
+      interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" } } },
+      retina_detect: true
     });
 
-    data.matches.forEach(match=>{
-      const div=document.createElement('div');
-      div.className="match-item";
+    const grid = document.getElementById('matchesGrid');
+    const lastUpdateEl = document.getElementById('lastUpdate');
+    const qInput = document.getElementById('q');
+    const btnUpcoming = document.getElementById('btnUpcoming');
+    const btnAll = document.getElementById('btnAll');
+    const joinTelegram = document.getElementById('joinTelegram');
+    let fullData = null;
 
-      let dotClass="live-dot-green";  // Live = সবুজ
-      let statusClass="status-live";
-      let statusText="Live";
+    function el(tag, cls){ const e = document.createElement(tag); if(cls) e.className = cls; return e; }
 
-      if(match.status?.toLowerCase()==="upcoming"){
-        dotClass="live-dot-red";      // Upcoming = লাল
-        statusClass="status-upcoming";
-        statusText="Upcoming";
+    async function loadAndRender(){
+      try{
+        const res = await fetch(JSON_URL, {cache: "no-store"});
+        if(!res.ok) throw new Error('JSON load failed');
+        const data = await res.json();
+        fullData = data;
+        const lut = data["last update time"] || data["last_update"] || data.lastUpdate || '—';
+        lastUpdateEl.textContent = 'Last Update: ' + lut;
+        renderMatches(data.matches || []);
+      }catch(err){
+        grid.innerHTML = '<div style="padding:18px;color:#f88">Could not load matches: '+err.message+'</div>';
+        console.error(err);
       }
+    }
 
-      div.innerHTML=`
-        <img src="${match.src||'https://via.placeholder.com/300x200?text=No+Image'}" alt="${match.title}">
-        <div class="match-details">
-          <h3>${match.team_1} vs ${match.team_2}</h3>
-          <div class="${statusClass}"><div class="live-dot ${dotClass}"></div>${statusText}</div>
-          ${match.status?.toLowerCase()==="upcoming"?`<p>Start Time: ${match.startTime}</p>`:""}
-          <button class="stream-button ${match.status?.toLowerCase()==="live"?"live":""}">
-            ${match.status?.toLowerCase()==="live" ? `<div class="live-dot ${dotClass}"></div>`:""}
-            Watch ${match.status?.toLowerCase()==="live"?"Now":match.startTime}
-          </button>
-        </div>`;
-      div.querySelector('.stream-button').onclick=(e)=>{
-        e.stopPropagation();
-        if(match.dai_url){ window.location.href=playerBaseURL+match.dai_url; }
-        else alert("No stream available.");
-      };
-      container.appendChild(div);
+    function renderMatches(list){
+      grid.innerHTML = '';
+      if(!list || list.length === 0){
+        grid.innerHTML = '<div style="padding:18px;color:var(--muted)">No matches found.</div>';
+        return;
+      }
+      list.forEach(m => {
+        const card = el('div','card');
+
+        const thumb = el('div','thumb');
+        const img = document.createElement('img');
+        img.src = m.src || m.image || 'https://via.placeholder.com/800x450?text=No+Image';
+        img.alt = (m.match_name || m.title || 'match image');
+        thumb.appendChild(img);
+
+        const meta = el('div','meta');
+        const teams = el('div','teams');
+        teams.textContent = (m.team_1 || '') + (m.team_2 ? '  vs  ' + m.team_2 : '');
+        const event = el('div','event');
+        event.textContent = (m.event_name || m.title || '');
+        const isLive = (m.status && m.status.toLowerCase().includes('live'));
+        const status = el('div','status ' + (isLive ? 'live' : 'upcoming'));
+        status.textContent = isLive ? 'LIVE' : 'UPCOMING';
+
+        const actions = el('div','actions');
+        if(!isLive && (m.status || '').toLowerCase().includes('upcoming')){
+          const upB = el('button','btn btn-up');
+          upB.textContent = 'Upcoming';
+          upB.onclick = () => alert('Starts at: ' + (m.startTime || 'Unknown'));
+          actions.appendChild(upB);
+        } else {
+          const freeB = el('button','btn btn-free');
+          freeB.textContent = 'Free';
+          freeB.onclick = () => openInNewTab(m.dai_url || m.m3u8 || m.src || m.adfree_url);
+
+          const adB = el('button','btn btn-adfree');
+          adB.textContent = 'Ad Free';
+          adB.onclick = () => openInNewTab(m.adfree_url || m.dai_url || m.m3u8 || m.src);
+
+          actions.appendChild(freeB);
+          actions.appendChild(adB);
+        }
+
+        meta.appendChild(teams);
+        meta.appendChild(event);
+        meta.appendChild(status);
+        meta.appendChild(actions);
+
+        card.appendChild(thumb);
+        card.appendChild(meta);
+        grid.appendChild(card);
+      });
+    }
+
+    function openInNewTab(link){
+      if(!link){
+        alert('No video link available for this match.');
+        return;
+      }
+      const final = playerBaseURL + encodeURIComponent(link);
+      window.open(final, '_blank');
+    }
+
+    qInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if(!fullData || !fullData.matches) return;
+      if(!q) { renderMatches(fullData.matches); return; }
+      const filtered = fullData.matches.filter(m => {
+        const s = ((m.team_1||'') + ' ' + (m.team_2||'') + ' ' + (m.event_name||'') + ' ' + (m.title||'')).toLowerCase();
+        return s.includes(q);
+      });
+      renderMatches(filtered);
     });
-  });
-</script>
 
-<footer>
-  <div>©2025 Sayan | All Rights Reserved</div>
-  <div class="links">
-    <a href="https://t.me/sayan_xyz" target="_blank">Telegram</a>
-    <a href="#">ㅤ</a>
-    <a href="#">ㅤ</a>
-  </div>
-  <div class="visitor">
-    Live Visitor Count:  
-    <img src="https://www.counter12.com/img-zcaY9Z50wC4Z99x7-61.gif" alt="Visitor Counter" />
-  </div>
-  <small> ❤️ </small>
-</footer>
+    btnUpcoming.addEventListener('click', () => {
+      if(!fullData || !fullData.matches) return;
+      const up = fullData.matches.filter(m => !(m.status || '').toLowerCase().includes('live'));
+      renderMatches(up);
+    });
 
+    btnAll.addEventListener('click', () => { if(fullData && fullData.matches) renderMatches(fullData.matches); });
+
+    joinTelegram.addEventListener('click', () => { window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T/', '_blank'); });
+
+    loadAndRender();
+  </script>
 </body>
-  </html>
-
-
-
+</html>
