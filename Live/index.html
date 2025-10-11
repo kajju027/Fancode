@@ -3,384 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Willow Cricbuzz</title>
-
-  <!-- Plyr CSS -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.13/plyr.css" />
-
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+  <title>FamCode Live</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
       background: #000;
-      font-family: Arial, sans-serif;
-    }
-
-    /* container preserved as requested (mobile-friendly default) */
-    .video-container {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      max-width: 720px;
-      aspect-ratio: 16/9;
-      z-index: 1;
-    }
-
-    /* video element will fill the container */
-    .video-container video {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 10px;
-      display: block;
-      background: transparent;
-      object-fit: cover;
-    }
-
-    /* Popup, buttons and other UI unchanged (kept from original) */
-    .popup-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
       display: flex;
-      align-items: center;
       justify-content: center;
-      z-index: 10002;
-    }
-
-    .popup-box {
-      width: 380px;
-      background: rgba(25, 25, 35, 0.8);
-      border: 1px solid rgba(173, 216, 230, 0.25);
-      border-radius: 20px;
-      backdrop-filter: blur(15px);
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
-      padding: 2.2rem 1.8rem;
-      text-align: center;
-      position: relative;
-      animation: fadeIn 0.5s ease forwards;
-    }
-
-    @keyframes fadeIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .popup-header {
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 0.7rem;
-      letter-spacing: 0.5px;
-    }
-
-    .popup-subtitle {
-      font-size: 1.05rem;
-      color: #ccc;
-      margin-bottom: 1.4rem;
-      line-height: 1.5;
-    }
-
-    .popup-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .popup-buttons a,
-    .popup-buttons button {
-      padding: 0.9rem;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.35s ease;
-      border: none;
-      text-decoration: none;
-    }
-
-    .join-btn {
-      background: linear-gradient(135deg, #00eaff, #9c00ff);
-    }
-
-    .already-btn {
-      background: rgba(255,255,255,0.04);
-    }
-
-    .already-btn:hover {
-      background: rgba(255,255,255,0.12);
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 16px;
-      font-size: 1.5rem;
-      color: #00eaff;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    #floatingTelegramBtn {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      padding: 0.8rem 1.2rem;
-      background: linear-gradient(135deg, #00eaff, #9c00ff);
-      color: #fff;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 14px;
-      text-decoration: none;
-      z-index: 10003;
-      display: flex;
       align-items: center;
-      gap: 6px;
+      height: 100vh;
     }
-
-    .material-icons { font-size: 1.3rem; }
-
-    #visitorToggle {
-      position: fixed;
-      top: 10px;
-      right: 14px;
-      font-size: 20px;
-      color: #00eaff;
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: none;
-      z-index: 10004;
-    }
-
-    #visitorCounter {
-      position: fixed;
-      top: 45px;
-      right: 10px;
-      display: none;
-      z-index: 10004;
-    }
-
-    #visitorCounter img {
-      width: 130px;
-    }
-
-    @media (max-width: 600px) {
-      .popup-box {
-        width: 88%;
-        padding: 1.8rem;
-      }
-      .popup-header { font-size: 1.8rem; }
-      .popup-subtitle { font-size: 0.95rem; }
-      .popup-buttons a, .popup-buttons button { font-size: 0.95rem; }
-    }
-
-    /* ---------------------------
-       Plyr styling to make the player pink-textured
-       --------------------------- */
-    /* wrapper gradient texture */
-    .plyr__video-wrapper {
-      background: linear-gradient(135deg, #ffcade 0%, #ff8fc4 50%, #ff66b3 100%);
-      background-blend-mode: overlay;
-      border-radius: 10px;
-      box-shadow: 0 8px 30px rgba(255,102,179,0.12);
-      overflow: hidden;
-    }
-
-    /* control highlights */
-    .plyr--full-ui .plyr__controls {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-    }
-
-    .plyr__control--pressed,
-    .plyr__control:hover,
-    .plyr__progress__buffer,
-    .plyr__progress__filled {
-      background: rgba(255,102,179,0.9) !important;
-    }
-
-    .plyr__progress__buffer {
-      background: rgba(255,102,179,0.18) !important;
-    }
-
-    .plyr__tooltip,
-    .plyr__menu__container,
-    .plyr__controls .plyr__control {
-      color: #fff !important;
-    }
-
-    /* make overlaid big-play button pink */
-    .plyr__control.plyr__control--overlaid {
-      background: rgba(255,102,179,0.95);
-      color: #fff;
-      border-radius: 10px;
-      padding: 14px 16px;
+    video {
+      width: 100%;
+      max-width: 900px;
+      border: 3px solid #ffd957;
+      border-radius: 12px;
+      background: #000;
     }
   </style>
 </head>
 <body>
+  <video id="player" controls playsinline></video>
 
-  <!-- VIDEO CONTAINER: replaced iframe with Plyr video element -->
-  <div class="video-container">
-    <video id="player" playsinline muted crossorigin controls></video>
-  </div>
-
-  <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" id="floatingTelegramBtn">
-    <span class="material-icons">send</span> Join WhatsApp
-  </a>
-
-  <div class="popup-overlay" id="telegramPopup">
-    <div class="popup-box" id="popupBox">
-      <button class="close-btn" onclick="closePopup()">×</button>
-      <div class="popup-header">Support Us!</div>
-      <div class="popup-subtitle">Join our WhatsApp for the latest news, updates, and releases.</div>
-      <div class="popup-buttons">
-        <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" class="join-btn" id="joinBtn">Join Now</a>
-        <button class="already-btn" onclick="closePopup()">Already Joined</button>
-      </div>
-    </div>
-  </div>
-
-  <button id="visitorToggle">×</button>
-  <div id="visitorCounter">
-    <img src="https://www.counter12.com/img-9205Yd3W54Z3y43Z-5.gif" alt="Visitor Counter">
-  </div>
-
-  <!-- Hls.js and Plyr JS -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.5/dist/hls.min.js"></script>
-  <script src="https://cdn.plyr.io/3.7.13/plyr.polyfilled.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
-    /* existing popup color randomizer kept */
-    const popup = document.getElementById('telegramPopup');
-    const popupBox = document.getElementById('popupBox');
-    const joinBtn = document.getElementById('joinBtn');
-    const colors = [
-      {header:'#FFD700',btn:'#FFD700'},
-      {header:'#FF4040',btn:'#FF4040'},
-      {header:'#00FF66',btn:'#00FF66'},
-      {header:'#FFA500',btn:'#FFA500'},
-      {header:'#00BFFF',btn:'#00BFFF'},
-      {header:'#FF1493',btn:'#FF1493'},
-      {header:'#9400D3',btn:'#9400D3'},
-      {header:'#00CED1',btn:'#00CED1'}
-    ];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    popupBox.style.boxShadow = `0 0 35px ${color.header}`;
-    joinBtn.style.background = color.btn;
-    popupBox.querySelector('.popup-header').style.color = color.header;
+    const params = new URLSearchParams(window.location.search);
+    const encodedUrl = params.get('ios');
 
-    function closePopup() {
-      popup.style.display = 'none';
-      document.getElementById('visitorToggle').style.display = 'block';
-    }
-
-    document.getElementById('visitorToggle').addEventListener('click', function() {
-      const counter = document.getElementById('visitorCounter');
-      counter.style.display = counter.style.display === 'block' ? 'none' : 'block';
-    });
-
-    /* --------------------------
-       Plyr + HLS integration
-       - uses URL param `?ios=<m3u8>` (URL-encoded)
-       - defaults to a public test stream if none provided
-       - forces a 360p start-level when available
-       - muted autoplay so browsers allow autoplay
-       -------------------------- */
-
-    (function() {
-      const params = new URLSearchParams(window.location.search);
-      const iosParam = params.get('ios');
-      // if you pass a URL, better to encodeURIComponent when generating the link
-      const streamUrl = iosParam ? decodeURIComponent(iosParam) : 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
-
+    if (!encodedUrl) {
+      document.body.innerHTML = '<p style="color:white;font-family:monospace">No video link provided.</p>';
+    } else {
+      const decodedUrl = decodeURIComponent(encodedUrl);
       const video = document.getElementById('player');
-
-      // Init Plyr first with muted autoplay to help browsers allow autoplay
-      const plyrOptions = {
-        controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen'],
-        autoplay: true,
-        clickToPlay: true,
-        muted: true
-      };
-      const player = new Plyr(video, plyrOptions);
-
-      // helper: set HLS level closest to 360 if available
-      function setClosestTo360(hls) {
-        if (!hls || !hls.levels || !hls.levels.length) return;
-        let closestIndex = 0;
-        let minDiff = Infinity;
-        hls.levels.forEach((lvl, i) => {
-          const h = lvl.height || 0;
-          const diff = Math.abs(h - 360);
-          if (diff < minDiff) { minDiff = diff; closestIndex = i; }
-        });
-        // set level (if -1 then auto)
-        hls.currentLevel = closestIndex;
-      }
 
       if (Hls.isSupported()) {
         const hls = new Hls();
+        hls.loadSource(decodedUrl);
         hls.attachMedia(video);
-        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-          hls.loadSource(streamUrl);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          video.play();
         });
-
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          // try to set default quality to nearest 360
-          setClosestTo360(hls);
-
-          // Build quality options for Plyr if available
-          const heights = Array.from(new Set(hls.levels.map(l => l.height).filter(Boolean))).sort((a,b)=>b-a);
-          if (heights.length) {
-            // Attempt to update plyr UI options (Plyr reads options on init; forced update not official)
-            // But we still listen for Plyr quality change and map it to hls levels.
-            player.on('qualityrequested', (event) => {
-              const q = parseInt(event.detail, 10);
-              const levelIndex = hls.levels.findIndex(l => l.height === q);
-              if (levelIndex !== -1) hls.currentLevel = levelIndex;
-            });
-
-            // If Plyr settings menu not showing correct list automatically, try to set default via API:
-            try {
-              player.options.quality = {
-                default: heights.includes(360) ? 360 : heights[Math.min(heights.length-1, 0)],
-                options: heights,
-                forced: true
-              };
-            } catch (e) {
-              // Non-fatal. Plyr may not accept dynamic options in some builds.
-            }
-          }
-
-          // attempt autoplay
-          video.play().catch(()=>{});
-        });
-
-        // expose for debugging if needed
-        window._hls = hls;
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // native HLS (Safari, iOS)
-        video.src = streamUrl;
+        video.src = decodedUrl;
         video.addEventListener('loadedmetadata', function() {
-          // Safari often allows autoplay if muted
-          video.play().catch(()=>{});
+          video.play();
         });
-      } else {
-        // unsupported environment: show message in console
-        console.warn('HLS not supported in this browser.');
       }
-    })();
+
+      const player = new Plyr(video, {
+        controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
+      });
+    }
   </script>
 </body>
 </html>
