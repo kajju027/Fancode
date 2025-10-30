@@ -3,258 +3,400 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Fancode | By SAYAN OAI</title>
+<title>Plyr Video Player</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
 <style>
   :root{
     --bg:#000;
     --accent:#2445ff;
-    --panel:#111;
-    --white:#fff;
-    --red:#e53935;
+    --panel:#0f1113;
+    --white:#ffffff;
+    --muted:#bfbfbf;
   }
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;}
-  /* header join button (top-right) */
-  header{position:fixed;top:12px;right:14px;z-index:999;padding:0}
-  .join-top{
-    background:linear-gradient(90deg,var(--accent),#001ed9);
-    color:#fff;padding:10px 16px;border-radius:14px;font-weight:700;text-decoration:none;display:inline-block;box-shadow:0 10px 30px rgba(36,69,255,0.35);
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--white);
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
   }
 
-  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;position:relative;}
-  .player-container{width:100%;max-width:980px;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 40px rgba(0,0,0,0.7);}
-  .player-wrap{position:relative;height:62vh;min-height:260px;background:#000;display:block;}
-  video#player{width:100%;height:100%;object-fit:contain;background:#000;display:block;border-radius:0;}
+  /* header join button */
+  header{
+    position:fixed;
+    top:10px;
+    right:12px;
+    z-index:1200;
+  }
+  .join-top{
+    display:inline-block;
+    background:linear-gradient(90deg,var(--accent),#001ed9);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-weight:800;
+    text-decoration:none;
+    box-shadow:0 8px 30px rgba(36,69,255,0.45);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* main layout */
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:70px 14px 40px;}
+  .player-container{
+    width:100%;
+    max-width:980px;
+    background:transparent;
+    border-radius:14px;
+    overflow:hidden;
+    position:relative;
+  }
+  .player-box{position:relative;border-radius:12px;overflow:hidden;background:#000;}
+  video#player{
+    width:100%;
+    height:64vh;
+    min-height:260px;
+    max-height:86vh;
+    background:#000;
+    display:block;
+    object-fit:contain;
+  }
+
   /* plyr theme */
   :root { --plyr-color-main: var(--accent); }
-  .plyr__control.plyr__control--overlaid{width:56px;height:56px;border-radius:50%;background:var(--accent)!important;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(36,69,255,0.28);}
-  .plyr--video .plyr__controls button.plyr__control svg, .plyr__controls [class*="plyr__control"] svg { fill: var(--white)!important; }
-  .plyr__controls{background:rgba(0,0,0,0.14);}
-  /* popup (center) - match screenshot look */
-  .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1200}
-  .popup{width:min(92%,380px);background:linear-gradient(180deg,#0e0e12,var(--panel));border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(36,69,255,0.12);text-align:center;}
-  .popup h2{margin:0 0 8px;font-size:22px;color:var(--accent);font-weight:800}
-  .popup p{margin:0 0 18px;color:#d1d8e6;opacity:0.9}
-  .popup .btn{display:block;width:100%;padding:12px;border-radius:12px;border:0;font-weight:800;cursor:pointer;margin-bottom:10px}
-  .btn-primary{background:linear-gradient(90deg,var(--accent),#0066ff);color:#fff;box-shadow:0 10px 30px rgba(36,69,255,0.18)}
-  .btn-ghost{background:rgba(255,255,255,0.03);color:#fff;border:1px solid rgba(255,255,255,0.04)}
-  /* visitor dot (bottom-right) */
+  .plyr__controls{ background: rgba(0,0,0,0.22) !important; backdrop-filter: blur(4px); }
+  .plyr__control.plyr__control--overlaid{ background: var(--accent) !important; box-shadow:0 8px 30px rgba(36,69,255,0.45); }
+
+  /* small error inline (not used for user instructions) */
+  #inlineError{ display:none; margin-top:8px; text-align:center; padding:10px; border-radius:10px; background:#111; color:#ffddcc; }
+
+  /* support popup (same look as your screenshot style) */
+  .popup-overlay{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background: rgba(0,0,0,0.88); z-index:1000;
+  }
+  .popup{
+    width:min(92%,420px);
+    background:#0d0f12;
+    border-radius:18px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(36,69,255,0.12), 0 8px 30px rgba(0,0,0,0.7);
+    border:1px solid rgba(255,255,255,0.02);
+  }
+  .popup h2{ margin:0 0 8px; color:var(--accent); font-size:20px; font-weight:800; }
+  .popup p{ margin:0 0 18px; color:#d6d9de; font-size:14px; }
+  .popup .btn{ display:block; width:100%; padding:12px 14px; border-radius:12px; font-weight:800; font-size:15px; border:0; cursor:pointer; margin-bottom:10px; }
+  .btn-join{ background:linear-gradient(90deg,var(--accent),#0036d9); color:#fff; box-shadow:0 8px 40px rgba(36,69,255,0.35); }
+  .btn-close{ background:#0b0b0b; color:#fff; border:1px solid rgba(255,255,255,0.03); }
+
+  /* visitor counter pulsing dot (blue) */
   .visitor-dot{
-    position:fixed;right:18px;bottom:18px;z-index:1300;width:18px;height:18px;border-radius:50%;
-    background:var(--accent);box-shadow:0 6px 26px rgba(36,69,255,0.28),0 0 0 rgba(36,69,255,0.35);
-    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;
-    animation:visitorPulse 1600ms infinite;
+    position:fixed;
+    right:14px;
+    bottom:14px;
+    z-index:1200;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 6px rgba(36,69,255,0.08), 0 6px 18px rgba(36,69,255,0.25);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .12s ease;
   }
-  @keyframes visitorPulse{
-    0%{transform:scale(1);box-shadow:0 6px 26px rgba(36,69,255,0.28),0 0 0 0 rgba(36,69,255,0.22);}
-    70%{transform:scale(1.15);box-shadow:0 12px 40px rgba(36,69,255,0.22),0 0 0 12px rgba(36,69,255,0.06);}
-    100%{transform:scale(1);box-shadow:0 6px 26px rgba(36,69,255,0.28),0 0 0 0 rgba(36,69,255,0.00);}
+  .visitor-dot:active{ transform:scale(.92); }
+
+  /* pulsing ring */
+  .visitor-dot::after{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    animation: pulseDot 1.6s infinite;
+    left:0; top:0;
+    box-shadow:0 0 18px rgba(36,69,255,0.25);
   }
-  .visitor-counter-box{
-    position:fixed;right:18px;bottom:56px;z-index:1301;background:rgba(0,0,0,0.9);border-radius:12px;padding:8px;display:none;
-    min-width:140px;max-width:260px;box-shadow:0 10px 40px rgba(0,0,0,0.6);backdrop-filter:blur(6px);
+  @keyframes pulseDot{
+    0%{ transform:scale(1); opacity:.9; }
+    60%{ transform:scale(1.9); opacity:.18; }
+    100%{ transform:scale(2.4); opacity:0; }
   }
-  .visitor-counter-box img{width:100%;height:auto;display:block;border-radius:8px}
-  /* error large card (center) like screenshot */
+
+  /* visitor counter popup card (hidden until clicked) */
+  .visitor-card{
+    position:fixed;
+    right:14px;
+    bottom:48px;
+    z-index:1200;
+    width:180px;
+    max-width:70vw;
+    background:linear-gradient(180deg,#0f141a,#0b0c0e);
+    border-radius:12px;
+    padding:8px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.65);
+    transform-origin:100% 100%;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .25s ease, transform .25s cubic-bezier(.2,.9,.2,1);
+    border:1px solid rgba(36,69,255,0.06);
+  }
+  .visitor-card.show{ opacity:1; visibility:visible; transform:translateY(-6px) scale(1); }
+
+  .visitor-card img{ width:100%; height:auto; display:block; border-radius:8px; }
+
+  /* error overlay (Stream Not Found) — matches screenshot style */
+  .error-overlay{
+    position:fixed; inset:0; display:flex; align-items:flex-start; justify-content:center;
+    z-index:1500; background:transparent; pointer-events:none;
+  }
   .error-card{
-    width:min(92%,420px);margin:20px auto;padding:26px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
-    box-shadow:0 12px 40px rgba(0,0,0,0.6);text-align:left;color:#fff;
+    margin-top:80px;
+    width:min(92%,560px);
+    background:#131417;
+    border-radius:12px;
+    padding:28px 26px;
+    text-align:center;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,0,0,0.02);
+    border:1px solid rgba(255,0,0,0.04);
+    pointer-events:auto;
   }
-  .error-card h1{color:var(--red);font-size:22px;margin:0 0 10px;font-weight:800;text-align:center}
-  .error-card p{color:#cfcfd3;text-align:center;margin:0 0 12px}
-  .error-card a{display:block;text-align:center;color:#9fb6ff;text-decoration:none;margin-top:6px}
-  /* small floating red indicator (screenshot had red dot) - keep reserved */
-  .small-indicator{position:fixed;right:16px;bottom:16px;width:14px;height:14px;border-radius:50%;background:#ff2d2d;box-shadow:0 6px 18px rgba(255,0,0,0.16);z-index:900;opacity:0}
+  .error-card h1{ margin:0 0 12px; color:#ff2b2b; font-size:22px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:10px;}
+  .error-card p{ margin:0 0 16px; color:#d6d6d6; font-size:15px; opacity:0.95;}
+  .error-card a{ display:inline-block; margin-top:6px; color:var(--muted); text-decoration:none; font-weight:600; }
+
+  /* red floating dot bottom-right (as in screenshot) */
+  .record-dot{
+    position:fixed;
+    right:18px;
+    bottom:12px;
+    z-index:1510;
+    width:18px; height:18px; border-radius:50%;
+    background:#ff2b2b;
+    box-shadow:0 0 18px rgba(255,43,43,0.35);
+    pointer-events:none;
+    opacity:0;
+    transform:scale(.8);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .record-dot.show{ opacity:1; transform:scale(1); }
+
   @media(max-width:540px){
-    .player-wrap{height:56vh}
+    video#player{ height:56vh; }
+    .error-card{ margin-top:64px; padding:20px; }
+    .popup{ width:min(92%,360px); padding:18px; }
   }
 </style>
 </head>
 <body>
-  <!-- top join -->
-  <header>
-    <a class="join-top" id="topJoin" href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" rel="noopener">Join WhatsApp</a>
-  </header>
 
-  <main class="wrap" id="mainWrap">
-    <div class="player-container" id="playerContainer">
-      <div class="player-wrap">
-        <video id="player" controls autoplay playsinline muted></video>
-      </div>
-    </div>
+<header>
+  <a class="join-top" href="https://whatsapp.com/channel/YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer">Join WhatsApp</a>
+</header>
 
-    <!-- Error card (hidden by default) -->
-    <div id="errorCard" style="display:none;">
-      <div class="error-card" role="alert">
-        <h1>    ⚠️ Stream Not Found</h1>
-        <p>The requested stream ID is invalid </p>
-        <a id="backAll" href="#" onclick="history.back();return false;">← Back to All Streams</a>
-      </div>
-    </div>
-
-    <!-- visitor counter box (hidden until click) -->
-    <div class="visitor-counter-box" id="visitorBox">
-      <!-- default visitor counter image (you can replace with your counter image URL) -->
-      <img id="visitorImg" src="https://www.counter12.com/img-9205Yd3W54Z3y43Z-5.gif" alt="visits" />
-    </div>
-  </main>
-
-  <!-- center popup (duplicate of screenshot effect) -->
-  <div class="popup-overlay" id="mainPopup" aria-hidden="false">
-    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="pTitle">
-      <h2 id="pTitle">Support Us!</h2>
-      <p>Join our WhatsApp for the latest news, updates, and releases.</p>
-      <button class="btn btn-primary" id="popupJoin">Join Now</button>
-      <button class="btn btn-ghost" id="popupClose">Already Joined</button>
+<main class="wrap" role="main">
+  <div class="player-container">
+    <div class="player-box">
+      <video id="player" controls playsinline autoplay muted></video>
     </div>
   </div>
 
-  <!-- visitor dot -->
-  <div class="visitor-dot" id="visitorDot" title="Visitors"></div>
-  <div class="small-indicator" id="smallInd"></div>
+  <div id="inlineError" aria-live="polite"></div>
+</main>
+
+<!-- Support popup (center) -->
+<div class="popup-overlay" id="supportPopup" role="dialog" aria-modal="true" style="display:block;">
+  <div class="popup" id="supportCard">
+    <h2>Support Us!</h2>
+    <p>Join our WhatsApp for latest news, updates, and releases.</p>
+    <button class="btn btn-join" id="popupJoin">Join Now</button>
+    <button class="btn btn-close" id="popupClose">Already Joined</button>
+  </div>
+</div>
+
+<!-- visitor dot and card -->
+<div class="visitor-dot" id="visitorDot" title="Visitors"></div>
+<div class="visitor-card" id="visitorCard" aria-hidden="true">
+  <img id="visitorImg" src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits">
+</div>
+
+<!-- error overlay (stream not found) -->
+<div class="error-overlay" id="errorOverlay" style="display:none; pointer-events:none;">
+  <div class="error-card" role="alertdialog" aria-live="assertive">
+    <h1>⚠️ Stream Not Found</h1>
+    <p>The requested stream ID is invalid or offline.</p>
+    <a href="/" id="backAll">← Back to All Streams</a>
+  </div>
+</div>
+
+<!-- red record dot -->
+<div class="record-dot" id="recordDot" aria-hidden="true"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
 <script>
 (function(){
+  const params = new URLSearchParams(window.location.search);
+  // accepts either ?ios=... or ?id=... (if your system uses id)
+  const m3u8 = params.get('ios') || params.get('url') || params.get('id') || null;
+
   const playerEl = document.getElementById('player');
-  const popup = document.getElementById('mainPopup');
+  const supportPopup = document.getElementById('supportPopup');
   const popupJoin = document.getElementById('popupJoin');
   const popupClose = document.getElementById('popupClose');
+
   const visitorDot = document.getElementById('visitorDot');
-  const visitorBox = document.getElementById('visitorBox');
+  const visitorCard = document.getElementById('visitorCard');
   const visitorImg = document.getElementById('visitorImg');
-  const errorCard = document.getElementById('errorCard');
-  const smallInd = document.getElementById('smallInd');
 
-  // URL param reading (?ios=)
-  const params = new URLSearchParams(window.location.search);
-  const m3u8 = params.get('ios');
+  const errorOverlay = document.getElementById('errorOverlay');
+  const recordDot = document.getElementById('recordDot');
+  const backAll = document.getElementById('backAll');
 
-  // Popup actions
+  // popup actions
   popupJoin.addEventListener('click', ()=> {
-    window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank','noopener');
+    window.open('https://whatsapp.com/channel/YOUR_WHATSAPP_LINK_HERE','_blank','noopener');
   });
   popupClose.addEventListener('click', ()=> {
-    popup.style.display='none';
+    if(supportPopup) supportPopup.style.display = 'none';
   });
 
-  // Auto hide popup after 60s
-  setTimeout(()=>{ if(popup) popup.style.display='none'; },60000);
+  // Auto-hide support popup after 60s
+  setTimeout(()=>{ if(supportPopup) supportPopup.style.display='none'; }, 60000);
 
-  // visitor dot click toggles counter box
-  visitorDot.addEventListener('click', ()=> {
-    if(visitorBox.style.display === 'block'){
-      visitorBox.style.display = 'none';
+  // visitor dot click toggles counter card
+  let visitorVisible = false;
+  visitorDot.addEventListener('click', (e) => {
+    visitorVisible = !visitorVisible;
+    if(visitorVisible){
+      visitorCard.classList.add('show');
+      visitorCard.setAttribute('aria-hidden','false');
+      // reload image to get fresh count
+      visitorImg.src = 'https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj&ts=' + Date.now();
     } else {
-      // show box and (re)load image to refresh counter
-      visitorImg.src = visitorImg.src.split('?')[0] + '?_=' + Date.now();
-      visitorBox.style.display = 'block';
+      visitorCard.classList.remove('show');
+      visitorCard.setAttribute('aria-hidden','true');
     }
-    // small indicator flash
-    smallInd.style.opacity = 1;
-    setTimeout(()=> smallInd.style.opacity = 0, 600);
   });
 
-  // On initial load: small indicator visible briefly (like screenshot subtle red)
-  smallInd.style.opacity = 0;
-  setTimeout(()=> { smallInd.style.opacity = 0; }, 100);
+  // close visitor card if clicked outside
+  document.addEventListener('click', (ev)=>{
+    if(!visitorDot.contains(ev.target) && !visitorCard.contains(ev.target)){
+      visitorVisible = false;
+      visitorCard.classList.remove('show');
+      visitorCard.setAttribute('aria-hidden','true');
+    }
+  });
 
-  // Pop sound using WebAudio (short "pop" for errors)
-  function playPop(){
+  // small utility to play short pop sound using WebAudio
+  function playPopSound(){
     try{
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      // some browsers require resume on user gesture; attempt anyway
+      if(ctx && ctx.state === 'suspended' && typeof ctx.resume === 'function'){ ctx.resume(); }
       const o = ctx.createOscillator();
       const g = ctx.createGain();
-      o.type='sine';
-      o.frequency.value = 420; // frequency for pop
+      o.type = 'sine';
+      o.frequency.value = 880;
       g.gain.value = 0.0001;
       o.connect(g);
       g.connect(ctx.destination);
       const now = ctx.currentTime;
       g.gain.setValueAtTime(0.0001, now);
-      g.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+      g.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
       o.start(now);
-      o.stop(now + 0.17);
-    }catch(e){
-      // ignore if audio blocked
-      console.warn('pop sound failed', e);
-    }
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      o.stop(now + 0.13);
+      // close context after short delay
+      setTimeout(()=>{ try{ ctx.close(); }catch(e){} }, 400);
+    }catch(e){ /* ignore */ }
   }
 
-  // Unified error handling UI (show error card and play pop)
-  function showStreamError(){
-    errorCard.style.display = 'block';
-    playPop();
-    // hide player container visually
-    document.getElementById('playerContainer').style.display = 'none';
+  // show error overlay (matches screenshot) and play pop sound + show red dot
+  function showStreamNotFound(){
+    errorOverlay.style.display = 'flex';
+    errorOverlay.style.pointerEvents = 'auto';
+    recordDot.classList.add('show');
+    // attempt pop
+    playPopSound();
   }
 
-  // HLS + Plyr setup with forced 360 default
+  // Try to setup HLS/Plyr
   if(!m3u8){
-    // No link provided => show error UI (exact behavior requested)
-    showStreamError();
+    // if no url provided -> show stream not found overlay (no instruction text)
+    showStreamNotFound();
     return;
   }
 
+  // HLS handling with error listener
   if(window.Hls && Hls.isSupported()){
     const hls = new Hls();
     hls.loadSource(m3u8);
     hls.attachMedia(playerEl);
 
+    // on manifest parsed, init Plyr with quality options, set default to 360
     hls.on(Hls.Events.MANIFEST_PARSED, function(){
-      const qualities = Array.from(new Set(hls.levels.map(l=>l.height).filter(Boolean))).sort((a,b)=>a-b);
-      const defaultQuality = 360;
+      const heights = Array.from(new Set(hls.levels.map(l=>l.height).filter(Boolean))).sort((a,b)=>a-b);
+      const options = heights.length ? heights : [360];
       window.player = new Plyr(playerEl, {
         controls: ['play-large','play','progress','current-time','mute','volume','settings','fullscreen'],
         settings: ['quality'],
         quality: {
-          default: defaultQuality,
-          options: qualities.length ? qualities : [360],
+          default: 360,
+          options: options,
           forced: true,
-          onChange: q => {
-            const idx = hls.levels.findIndex(l => l.height === q);
+          onChange: (newQ) => {
+            const idx = hls.levels.findIndex(l=>l.height === newQ);
             if(idx !== -1) hls.currentLevel = idx;
           }
         }
       });
-      // force to 360 if available
-      const idx360 = hls.levels.findIndex(l=>l.height===360);
+      // force 360 if available
+      const idx360 = hls.levels.findIndex(l=>l.height === 360);
       if(idx360 !== -1) hls.currentLevel = idx360;
     });
 
-    // If errors (e.g., network/404), show error UI
+    // HLS error listener: on fatal -> show overlay
     hls.on(Hls.Events.ERROR, function(event, data){
-      // If fatal error, show error UI
+      // if fatal or network errors -> show overlay
       if(data && data.fatal){
-        showStreamError();
+        // destroy hls to prevent loops
+        try{ hls.destroy(); }catch(e){}
+        showStreamNotFound();
       }
     });
-  } else if(playerEl.canPlayType('application/vnd.apple.mpegurl')){
+
+    // if manifest fails to load within short time, show not found
+    let manifestTimer = setTimeout(()=>{ showStreamNotFound(); }, 15000);
+    hls.on(Hls.Events.MANIFEST_PARSED, ()=>{ clearTimeout(manifestTimer); });
+
+  }else if(playerEl.canPlayType('application/vnd.apple.mpegurl')){
+    // native HLS (iOS)
     playerEl.src = m3u8;
-    window.player = new Plyr(playerEl, { controls: ['play-large','play','progress','current-time','mute','volume','settings','fullscreen'] });
-    // If no playable source, try to detect errors after a short timeout
-    playerEl.addEventListener('error', ()=> {
-      showStreamError();
+    window.player = new Plyr(playerEl, {
+      controls: ['play-large','play','progress','current-time','mute','volume','settings','fullscreen'],
+      settings: ['quality']
     });
+    // if video errors (playback error) -> show overlay
+    playerEl.addEventListener('error', ()=> { showStreamNotFound(); });
   } else {
-    // browser doesn't support HLS
-    showStreamError();
+    // browser does not support hls
+    showStreamNotFound();
   }
 
-  // When playback stalls / no data - show error quickly
-  playerEl.addEventListener('stalled', ()=> {
-    // small debounce
-    setTimeout(()=> {
-      if(playerEl.readyState < 2) showStreamError();
-    }, 600);
-  });
+  // If the video element reports stalled/ended with no data, show overlay
+  playerEl.addEventListener('stalled', ()=>{ showStreamNotFound(); });
+  playerEl.addEventListener('emptied', ()=>{ showStreamNotFound(); });
 
-  // When playback ends unexpectedly (optional)
-  playerEl.addEventListener('error', ()=> {
-    showStreamError();
-  });
+  // back link behavior: go to homepage root
+  backAll.addEventListener('click', (e)=>{ /* default href handles navigation */ });
 
 })();
 </script>
