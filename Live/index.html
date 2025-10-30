@@ -1,155 +1,262 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>FREE LIVE FANCODE  PLAYE : BY SAYAN OAI </title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <meta name="referrer" content="no-referrer" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
-  <style>
-    :root {
-      --bg:#000;
-      --accent:#FFD957;
-      --white:#fff;
-      --panel:#111;
-      --blue:#0099ff;
-    }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;}
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;position:relative;}
-    .player-container{width:100%;max-width:980px;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 24px rgba(0,0,0,0.6);}
-    .player-wrap{position:relative;height:60vh;min-height:260px;background:#000;}
-    video#player{width:100%;height:100%;object-fit:contain;background:#000;display:block;border-radius:12px;}
-    .live-badge{position:absolute;top:12px;right:12px;background:#e53935;color:#fff;padding:6px 10px;border-radius:18px;font-weight:700;font-size:12px;z-index:60;}
-    /* Plyr Color Theme */
-    :root { --plyr-color-main: var(--accent); }
-    .plyr__control.plyr__control--overlaid{width:56px;height:56px;border-radius:50%;background:var(--accent)!important;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-    .plyr--video .plyr__controls button.plyr__control svg, .plyr__controls [class*="plyr__control"] svg { fill: var(--white)!important; }
-    .plyr--video .plyr__controls button.plyr__control[aria-pressed="true"] svg, .plyr__controls [class*="plyr__control"][aria-expanded="true"] svg { fill: var(--accent)!important; }
-    .plyr__progress--played, .plyr__progress__buffer { background: linear-gradient(90deg,#FFD957,rgba(255,217,87,0.8))!important; }
-    .plyr__controls{background:rgba(0,0,0,0.12);backdrop-filter:blur(4px);}
-    .error{padding:14px;text-align:center;color:#ffd9a8;background:#1a1a1a;}
-    /* Popup */
-    .popup-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000;}
-    .popup {background:var(--panel);padding:20px;border-radius:12px;text-align:center;width:min(92%,360px);box-shadow:0 12px 40px rgba(0,0,0,0.8);}
-    .popup h2{margin:0 0 8px;color:var(--blue);font-size:18px;}
-    .popup p{margin:0 0 16px;color:#ddd;font-size:14px;}
-    .popup button{display:block;width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;margin-bottom:8px;cursor:pointer;}
-    .btn-join{background:linear-gradient(90deg,#00a2ff,#006eff);color:#fff;}
-    .btn-close{background:#000;color:#fff;border:1px solid rgba(255,255,255,0.06);}
-    /* Bottom Left Telegram */
-    .bottom-left{position:fixed;bottom:12px;left:12px;z-index:500;}
-    .tg-btn{background:#00a2ff;color:#fff;padding:10px 16px;font-weight:700;border:none;border-radius:8px;font-size:14px;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.4);}
-    /* Bottom Right Visitor Counter */
-    .bottom-right{position:fixed;bottom:12px;right:12px;z-index:500;}
-    .bottom-right img{height:22px;width:auto;opacity:0.8;}
-    /* Dark/Night mode toggle */
-    .theme-toggle{position:fixed;top:12px;right:12px;background:var(--panel);color:var(--white);padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:13px;z-index:500;}
-    .light-mode{--bg:#f6f6f6;--panel:#fff;--white:#000;}
-    @media(max-width:540px){
-      .player-wrap{height:56vh;}
-      .live-badge{top:10px;right:10px;padding:6px 8px;font-size:11px;}
-      .theme-toggle{padding:6px 10px;font-size:12px;}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Fancode | By SAYAN OAI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
+<style>
+  :root{
+    --bg:#000;
+    --accent:#2445ff;
+    --panel:#111;
+    --white:#fff;
+    --red:#e53935;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;}
+  /* header join button (top-right) */
+  header{position:fixed;top:12px;right:14px;z-index:999;padding:0}
+  .join-top{
+    background:linear-gradient(90deg,var(--accent),#001ed9);
+    color:#fff;padding:10px 16px;border-radius:14px;font-weight:700;text-decoration:none;display:inline-block;box-shadow:0 10px 30px rgba(36,69,255,0.35);
+  }
+
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;position:relative;}
+  .player-container{width:100%;max-width:980px;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 40px rgba(0,0,0,0.7);}
+  .player-wrap{position:relative;height:62vh;min-height:260px;background:#000;display:block;}
+  video#player{width:100%;height:100%;object-fit:contain;background:#000;display:block;border-radius:0;}
+  /* plyr theme */
+  :root { --plyr-color-main: var(--accent); }
+  .plyr__control.plyr__control--overlaid{width:56px;height:56px;border-radius:50%;background:var(--accent)!important;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(36,69,255,0.28);}
+  .plyr--video .plyr__controls button.plyr__control svg, .plyr__controls [class*="plyr__control"] svg { fill: var(--white)!important; }
+  .plyr__controls{background:rgba(0,0,0,0.14);}
+  /* popup (center) - match screenshot look */
+  .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1200}
+  .popup{width:min(92%,380px);background:linear-gradient(180deg,#0e0e12,var(--panel));border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(36,69,255,0.12);text-align:center;}
+  .popup h2{margin:0 0 8px;font-size:22px;color:var(--accent);font-weight:800}
+  .popup p{margin:0 0 18px;color:#d1d8e6;opacity:0.9}
+  .popup .btn{display:block;width:100%;padding:12px;border-radius:12px;border:0;font-weight:800;cursor:pointer;margin-bottom:10px}
+  .btn-primary{background:linear-gradient(90deg,var(--accent),#0066ff);color:#fff;box-shadow:0 10px 30px rgba(36,69,255,0.18)}
+  .btn-ghost{background:rgba(255,255,255,0.03);color:#fff;border:1px solid rgba(255,255,255,0.04)}
+  /* visitor dot (bottom-right) */
+  .visitor-dot{
+    position:fixed;right:18px;bottom:18px;z-index:1300;width:18px;height:18px;border-radius:50%;
+    background:var(--accent);box-shadow:0 6px 26px rgba(36,69,255,0.28),0 0 0 rgba(36,69,255,0.35);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease;
+    animation:visitorPulse 1600ms infinite;
+  }
+  @keyframes visitorPulse{
+    0%{transform:scale(1);box-shadow:0 6px 26px rgba(36,69,255,0.28),0 0 0 0 rgba(36,69,255,0.22);}
+    70%{transform:scale(1.15);box-shadow:0 12px 40px rgba(36,69,255,0.22),0 0 0 12px rgba(36,69,255,0.06);}
+    100%{transform:scale(1);box-shadow:0 6px 26px rgba(36,69,255,0.28),0 0 0 0 rgba(36,69,255,0.00);}
+  }
+  .visitor-counter-box{
+    position:fixed;right:18px;bottom:56px;z-index:1301;background:rgba(0,0,0,0.9);border-radius:12px;padding:8px;display:none;
+    min-width:140px;max-width:260px;box-shadow:0 10px 40px rgba(0,0,0,0.6);backdrop-filter:blur(6px);
+  }
+  .visitor-counter-box img{width:100%;height:auto;display:block;border-radius:8px}
+  /* error large card (center) like screenshot */
+  .error-card{
+    width:min(92%,420px);margin:20px auto;padding:26px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+    box-shadow:0 12px 40px rgba(0,0,0,0.6);text-align:left;color:#fff;
+  }
+  .error-card h1{color:var(--red);font-size:22px;margin:0 0 10px;font-weight:800;text-align:center}
+  .error-card p{color:#cfcfd3;text-align:center;margin:0 0 12px}
+  .error-card a{display:block;text-align:center;color:#9fb6ff;text-decoration:none;margin-top:6px}
+  /* small floating red indicator (screenshot had red dot) - keep reserved */
+  .small-indicator{position:fixed;right:16px;bottom:16px;width:14px;height:14px;border-radius:50%;background:#ff2d2d;box-shadow:0 6px 18px rgba(255,0,0,0.16);z-index:900;opacity:0}
+  @media(max-width:540px){
+    .player-wrap{height:56vh}
+  }
+</style>
 </head>
 <body>
-  <button class="theme-toggle" id="themeToggle">🌙 Mode</button>
+  <!-- top join -->
+  <header>
+    <a class="join-top" id="topJoin" href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" rel="noopener">Join WhatsApp</a>
+  </header>
 
-  <div class="wrap">
-    <div class="player-container">
+  <main class="wrap" id="mainWrap">
+    <div class="player-container" id="playerContainer">
       <div class="player-wrap">
         <video id="player" controls autoplay playsinline muted></video>
-        <div class="live-badge">LIVE</div>
       </div>
-      <div id="error" class="error" style="display:none"></div>
+    </div>
+
+    <!-- Error card (hidden by default) -->
+    <div id="errorCard" style="display:none;">
+      <div class="error-card" role="alert">
+        <h1>    ⚠️ Stream Not Found</h1>
+        <p>The requested stream ID is invalid </p>
+        <a id="backAll" href="#" onclick="history.back();return false;">← Back to All Streams</a>
+      </div>
+    </div>
+
+    <!-- visitor counter box (hidden until click) -->
+    <div class="visitor-counter-box" id="visitorBox">
+      <!-- default visitor counter image (you can replace with your counter image URL) -->
+      <img id="visitorImg" src="https://www.counter12.com/img-9205Yd3W54Z3y43Z-5.gif" alt="visits" />
+    </div>
+  </main>
+
+  <!-- center popup (duplicate of screenshot effect) -->
+  <div class="popup-overlay" id="mainPopup" aria-hidden="false">
+    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+      <h2 id="pTitle">Support Us!</h2>
+      <p>Join our WhatsApp for the latest news, updates, and releases.</p>
+      <button class="btn btn-primary" id="popupJoin">Join Now</button>
+      <button class="btn btn-ghost" id="popupClose">Already Joined</button>
     </div>
   </div>
 
-  <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" class="tg-btn bottom-left">Join WhatsApp</a>
-  <div class="bottom-right">
-    <img src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits" />
-  </div>
+  <!-- visitor dot -->
+  <div class="visitor-dot" id="visitorDot" title="Visitors"></div>
+  <div class="small-indicator" id="smallInd"></div>
 
-  <div class="popup-overlay" id="popup">
-    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="p-title">
-      <h2 id="p-title">Support Us</h2>
-      <p>Join our channel for latest updates.</p>
-      <button class="btn-join" id="joinBtn" type="button">Join Now</button>
-      <button class="btn-close" id="closePopup" type="button">Already Joined</button>
-    </div>
-  </div>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
+<script>
+(function(){
+  const playerEl = document.getElementById('player');
+  const popup = document.getElementById('mainPopup');
+  const popupJoin = document.getElementById('popupJoin');
+  const popupClose = document.getElementById('popupClose');
+  const visitorDot = document.getElementById('visitorDot');
+  const visitorBox = document.getElementById('visitorBox');
+  const visitorImg = document.getElementById('visitorImg');
+  const errorCard = document.getElementById('errorCard');
+  const smallInd = document.getElementById('smallInd');
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
-  <script>
-    (function(){
-      const playerEl=document.getElementById('player');
-      const errorEl=document.getElementById('error');
-      const popup=document.getElementById('popup');
-      const joinBtn=document.getElementById('joinBtn');
-      const closePopup=document.getElementById('closePopup');
-      const toggle=document.getElementById('themeToggle');
+  // URL param reading (?ios=)
+  const params = new URLSearchParams(window.location.search);
+  const m3u8 = params.get('ios');
 
-      // Theme toggle system
-      let dark=true;
-      toggle.addEventListener('click',()=>{
-        dark=!dark;
-        document.body.classList.toggle('light-mode',!dark);
-        toggle.textContent=dark?'🌙 Mode':'☀️ Mode';
+  // Popup actions
+  popupJoin.addEventListener('click', ()=> {
+    window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank','noopener');
+  });
+  popupClose.addEventListener('click', ()=> {
+    popup.style.display='none';
+  });
+
+  // Auto hide popup after 60s
+  setTimeout(()=>{ if(popup) popup.style.display='none'; },60000);
+
+  // visitor dot click toggles counter box
+  visitorDot.addEventListener('click', ()=> {
+    if(visitorBox.style.display === 'block'){
+      visitorBox.style.display = 'none';
+    } else {
+      // show box and (re)load image to refresh counter
+      visitorImg.src = visitorImg.src.split('?')[0] + '?_=' + Date.now();
+      visitorBox.style.display = 'block';
+    }
+    // small indicator flash
+    smallInd.style.opacity = 1;
+    setTimeout(()=> smallInd.style.opacity = 0, 600);
+  });
+
+  // On initial load: small indicator visible briefly (like screenshot subtle red)
+  smallInd.style.opacity = 0;
+  setTimeout(()=> { smallInd.style.opacity = 0; }, 100);
+
+  // Pop sound using WebAudio (short "pop" for errors)
+  function playPop(){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type='sine';
+      o.frequency.value = 420; // frequency for pop
+      g.gain.value = 0.0001;
+      o.connect(g);
+      g.connect(ctx.destination);
+      const now = ctx.currentTime;
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+      o.start(now);
+      o.stop(now + 0.17);
+    }catch(e){
+      // ignore if audio blocked
+      console.warn('pop sound failed', e);
+    }
+  }
+
+  // Unified error handling UI (show error card and play pop)
+  function showStreamError(){
+    errorCard.style.display = 'block';
+    playPop();
+    // hide player container visually
+    document.getElementById('playerContainer').style.display = 'none';
+  }
+
+  // HLS + Plyr setup with forced 360 default
+  if(!m3u8){
+    // No link provided => show error UI (exact behavior requested)
+    showStreamError();
+    return;
+  }
+
+  if(window.Hls && Hls.isSupported()){
+    const hls = new Hls();
+    hls.loadSource(m3u8);
+    hls.attachMedia(playerEl);
+
+    hls.on(Hls.Events.MANIFEST_PARSED, function(){
+      const qualities = Array.from(new Set(hls.levels.map(l=>l.height).filter(Boolean))).sort((a,b)=>a-b);
+      const defaultQuality = 360;
+      window.player = new Plyr(playerEl, {
+        controls: ['play-large','play','progress','current-time','mute','volume','settings','fullscreen'],
+        settings: ['quality'],
+        quality: {
+          default: defaultQuality,
+          options: qualities.length ? qualities : [360],
+          forced: true,
+          onChange: q => {
+            const idx = hls.levels.findIndex(l => l.height === q);
+            if(idx !== -1) hls.currentLevel = idx;
+          }
+        }
       });
+      // force to 360 if available
+      const idx360 = hls.levels.findIndex(l=>l.height===360);
+      if(idx360 !== -1) hls.currentLevel = idx360;
+    });
 
-      // ?ios= param read
-      const params=new URLSearchParams(window.location.search);
-      const m3u8=params.get('ios');
-
-      // Popup auto hide
-      setTimeout(()=>{if(popup)popup.style.display='none';},70000);
-      joinBtn.addEventListener('click',()=>{window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');});
-      closePopup.addEventListener('click',()=>{if(popup)popup.style.display='none';});
-
-      function showError(msg){errorEl.style.display='block';errorEl.textContent=msg;}
-
-      if(!m3u8){
-        playerEl.style.display='none';
-        showError('No video URL provided. Use ?ios=YOUR_M3U8_URL');
-        popup.style.display='flex';
-        return;
+    // If errors (e.g., network/404), show error UI
+    hls.on(Hls.Events.ERROR, function(event, data){
+      // If fatal error, show error UI
+      if(data && data.fatal){
+        showStreamError();
       }
+    });
+  } else if(playerEl.canPlayType('application/vnd.apple.mpegurl')){
+    playerEl.src = m3u8;
+    window.player = new Plyr(playerEl, { controls: ['play-large','play','progress','current-time','mute','volume','settings','fullscreen'] });
+    // If no playable source, try to detect errors after a short timeout
+    playerEl.addEventListener('error', ()=> {
+      showStreamError();
+    });
+  } else {
+    // browser doesn't support HLS
+    showStreamError();
+  }
 
-      // HLS setup
-      if(window.Hls && Hls.isSupported()){
-        const hls=new Hls();
-        hls.loadSource(m3u8);
-        hls.attachMedia(playerEl);
+  // When playback stalls / no data - show error quickly
+  playerEl.addEventListener('stalled', ()=> {
+    // small debounce
+    setTimeout(()=> {
+      if(playerEl.readyState < 2) showStreamError();
+    }, 600);
+  });
 
-        hls.on(Hls.Events.MANIFEST_PARSED,function(){
-          const qualities=Array.from(new Set(hls.levels.map(l=>l.height).filter(Boolean))).sort((a,b)=>a-b);
-          const defaultQuality=360; // forced default 360p
-          window.player=new Plyr(playerEl,{
-            controls:['play-large','play','progress','current-time','mute','volume','settings','airplay','fullscreen'],
-            settings:['quality'],
-            quality:{
-              default:defaultQuality,
-              options:qualities.length?qualities:[360],
-              forced:true,
-              onChange:q=>{
-                const idx=hls.levels.findIndex(l=>l.height===q);
-                if(idx!==-1)hls.currentLevel=idx;
-              }
-            }
-          });
-          // Set to 360 if exists
-          const idx=hls.levels.findIndex(l=>l.height===360);
-          if(idx!==-1)hls.currentLevel=idx;
-        });
-      }else if(playerEl.canPlayType('application/vnd.apple.mpegurl')){
-        playerEl.src=m3u8;
-        window.player=new Plyr(playerEl,{controls:['play-large','play','progress','current-time','mute','volume','settings','airplay','fullscreen']});
-      }else{
-        playerEl.style.display='none';
-        showError('Your browser does not support HLS playback.');
-      }
-    })();
-  </script>
+  // When playback ends unexpectedly (optional)
+  playerEl.addEventListener('error', ()=> {
+    showStreamError();
+  });
+
+})();
+</script>
 </body>
 </html>
