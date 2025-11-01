@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>FREE LIVE PLAYER : BY SAYAN OAI</title>
+  <title>FREE LIVE PLAYER: BY SAYAN OAI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <meta name="referrer" content="no-referrer" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
   <style>
-    /* 1. Pitch Black Theme */
+    /* New Green Theme Colors */
     :root {
       --bg: #000; /* Pitch Black */
-      --accent: #FFD957; /* Accent Color */
+      --accent: #4CAF50; /* Bright Green */
       --white: #fff;
       --panel: #111;
       --blue: #0099ff;
@@ -37,14 +37,14 @@
       position: relative;
     }
     
-    /* 2. Focused Player Container (Only Video) */
+    /* Focused Player Container (Only Video) */
     .player-container {
       width: 100%;
       max-width: 980px;
       border-radius: 12px;
       overflow: hidden;
       background: #000;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.9); /* Stronger shadow */
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.9);
     }
     
     .player-wrap {
@@ -71,7 +71,7 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      background: #e53935;
+      background: #e53935; /* Red LIVE badge */
       color: #fff;
       padding: 6px 10px;
       border-radius: 18px;
@@ -80,21 +80,35 @@
       z-index: 60;
     }
     
-    /* Plyr Color Theme (Pitch Black Background for Controls) */
+    /* Plyr Color Theme: GREEN */
     :root { 
       --plyr-color-main: var(--accent); 
     }
     
     .plyr__controls {
       background: rgba(0, 0, 0, 0.8); /* Darker controls background */
-      backdrop-filter: none; /* No blur for a more solid look */
+      backdrop-filter: none;
     }
     
-    /* The rest of the Plyr styling is kept for the accent color */
-    .plyr__control.plyr__control--overlaid{width:56px;height:56px;border-radius:50%;background:var(--accent)!important;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
+    /* Overlaid Play Button (Center of Video) */
+    .plyr__control.plyr__control--overlaid{
+        width:56px;
+        height:56px;
+        border-radius:50%;
+        background:var(--accent)!important; /* Green */
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    }
+    /* SVG Icons (White) */
     .plyr--video .plyr__controls button.plyr__control svg, .plyr__controls [class*="plyr__control"] svg { fill: var(--white)!important; }
+    /* Active Controls (Green) */
     .plyr--video .plyr__controls button.plyr__control[aria-pressed="true"] svg, .plyr__controls [class*="plyr__control"][aria-expanded="true"] svg { fill: var(--accent)!important; }
-    .plyr__progress--played, .plyr__progress__buffer { background: linear-gradient(90deg,#FFD957,rgba(255,217,87,0.8))!important; }
+    /* Progress Bar (Green Gradient) */
+    .plyr__progress--played, .plyr__progress__buffer { 
+        background: linear-gradient(90deg, #4CAF50, rgba(76, 175, 80, 0.8))!important; 
+    }
 
     .error {
       padding: 14px;
@@ -103,15 +117,15 @@
       background: #1a1a1a;
     }
     
-    /* 3. Mandatory Full-Screen Popup */
+    /* Mandatory Full-Screen Popup */
     .popup-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 1); /* Solid black overlay */
-      display: flex; /* Always display */
+      background: rgba(0, 0, 0, 1);
+      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
@@ -119,16 +133,16 @@
     
     .popup {
       background: var(--panel);
-      padding: 30px; /* Increased padding */
+      padding: 30px;
       border-radius: 12px;
       text-align: center;
-      width: min(90%, 400px); /* Slightly larger popup */
-      box-shadow: 0 12px 40px rgba(255, 255, 255, 0.1); /* Lighter shadow for contrast */
+      width: min(90%, 400px);
+      box-shadow: 0 12px 40px rgba(255, 255, 255, 0.1);
     }
     
     .popup h2 {
       margin: 0 0 10px;
-      color: var(--accent); /* Changed title color to accent */
+      color: var(--accent); /* Green title */
       font-size: 24px;
     }
     
@@ -141,7 +155,7 @@
     .popup button {
       display: block;
       width: 100%;
-      padding: 14px; /* Increased button padding */
+      padding: 14px;
       border: 0;
       border-radius: 10px;
       font-weight: 700;
@@ -152,7 +166,7 @@
     }
     
     .btn-join {
-      background: linear-gradient(90deg, #00a2ff, #006eff);
+      background: linear-gradient(90deg, #00a2ff, #006eff); /* Blue for Join Now */
       color: #fff;
     }
     
@@ -161,7 +175,7 @@
     }
     
     .btn-close {
-      background: #333; /* Dark gray for 'Already Joined' */
+      background: #333;
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
@@ -170,11 +184,11 @@
         background: #444;
     }
     
-    /* 4. Bottom Left WhatsApp Button */
+    /* Bottom Left WhatsApp Button */
     .bottom-left {
       position: fixed;
-      bottom: 16px; /* Slightly higher */
-      left: 16px; /* Slightly further from the edge */
+      bottom: 16px;
+      left: 16px;
       z-index: 500;
     }
     
@@ -196,7 +210,7 @@
         background: #1DA851;
     }
     
-    /* 5. Bottom Right Visitor Counter */
+    /* Bottom Right Visitor Counter */
     .bottom-right {
       position: fixed;
       bottom: 16px;
@@ -205,14 +219,14 @@
     }
     
     .bottom-right img {
-      height: 24px; /* Slightly larger counter image */
+      height: 24px;
       width: auto;
       opacity: 0.9;
     }
     
     @media(max-width: 540px) {
       .player-container {
-        border-radius: 0; /* Full width on small screens */
+        border-radius: 0;
       }
       .live-badge {
         top: 8px;
@@ -235,15 +249,15 @@
     </div>
   </div>
 
-  <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" class="tg-btn bottom-left"> Follow US on WhatsApp </a>
+  <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" class="tg-btn bottom-left">FOLLOW US on WhatsApp</a>
   <div class="bottom-right">
-    <img src="https://www.counter12.com/img-9205Yd3W54Z3y43Z-5.gif" alt="visits" />
+    <img src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits" />
   </div>
 
   <div class="popup-overlay" id="popup">
     <div class="popup" role="dialog" aria-modal="true" aria-labelledby="p-title">
       <h2 id="p-title">Support Us</h2>
-      <p>Join our WhatsApp channel to watch all FanCode matches.</p>
+      <p>Join our channel for the latest updates and streaming links.</p>
       <button class="btn-join" id="joinBtn" type="button">Join Now</button>
       <button class="btn-close" id="closePopup" type="button">Already Joined</button>
     </div>
@@ -283,7 +297,6 @@
       if (!m3u8) {
         playerEl.style.display = 'none';
         showError('No video URL provided. Use ?ios=YOUR_M3U8_URL');
-        // The mandatory popup is already visible via CSS
         return;
       }
 
