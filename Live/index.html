@@ -1,203 +1,145 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <title>FREE LIVE PLAYER: BY SAYAN OAI</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<meta name="referrer" content="no-referrer" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css">
 <style>
 :root {
-  --bg: #000;
-  --accent: #FFD957;
-  --white: #fff;
-  --panel: #111;
+  --bg: #ffffff;
+  --accent: #007bff;
+  --text: #111;
+  --panel: #f0f0f0;
 }
 
 html, body {
-  height: 100%;
-  margin: 0;
-  background: var(--bg);
-  color: var(--white);
+  height:100%;
+  margin:0;
   font-family: Inter, system-ui, Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  overflow:hidden;
 }
 
 .wrap {
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  box-sizing: border-box;
-  position: relative;
+  width:100%;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  padding:14px;
+  box-sizing:border-box;
 }
 
 .player-container {
-  width: 100%;
-  max-width: 980px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.9);
+  width:100%;
+  max-width:980px;
+  border-radius:12px;
+  overflow:hidden;
+  background:#000; /* black behind video is ok */
+  box-shadow:0 6px 24px rgba(0,0,0,0.3);
 }
 
 .player-wrap {
-  position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
-  background: #000;
+  position:relative;
+  padding-bottom:56.25%;
+  height:0;
+  background:#000;
 }
 
 video#player {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* contain -> cover for full video display */
-  display: block;
-  border-radius: 12px;
-  background: #000;
+  position:absolute;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  border-radius:12px;
+  background:#000;
 }
 
 .live-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #e53935;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 18px;
-  font-weight: 700;
-  font-size: 12px;
-  z-index: 60;
+  position:absolute;
+  top:12px; right:12px;
+  background:#007bff;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:18px;
+  font-weight:700;
+  font-size:12px;
+  z-index:60;
 }
 
+.plyr__controls { background: rgba(255,255,255,0.95); }
 :root { --plyr-color-main: var(--accent); }
 
-.plyr__controls {
-  background: rgba(0,0,0,0.8);
-}
-
 .plyr__control.plyr__control--overlaid {
-  width:56px; height:56px; border-radius:50%;
+  width:56px; height:56px;
+  border-radius:50%;
   background:var(--accent)!important;
   display:flex; align-items:center; justify-content:center;
-  box-shadow:0 6px 18px rgba(0,0,0,0.6);
+  box-shadow:0 6px 18px rgba(0,0,0,0.3);
 }
 
 .plyr--video .plyr__controls button.plyr__control svg,
-.plyr__controls [class*="plyr__control"] svg { fill: var(--white)!important; }
-
+.plyr__controls [class*="plyr__control"] svg { fill: var(--text)!important; }
 .plyr--video .plyr__controls button.plyr__control[aria-pressed="true"] svg,
 .plyr__controls [class*="plyr__control"][aria-expanded="true"] svg { fill: var(--accent)!important; }
+.plyr__progress--played, .plyr__progress__buffer { background: var(--accent)!important; }
 
-.plyr__progress--played, .plyr__progress__buffer {
-  background: linear-gradient(90deg,#FFD957,rgba(255,217,87,0.8))!important;
-}
-
-.error {
-  padding: 14px;
-  text-align: center;
-  color: #ffd9a8;
-  background: #1a1a1a;
-  display: none;
-}
+.error { padding:14px; text-align:center; color:#ff0000; background:#ffe5e5; display:none; }
 
 .popup-overlay {
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,1);
-  display: flex; align-items:center; justify-content:center;
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(255,255,255,0.95);
+  display:flex; align-items:center; justify-content:center;
   z-index:1000;
 }
 
 .popup {
   background: var(--panel);
-  padding: 30px;
+  padding:30px;
   border-radius:12px;
   text-align:center;
-  width: min(90%,400px);
-  box-shadow: 0 12px 40px rgba(255,255,255,0.1);
+  width:min(90%,400px);
+  box-shadow:0 12px 40px rgba(0,0,0,0.1);
 }
 
-.popup h2 {
-  margin:0 0 10px;
-  color: var(--accent);
-  font-size:24px;
-}
-
-.popup p {
-  margin:0 0 20px;
-  color:#ccc;
-  font-size:16px;
-}
-
+.popup h2 { margin:0 0 10px; color: var(--accent); font-size:24px; }
+.popup p { margin:0 0 20px; color:#333; font-size:16px; }
 .popup button {
-  display:block;
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:10px;
-  font-weight:700;
-  font-size:16px;
-  margin-bottom:10px;
-  cursor:pointer;
-  transition: background 0.2s;
+  display:block; width:100%; padding:14px; margin-bottom:10px;
+  border:0; border-radius:10px; font-weight:700; font-size:16px;
+  cursor:pointer; transition:0.2s background;
 }
+.btn-join { background: var(--accent); color:#fff; }
+.btn-join:hover { background:#0056b3; }
+.btn-close { background:#ccc; color:#111; }
+.btn-close:hover { background:#bbb; }
 
-.btn-join { background: linear-gradient(90deg, #00a2ff, #006eff); color:#fff; }
-.btn-join:hover { background: linear-gradient(90deg, #006eff, #00a2ff); }
-
-.btn-close { background:#333; color:#fff; border:1px solid rgba(255,255,255,0.1); }
-.btn-close:hover { background:#444; }
-
-.bottom-left {
-  position: fixed;
-  bottom:16px; left:16px; z-index:500;
-}
-
+.bottom-left { position:fixed; bottom:16px; left:16px; z-index:500; }
 .tg-btn {
-  background:#25D366;
-  color:#fff;
-  padding:12px 20px;
-  font-weight:700;
-  border:none;
-  border-radius:8px;
-  font-size:15px;
-  cursor:pointer;
-  text-decoration:none;
-  box-shadow:0 4px 12px rgba(0,0,0,0.6);
-  transition: background 0.2s;
+  background:#25D366; color:#fff; padding:12px 20px; font-weight:700;
+  border:none; border-radius:8px; font-size:15px; text-decoration:none;
+  cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:0.2s background;
 }
-
 .tg-btn:hover { background:#1DA851; }
 
-.bottom-right {
-  position: fixed;
-  bottom:16px; right:16px; z-index:500;
-}
+.bottom-right { position:fixed; bottom:16px; right:16px; z-index:500; }
+.bottom-right img { height:24px; width:auto; opacity:0.9; }
 
-.bottom-right img {
-  height:24px;
-  width:auto;
-  opacity:0.9;
-}
-
-@media(max-width:540px){
-  .player-container { border-radius:0; }
-  .live-badge { top:8px; right:8px; padding:4px 6px; font-size:10px; }
-}
+@media(max-width:540px){ .player-container { border-radius:0; } .live-badge { top:8px; right:8px; padding:4px 6px; font-size:10px; } }
 </style>
 </head>
 <body>
+
 <div class="wrap">
   <div class="player-container">
     <div class="player-wrap">
-      <video id="player" controls autoplay playsinline muted></video>
+      <video id="player" controls playsinline muted></video>
       <div class="live-badge">LIVE</div>
     </div>
     <div id="error" class="error"></div>
@@ -211,11 +153,11 @@ video#player {
 </div>
 
 <div class="popup-overlay" id="popup">
-  <div class="popup" role="dialog" aria-modal="true" aria-labelledby="p-title">
-    <h2 id="p-title">Support Us</h2>
+  <div class="popup">
+    <h2>Support Us</h2>
     <p>Join our WhatsApp channel to watch all FanCode matches.</p>
-    <button class="btn-join" id="joinBtn" type="button">Join Now</button>
-    <button class="btn-close" id="closePopup" type="button">Already Joined</button>
+    <button class="btn-join" id="joinBtn">Join Now</button>
+    <button class="btn-close" id="closePopup">Already Joined</button>
   </div>
 </div>
 
@@ -224,38 +166,41 @@ video#player {
 <script>
 (function(){
   const playerEl = document.getElementById('player');
-  const errorEl = document.getElementById('error');
   const popup = document.getElementById('popup');
   const joinBtn = document.getElementById('joinBtn');
   const closePopup = document.getElementById('closePopup');
+  const errorEl = document.getElementById('error');
   const params = new URLSearchParams(window.location.search);
   const m3u8 = params.get('ios');
 
-  joinBtn.addEventListener('click', ()=>{ window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank'); if(popup) popup.style.display='none'; });
-  closePopup.addEventListener('click', ()=>{ if(popup) popup.style.display='none'; });
-
   function showError(msg){ errorEl.style.display='block'; errorEl.textContent=msg; }
 
-  if(!m3u8){ playerEl.style.display='none'; showError('No video URL provided. Use ?ios=YOUR_M3U8_URL'); return; }
+  function initPlayer(){
+    const player = new Plyr(playerEl,{controls:['play-large','play','progress','current-time','mute','volume','settings','airplay','fullscreen'],autoplay:true,muted:false});
+    if(Hls.isSupported() && m3u8){
+      const hls = new Hls({autoStartLoad:true});
+      hls.loadSource(m3u8);
+      hls.attachMedia(playerEl);
+      hls.on(Hls.Events.MANIFEST_PARSED, ()=>{ player.play().catch(()=>{}); });
+      hls.on(Hls.Events.ERROR,(event,data)=>{ if(data.fatal){ showError("Playback error occurred."); } });
+    } else if(playerEl.canPlayType('application/vnd.apple.mpegurl') && m3u8){
+      playerEl.src = m3u8;
+      player.play().catch(()=>{});
+    } else{
+      showError("Your browser does not support HLS playback.");
+    }
+  }
 
-  const player = new Plyr(playerEl,{controls:['play-large','play','progress','current-time','mute','volume','settings','airplay','fullscreen'],autoplay:true,muted:true});
-
-  if(Hls.isSupported()){
-    const hls = new Hls({autoStartLoad:true,debug:false});
-    hls.loadSource(m3u8);
-    hls.attachMedia(playerEl);
-
-    hls.on(Hls.Events.MANIFEST_PARSED,function(){
-      const qualities=Array.from(new Set(hls.levels.map(l=>l.height).filter(Boolean))).sort((a,b)=>a-b);
-      const defaultQuality=360;
-      player.options.quality={default:defaultQuality,options:qualities.length?qualities:[360],forced:true,onChange:q=>{ const idx=hls.levels.findIndex(l=>l.height===q); if(idx!==-1) hls.currentLevel=idx; }};
-      player.play().catch(e=>console.log(e));
-    });
-
-    hls.on(Hls.Events.ERROR,function(event,data){ if(data.fatal){ switch(data.type){ case Hls.ErrorTypes.NETWORK_ERROR: showError('Network error: Cannot load video source.'); break; case Hls.ErrorTypes.MEDIA_ERROR: showError('Media error: Playback failed.'); break; default: showError('An unknown error occurred during HLS playback.'); break; } } });
-  } else if(playerEl.canPlayType('application/vnd.apple.mpegurl')){ playerEl.src=m3u8; player.play().catch(e=>console.log(e)); }
-  else{ playerEl.style.display='none'; showError('Your browser does not support HLS playback.'); }
-
+  // Popup logic
+  joinBtn.addEventListener('click', ()=>{
+    window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');
+    popup.style.display='none';
+    initPlayer();
+  });
+  closePopup.addEventListener('click', ()=>{
+    popup.style.display='none';
+    initPlayer();
+  });
 })();
 </script>
 </body>
