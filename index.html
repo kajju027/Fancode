@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -14,6 +14,7 @@
       --muted:#9aa6b2;
       --accent:#00FF00;
       --accent-2:#ff4b4b;
+      --deep-green:#006400; /* Deep Green for Watch Now */
     }
     html,body{
       height:100%;
@@ -136,6 +137,12 @@
       font-weight:700;
       cursor:pointer;
     }
+    /* New Button Styles */
+    .btn-watch-now {
+        background: linear-gradient(180deg, #00A300, var(--deep-green));
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(0, 100, 0, 0.2);
+    }
     .btn-free{
       background:linear-gradient(180deg,var(--accent),#00d600);
       color:#052000;
@@ -147,6 +154,12 @@
       box-shadow:0 8px 24px rgba(255,230,0,0.08);
     }
     .btn-up{background:#ff4b4b;color:#fff}
+    .btn.active-filter{
+        background: var(--accent);
+        color: var(--bg);
+        box-shadow: 0 0 0 2px var(--accent);
+    }
+
 
     footer{
       padding:14px 18px;
@@ -161,6 +174,15 @@
     }
     .note{font-size:13px;color:var(--muted)}
     .visitor-counter{height:34px;border-radius:8px;overflow:hidden}
+
+    /* Loading Indicator Style */
+    #loadingIndicator {
+        text-align: center;
+        padding: 15px;
+        color: var(--accent);
+        font-weight: 600;
+        display: none;
+    }
   </style>
 </head>
 <body>
@@ -172,7 +194,7 @@
         <img src="https://files.catbox.moe/eu7lyx.jpeg" alt="Header image">
         <div>
           <div class="title">FREE LIV TV FANCODE</div>
-          <div class="last-update" id="lastUpdate">Last Update: —</div>
+          <div class="last-update" id="lastUpdate">Last Update: </div>
         </div>
       </div>
       <button class="join-btn" id="joinTelegram" title="Join our Telegram">Join Our WhatsApp</button>
@@ -188,6 +210,10 @@
       </div>
 
       <div id="matchesGrid" class="grid" aria-live="polite"></div>
+
+      <div id="loadingIndicator">
+          Loading more matches...
+      </div>
     </main>
 
     <footer>
@@ -221,29 +247,106 @@
     const btnUpcoming = document.getElementById('btnUpcoming');
     const btnAll = document.getElementById('btnAll');
     const joinTelegram = document.getElementById('joinTelegram');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
     let fullData = null;
+    let currentMatches = [];
+    let currentIndex = 0;
+    const batchSize = 4; // Subsequent load batch size
+    const initialLoadSize = 4; // Initial load size
 
     function el(tag, cls){ const e = document.createElement(tag); if(cls) e.className = cls; return e; }
 
+    let isFetching = false;
+    // Scroll event listener to load more data only when near the bottom
+    window.addEventListener('scroll', () => {
+        // Only trigger if we are in the default 'All' view and not currently fetching
+        const isDefaultView = qInput.value === '' && btnAll.classList.contains('active-filter');
+
+        // Check if user has scrolled near the very bottom (50px margin)
+        if (!isFetching && isDefaultView && (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 50)) {
+            loadNextBatch();
+        }
+    });
+
+    // Function to load JSON and start rendering
     async function loadAndRender(){
       try{
         const res = await fetch(JSON_URL, {cache: "no-store"});
         if(!res.ok) throw new Error('JSON load failed');
         const data = await res.json();
         fullData = data;
-        const lut = data["last update time"] || data["last_update"] || data.lastUpdate || '—';
+        const lut = data["last update time"] || data["last_update"] || data.lastUpdate || '';
         lastUpdateEl.textContent = 'Last Update: ' + lut;
-        renderMatches(data.matches || []);
+
+        currentMatches = data.matches || [];
+        currentIndex = 0;
+        grid.innerHTML = '';
+        
+        // Initial load using the specific initialLoadSize
+        loadNextBatch(true, currentMatches, initialLoadSize);
+
+        // Set default filter active state
+        btnAll.classList.add('active-filter');
+
       }catch(err){
         grid.innerHTML = '<div style="padding:18px;color:#f88">Could not load matches: '+err.message+'</div>';
         console.error(err);
       }
     }
 
-    function renderMatches(list){
-      grid.innerHTML = '';
+    // Function to load the next batch of matches
+    function loadNextBatch(shouldClearGrid = false, listToRender = currentMatches, size = batchSize){
+        if (isFetching) return;
+        isFetching = true;
+
+        if(shouldClearGrid){
+            grid.innerHTML = '';
+            currentIndex = 0;
+        }
+
+        const nextBatch = listToRender.slice(currentIndex, currentIndex + size);
+
+        if (nextBatch.length === 0 && listToRender.length > 0) {
+            loadingIndicator.textContent = "No more matches to load.";
+            loadingIndicator.style.display = 'block';
+            isFetching = false;
+            return;
+        }
+
+        if (listToRender.length === 0) {
+            grid.innerHTML = '<div style="padding:18px;color:var(--muted)">No matches found.</div>';
+            loadingIndicator.style.display = 'none';
+            isFetching = false;
+            return;
+        }
+
+        loadingIndicator.textContent = "Loading more matches...";
+        loadingIndicator.style.display = 'block';
+
+        setTimeout(() => {
+            renderMatches(nextBatch, true); // Append true
+            currentIndex += nextBatch.length;
+            
+            // Hide indicator only if there are no more matches left
+            if(currentIndex >= listToRender.length){
+                 loadingIndicator.textContent = "No more matches to load.";
+            } else {
+                 loadingIndicator.style.display = 'none';
+            }
+            
+            isFetching = false;
+        }, 300);
+    }
+
+    // Function to render match cards
+    function renderMatches(list, append = false){
+      if(!append) {
+          grid.innerHTML = '';
+      }
+
       if(!list || list.length === 0){
-        grid.innerHTML = '<div style="padding:18px;color:var(--muted)">No matches found.</div>';
+        if(!append) grid.innerHTML = '<div style="padding:18px;color:var(--muted)">No matches found.</div>';
         return;
       }
       list.forEach(m => {
@@ -261,16 +364,29 @@
         const event = el('div','event');
         event.textContent = (m.event_name || m.title || '');
         const isLive = (m.status && m.status.toLowerCase().includes('live'));
-        const status = el('div','status ' + (isLive ? 'live' : 'upcoming'));
+        // Live matches do not need the status text in the meta area, as the button covers it
+        const status = isLive ? el('div','status live') : el('div','status upcoming');
         status.textContent = isLive ? 'LIVE' : 'UPCOMING';
 
         const actions = el('div','actions');
-        if(!isLive && (m.status || '').toLowerCase().includes('upcoming')){
+
+        if(isLive){
+          // CHANGE: For Live matches, show only one "Watch Now" button (Deep Green)
+          const watchNowB = el('button','btn btn-watch-now');
+          watchNowB.textContent = 'Watch Now';
+          // Link uses the Free button's link logic (m.dai_url || m.m3u8 || m.src || m.adfree_url)
+          watchNowB.onclick = () => openInNewTab(m.dai_url || m.m3u8 || m.src || m.adfree_url);
+          actions.appendChild(watchNowB);
+
+        } else if((m.status || '').toLowerCase().includes('upcoming')){
+          // For Upcoming matches, keep the 'Upcoming' button
           const upB = el('button','btn btn-up');
           upB.textContent = 'Upcoming';
           upB.onclick = () => alert('Starts at: ' + (m.startTime || 'Unknown'));
           actions.appendChild(upB);
+
         } else {
+          // For other non-live, non-upcoming matches, keep Free and Ad Free buttons (or use your preferred default)
           const freeB = el('button','btn btn-free');
           freeB.textContent = 'Free';
           freeB.onclick = () => openInNewTab(m.dai_url || m.m3u8 || m.src || m.adfree_url);
@@ -282,6 +398,7 @@
           actions.appendChild(freeB);
           actions.appendChild(adB);
         }
+
 
         meta.appendChild(teams);
         meta.appendChild(event);
@@ -303,24 +420,53 @@
       window.open(final, '_blank');
     }
 
+    // Search logic: Renders all filtered results at once (no scroll loading for search)
     qInput.addEventListener('input', (e) => {
       const q = e.target.value.trim().toLowerCase();
       if(!fullData || !fullData.matches) return;
-      if(!q) { renderMatches(fullData.matches); return; }
+
       const filtered = fullData.matches.filter(m => {
         const s = ((m.team_1||'') + ' ' + (m.team_2||'') + ' ' + (m.event_name||'') + ' ' + (m.title||'')).toLowerCase();
         return s.includes(q);
       });
-      renderMatches(filtered);
+
+      currentMatches = filtered;
+      currentIndex = 0;
+      renderMatches(currentMatches);
+      loadingIndicator.style.display = 'none';
+
+      btnAll.classList.remove('active-filter');
+      btnUpcoming.classList.remove('active-filter');
     });
 
+    // Upcoming button logic: Renders all upcoming results at once
     btnUpcoming.addEventListener('click', () => {
       if(!fullData || !fullData.matches) return;
+
       const up = fullData.matches.filter(m => !(m.status || '').toLowerCase().includes('live'));
-      renderMatches(up);
+
+      currentMatches = up;
+      currentIndex = 0;
+      renderMatches(currentMatches);
+      loadingIndicator.style.display = 'none';
+      qInput.value = '';
+
+      btnAll.classList.remove('active-filter');
+      btnUpcoming.classList.add('active-filter');
     });
 
-    btnAll.addEventListener('click', () => { if(fullData && fullData.matches) renderMatches(fullData.matches); });
+    // All button logic: Resets to full list and reloads first batch
+    btnAll.addEventListener('click', () => {
+        if(fullData && fullData.matches) {
+            currentMatches = fullData.matches;
+            qInput.value = '';
+            // Load first batch (size=initialLoadSize=4) and clear grid
+            loadNextBatch(true, currentMatches, initialLoadSize);
+
+            btnAll.classList.add('active-filter');
+            btnUpcoming.classList.remove('active-filter');
+        }
+    });
 
     joinTelegram.addEventListener('click', () => { window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T/', '_blank'); });
 
@@ -328,4 +474,3 @@
   </script>
 </body>
 </html>
-
