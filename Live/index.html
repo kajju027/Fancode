@@ -2,58 +2,228 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>FREE LIVE FANCODE  PLAYE : BY SAYAN OAI </title>
+  <title>FREE LIVE PLAYER : BY SAYAN OAI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <meta name="referrer" content="no-referrer" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
   <style>
+    /* 1. Pitch Black Theme */
     :root {
-      --bg:#000;
-      --accent:#FFD957;
-      --white:#fff;
-      --panel:#111;
-      --blue:#0099ff;
+      --bg: #000; /* Pitch Black */
+      --accent: #FFD957; /* Accent Color */
+      --white: #fff;
+      --panel: #111;
+      --blue: #0099ff;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;}
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;position:relative;}
-    .player-container{width:100%;max-width:980px;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 24px rgba(0,0,0,0.6);}
-    .player-wrap{position:relative;height:60vh;min-height:260px;background:#000;}
-    video#player{width:100%;height:100%;object-fit:contain;background:#000;display:block;border-radius:12px;}
-    .live-badge{position:absolute;top:12px;right:12px;background:#e53935;color:#fff;padding:6px 10px;border-radius:18px;font-weight:700;font-size:12px;z-index:60;}
-    /* Plyr Color Theme */
-    :root { --plyr-color-main: var(--accent); }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--white);
+      font-family: Inter, system-ui, Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden; /* Prevent scrolling when popup is active */
+    }
+    
+    .wrap {
+      width: 100%;
+      height: 100vh; /* Full viewport height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      box-sizing: border-box;
+      position: relative;
+    }
+    
+    /* 2. Focused Player Container (Only Video) */
+    .player-container {
+      width: 100%;
+      max-width: 980px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.9); /* Stronger shadow */
+    }
+    
+    .player-wrap {
+      position: relative;
+      /* Set a fixed aspect ratio for the video player (e.g., 16:9) */
+      padding-bottom: 56.25%; 
+      height: 0;
+      background: #000;
+    }
+    
+    video#player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      display: block;
+      border-radius: 12px;
+    }
+    
+    .live-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #e53935;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 18px;
+      font-weight: 700;
+      font-size: 12px;
+      z-index: 60;
+    }
+    
+    /* Plyr Color Theme (Pitch Black Background for Controls) */
+    :root { 
+      --plyr-color-main: var(--accent); 
+    }
+    
+    .plyr__controls {
+      background: rgba(0, 0, 0, 0.8); /* Darker controls background */
+      backdrop-filter: none; /* No blur for a more solid look */
+    }
+    
+    /* The rest of the Plyr styling is kept for the accent color */
     .plyr__control.plyr__control--overlaid{width:56px;height:56px;border-radius:50%;background:var(--accent)!important;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
     .plyr--video .plyr__controls button.plyr__control svg, .plyr__controls [class*="plyr__control"] svg { fill: var(--white)!important; }
     .plyr--video .plyr__controls button.plyr__control[aria-pressed="true"] svg, .plyr__controls [class*="plyr__control"][aria-expanded="true"] svg { fill: var(--accent)!important; }
     .plyr__progress--played, .plyr__progress__buffer { background: linear-gradient(90deg,#FFD957,rgba(255,217,87,0.8))!important; }
-    .plyr__controls{background:rgba(0,0,0,0.12);backdrop-filter:blur(4px);}
-    .error{padding:14px;text-align:center;color:#ffd9a8;background:#1a1a1a;}
-    /* Popup */
-    .popup-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000;}
-    .popup {background:var(--panel);padding:20px;border-radius:12px;text-align:center;width:min(92%,360px);box-shadow:0 12px 40px rgba(0,0,0,0.8);}
-    .popup h2{margin:0 0 8px;color:var(--blue);font-size:18px;}
-    .popup p{margin:0 0 16px;color:#ddd;font-size:14px;}
-    .popup button{display:block;width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;margin-bottom:8px;cursor:pointer;}
-    .btn-join{background:linear-gradient(90deg,#00a2ff,#006eff);color:#fff;}
-    .btn-close{background:#000;color:#fff;border:1px solid rgba(255,255,255,0.06);}
-    /* Bottom Left Telegram */
-    .bottom-left{position:fixed;bottom:12px;left:12px;z-index:500;}
-    .tg-btn{background:#00a2ff;color:#fff;padding:10px 16px;font-weight:700;border:none;border-radius:8px;font-size:14px;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.4);}
-    /* Bottom Right Visitor Counter */
-    .bottom-right{position:fixed;bottom:12px;right:12px;z-index:500;}
-    .bottom-right img{height:22px;width:auto;opacity:0.8;}
-    /* Dark/Night mode toggle */
-    .theme-toggle{position:fixed;top:12px;right:12px;background:var(--panel);color:var(--white);padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:13px;z-index:500;}
-    .light-mode{--bg:#f6f6f6;--panel:#fff;--white:#000;}
-    @media(max-width:540px){
-      .player-wrap{height:56vh;}
-      .live-badge{top:10px;right:10px;padding:6px 8px;font-size:11px;}
-      .theme-toggle{padding:6px 10px;font-size:12px;}
+
+    .error {
+      padding: 14px;
+      text-align: center;
+      color: #ffd9a8;
+      background: #1a1a1a;
+    }
+    
+    /* 3. Mandatory Full-Screen Popup */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 1); /* Solid black overlay */
+      display: flex; /* Always display */
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .popup {
+      background: var(--panel);
+      padding: 30px; /* Increased padding */
+      border-radius: 12px;
+      text-align: center;
+      width: min(90%, 400px); /* Slightly larger popup */
+      box-shadow: 0 12px 40px rgba(255, 255, 255, 0.1); /* Lighter shadow for contrast */
+    }
+    
+    .popup h2 {
+      margin: 0 0 10px;
+      color: var(--accent); /* Changed title color to accent */
+      font-size: 24px;
+    }
+    
+    .popup p {
+      margin: 0 0 20px;
+      color: #ccc;
+      font-size: 16px;
+    }
+    
+    .popup button {
+      display: block;
+      width: 100%;
+      padding: 14px; /* Increased button padding */
+      border: 0;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .btn-join {
+      background: linear-gradient(90deg, #00a2ff, #006eff);
+      color: #fff;
+    }
+    
+    .btn-join:hover {
+        background: linear-gradient(90deg, #006eff, #00a2ff);
+    }
+    
+    .btn-close {
+      background: #333; /* Dark gray for 'Already Joined' */
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-close:hover {
+        background: #444;
+    }
+    
+    /* 4. Bottom Left WhatsApp Button */
+    .bottom-left {
+      position: fixed;
+      bottom: 16px; /* Slightly higher */
+      left: 16px; /* Slightly further from the edge */
+      z-index: 500;
+    }
+    
+    .tg-btn {
+      background: #25D366; /* WhatsApp Green */
+      color: #fff;
+      padding: 12px 20px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      transition: background 0.2s;
+    }
+    
+    .tg-btn:hover {
+        background: #1DA851;
+    }
+    
+    /* 5. Bottom Right Visitor Counter */
+    .bottom-right {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 500;
+    }
+    
+    .bottom-right img {
+      height: 24px; /* Slightly larger counter image */
+      width: auto;
+      opacity: 0.9;
+    }
+    
+    @media(max-width: 540px) {
+      .player-container {
+        border-radius: 0; /* Full width on small screens */
+      }
+      .live-badge {
+        top: 8px;
+        right: 8px;
+        padding: 4px 6px;
+        font-size: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" id="themeToggle">🌙 Mode</button>
 
   <div class="wrap">
     <div class="player-container">
@@ -65,15 +235,15 @@
     </div>
   </div>
 
-  <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" class="tg-btn bottom-left">Join WhatsApp</a>
+  <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" class="tg-btn bottom-left"> Follow US on WhatsApp </a>
   <div class="bottom-right">
-    <img src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits" />
+    <img src="https://www.counter12.com/img-9205Yd3W54Z3y43Z-5.gif" alt="visits" />
   </div>
 
   <div class="popup-overlay" id="popup">
     <div class="popup" role="dialog" aria-modal="true" aria-labelledby="p-title">
       <h2 id="p-title">Support Us</h2>
-      <p>Join our channel for latest updates.</p>
+      <p>Join our WhatsApp channel to watch all FanCode matches.</p>
       <button class="btn-join" id="joinBtn" type="button">Join Now</button>
       <button class="btn-close" id="closePopup" type="button">Already Joined</button>
     </div>
@@ -83,70 +253,89 @@
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
   <script>
     (function(){
-      const playerEl=document.getElementById('player');
-      const errorEl=document.getElementById('error');
-      const popup=document.getElementById('popup');
-      const joinBtn=document.getElementById('joinBtn');
-      const closePopup=document.getElementById('closePopup');
-      const toggle=document.getElementById('themeToggle');
-
-      // Theme toggle system
-      let dark=true;
-      toggle.addEventListener('click',()=>{
-        dark=!dark;
-        document.body.classList.toggle('light-mode',!dark);
-        toggle.textContent=dark?'🌙 Mode':'☀️ Mode';
-      });
+      const playerEl = document.getElementById('player');
+      const errorEl = document.getElementById('error');
+      const popup = document.getElementById('popup');
+      const joinBtn = document.getElementById('joinBtn');
+      const closePopup = document.getElementById('closePopup');
 
       // ?ios= param read
-      const params=new URLSearchParams(window.location.search);
-      const m3u8=params.get('ios');
+      const params = new URLSearchParams(window.location.search);
+      const m3u8 = params.get('ios');
 
-      // Popup auto hide
-      setTimeout(()=>{if(popup)popup.style.display='none';},70000);
-      joinBtn.addEventListener('click',()=>{window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');});
-      closePopup.addEventListener('click',()=>{if(popup)popup.style.display='none';});
+      // --- Popup Control (Mandatory Full Screen) ---
+      // The popup is now displayed by default via CSS.
+      joinBtn.addEventListener('click', () => {
+          window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T', '_blank');
+          if (popup) popup.style.display = 'none'; // Close popup after clicking Join Now
+      });
 
-      function showError(msg){errorEl.style.display='block';errorEl.textContent=msg;}
+      closePopup.addEventListener('click', () => {
+          if (popup) popup.style.display = 'none'; // Close popup after clicking Already Joined
+      });
+      // ---------------------------------------------
 
-      if(!m3u8){
-        playerEl.style.display='none';
+      function showError(msg) {
+        errorEl.style.display = 'block';
+        errorEl.textContent = msg;
+      }
+
+      if (!m3u8) {
+        playerEl.style.display = 'none';
         showError('No video URL provided. Use ?ios=YOUR_M3U8_URL');
-        popup.style.display='flex';
+        // The mandatory popup is already visible via CSS
         return;
       }
 
       // HLS setup
-      if(window.Hls && Hls.isSupported()){
-        const hls=new Hls();
+      if (window.Hls && Hls.isSupported()) {
+        const hls = new Hls();
         hls.loadSource(m3u8);
         hls.attachMedia(playerEl);
 
-        hls.on(Hls.Events.MANIFEST_PARSED,function(){
-          const qualities=Array.from(new Set(hls.levels.map(l=>l.height).filter(Boolean))).sort((a,b)=>a-b);
-          const defaultQuality=360; // forced default 360p
-          window.player=new Plyr(playerEl,{
-            controls:['play-large','play','progress','current-time','mute','volume','settings','airplay','fullscreen'],
-            settings:['quality'],
-            quality:{
-              default:defaultQuality,
-              options:qualities.length?qualities:[360],
-              forced:true,
-              onChange:q=>{
-                const idx=hls.levels.findIndex(l=>l.height===q);
-                if(idx!==-1)hls.currentLevel=idx;
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          const qualities = Array.from(new Set(hls.levels.map(l => l.height).filter(Boolean))).sort((a, b) => a - b);
+          const defaultQuality = 360; // forced default 360p
+          window.player = new Plyr(playerEl, {
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'airplay', 'fullscreen'],
+            settings: ['quality'],
+            quality: {
+              default: defaultQuality,
+              options: qualities.length ? qualities : [360],
+              forced: true,
+              onChange: q => {
+                const idx = hls.levels.findIndex(l => l.height === q);
+                if (idx !== -1) hls.currentLevel = idx;
               }
             }
           });
           // Set to 360 if exists
-          const idx=hls.levels.findIndex(l=>l.height===360);
-          if(idx!==-1)hls.currentLevel=idx;
+          const idx = hls.levels.findIndex(l => l.height === 360);
+          if (idx !== -1) hls.currentLevel = idx;
         });
-      }else if(playerEl.canPlayType('application/vnd.apple.mpegurl')){
-        playerEl.src=m3u8;
-        window.player=new Plyr(playerEl,{controls:['play-large','play','progress','current-time','mute','volume','settings','airplay','fullscreen']});
-      }else{
-        playerEl.style.display='none';
+
+        hls.on(Hls.Events.ERROR, function(event, data) {
+            if (data.fatal) {
+                switch(data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        showError('Network error: Cannot load video source.');
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        showError('Media error: Playback failed.');
+                        break;
+                    default:
+                        showError('An unknown error occurred during HLS playback.');
+                        break;
+                }
+            }
+        });
+      } else if (playerEl.canPlayType('application/vnd.apple.mpegurl')) {
+        playerEl.src = m3u8;
+        window.player = new Plyr(playerEl, {
+          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'airplay', 'fullscreen']
+        });
+      } else {
+        playerEl.style.display = 'none';
         showError('Your browser does not support HLS playback.');
       }
     })();
