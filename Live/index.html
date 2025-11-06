@@ -15,23 +15,8 @@
     }
     html,body{margin:0;height:100%;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--white);}
     .wrap{height:100vh;display:flex;align-items:center;justify-content:center;background:#000;}
-    .player-container,
-    video#player {
-      width: 100%;
-      height: 100vh;
-      object-fit: cover;
-      background: #000;
-    }
-    /* Plyr fullscreen states */
-    .plyr--fullscreen-active .player-container,
-    .plyr--fullscreen-active video#player {
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: 100vw !important;
-      max-height: 100vh !important;
-      object-fit: contain !important; /* or cover */
-      background: #000;
-    }
+    .player-container{width:100%;height:100vh;position:relative;}
+    video#player{width:100%;height:100%;object-fit:cover;background:#000;}
     .live-badge{
       position:absolute;
       bottom:12px;right:14px;
@@ -52,7 +37,7 @@
     /* Error box */
     .error{padding:12px;text-align:center;background:#1a1a1a;color:#ffb;}
 
-    /* Popup styles ... */
+    /* === Popup (exact copy of screenshot style) === */
     .popup-overlay{
       position:fixed;top:0;left:0;width:100%;height:100%;
       background:rgba(0,0,0,0.7);
@@ -110,13 +95,13 @@
     </div>
   </div>
 
-  <img class="visitor" src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits">
+  <img class="visitor" src="https://counter1.optistats.ovh/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits">
 
   <!-- popup -->
   <div class="popup-overlay" id="popup">
     <div class="popup" role="dialog" aria-modal="true">
       <h2>Support Us!</h2>
-      <p>Join our WhatsApp for the latest news, updates, and releases.</p>
+      <p>Join our WhatsApp for the Exclusive Live Link</p>
       <button class="btn-join" id="joinBtn">Join Now</button>
       <button class="btn-close" id="closePopup">Already Joined</button>
     </div>
@@ -142,11 +127,7 @@
       const plyrOptions={
         controls:['play-large','play','progress','current-time','mute','volume','settings','pip','airplay','fullscreen'],
         settings:['quality','speed'],
-        fullscreen:{
-          enabled:true,
-          fallback:true,
-          iosNative:true
-        }
+        fullscreen:{enabled:true,fallback:false,iosNative:true},
       };
 
       if(Hls.isSupported()){
