@@ -1,72 +1,109 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>FREE LIVE FANCODE PLAYER : BY SAYAN OAI</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <meta name="referrer" content="no-referrer" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css" />
+  <meta charset="utf-8">
+  <title>FREE LIVE PLAYER : BY SAYAN OAI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css">
+
   <style>
     :root{
-      --bg: #000;
-      --accent: #7d0000; /* changed theme color as requested */
-      --white: #ffffff;
-      --panel: #111;
+      --accent:#7d0000;
+      --white:#fff;
+      --bg:#000;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--white);font-family:Inter,system-ui,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;}
-    /* Make player take most of viewport and be mobile friendly */
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;margin:0;box-sizing:border-box;position:relative;}
-    .player-container{width:100%;height:100vh;border-radius:0;overflow:hidden;background:#000;box-shadow:none;display:flex;align-items:center;justify-content:center;}
-    .player-wrap{position:relative;width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;}
-    video#player{width:100%;height:100%;object-fit:cover;background:#000;display:block;}
-    /* Live badge */
-    .live-badge{position:absolute;top:14px;right:14px;background:var(--accent);color:#fff;padding:8px 12px;border-radius:20px;font-weight:700;font-size:13px;z-index:60;display:inline-block;}
-    /* Plyr color theme */
-    :root { --plyr-color-main: var(--accent); }
-    .plyr__control.plyr__control--overlaid{width:56px;height:56px;border-radius:50%;background:var(--accent)!important;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-    .plyr--video .plyr__controls button.plyr__control svg, .plyr__controls [class*="plyr__control"] svg { fill: var(--white) !important; }
-    .plyr--video .plyr__controls button.plyr__control[aria-pressed="true"] svg, .plyr__controls [class*="plyr__control"][aria-expanded="true"] svg { fill: var(--accent) !important; }
-    .plyr__progress--played, .plyr__progress__buffer { background: linear-gradient(90deg,var(--accent), rgba(125,0,0,0.9))!important; }
+    html,body{margin:0;height:100%;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--white);}
+    .wrap{height:100vh;display:flex;align-items:center;justify-content:center;background:#000;}
+    .player-container{width:100%;height:100vh;position:relative;}
+    video#player{width:100%;height:100%;object-fit:cover;background:#000;}
+    .live-badge{
+      position:absolute;
+      bottom:12px;right:14px;
+      background:var(--accent);
+      color:#fff;
+      padding:6px 12px;
+      border-radius:20px;
+      font-weight:700;
+      font-size:13px;
+      z-index:40;
+    }
+
+    /* Plyr Theme */
+    :root{--plyr-color-main:var(--accent);}
     .plyr__controls{background:rgba(0,0,0,0.18);backdrop-filter:blur(6px);}
-    /* Simple error area (hidden by default) */
-    .error{padding:14px;text-align:center;color:#ffd9a8;background:#1a1a1a;display:none;}
-    /* Popup (kept) */
-    .popup-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;}
-    .popup {background:var(--panel);padding:20px;border-radius:12px;text-align:center;width:min(92%,420px);box-shadow:0 12px 40px rgba(0,0,0,0.8);}
-    .popup h2{margin:0 0 8px;color:var(--accent);font-size:18px;}
-    .popup p{margin:0 0 16px;color:#ddd;font-size:14px;}
-    .popup button{display:block;width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;margin-bottom:8px;cursor:pointer;}
-    .btn-join{background:var(--accent);color:#fff;}
-    .btn-close{background:#000;color:#fff;border:1px solid rgba(255,255,255,0.06);}
-    /* Hidden visitor counter kept but hidden */
-    .visitor-counter{display:none !important;}
+    .plyr__control.plyr__control--overlaid{background:var(--accent)!important;}
+
+    /* Error box */
+    .error{padding:12px;text-align:center;background:#1a1a1a;color:#ffb;}
+
+    /* === Popup (exact copy of screenshot style) === */
+    .popup-overlay{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.7);
+      display:flex;align-items:center;justify-content:center;
+      z-index:999;
+    }
+    .popup{
+      background:rgba(17,17,17,0.9);
+      border-radius:16px;
+      box-shadow:0 0 25px rgba(255,0,102,0.6);
+      padding:24px;
+      text-align:center;
+      width:min(92%,400px);
+    }
+    .popup h2{
+      margin:0 0 10px;
+      color:#ff1493;
+      font-size:20px;
+      font-weight:700;
+    }
+    .popup p{
+      color:#ccc;
+      font-size:15px;
+      margin-bottom:18px;
+    }
+    .popup button{
+      display:block;width:100%;
+      padding:12px;border:0;border-radius:10px;
+      font-weight:700;font-size:15px;
+      cursor:pointer;margin-bottom:10px;
+    }
+    .btn-join{
+      background:linear-gradient(90deg,#00b2ff,#a200ff);
+      color:#fff;
+      box-shadow:0 0 15px rgba(255,0,204,0.6);
+    }
+    .btn-close{
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+    }
+    /* hidden visitor counter */
+    .visitor{display:none!important;}
+
     @media(max-width:540px){
-      .live-badge{top:10px;right:10px;padding:6px 10px;font-size:12px;}
       .popup{width:min(92%,340px);}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="player-container" id="playerContainer">
-      <div class="player-wrap">
-        <video id="player" controls autoplay playsinline muted></video>
-        <div class="live-badge" id="liveBadge">LIVE</div>
-      </div>
-      <div id="error" class="error" role="status" aria-live="polite"></div>
+    <div class="player-container">
+      <video id="player" controls autoplay playsinline muted></video>
+      <div class="live-badge">LIVE</div>
+      <div id="error" class="error" style="display:none"></div>
     </div>
   </div>
 
-  <!-- Hidden visitor counter (kept but hidden as requested) -->
-  <img class="visitor-counter" src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits">
+  <img class="visitor" src="https://counter1.optistats.ovh/private/freecounterstat.php?c=5ggh91rsudsf178p2fp3f6r7e4jmw8jj" alt="visits">
 
-  <!-- Popup (kept) -->
-  <div class="popup-overlay" id="popup" aria-hidden="false">
-    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="p-title">
-      <h2 id="p-title">Support Us</h2>
-      <p>Join our channel for updates and support.</p>
-      <button class="btn-join" id="joinBtn" type="button">Join Now</button>
-      <button class="btn-close" id="closePopup" type="button">Already Joined</button>
+  <!-- popup -->
+  <div class="popup-overlay" id="popup">
+    <div class="popup" role="dialog" aria-modal="true">
+      <h2>Support Us!</h2>
+      <p>Join our WhatsApp for the latest news, updates, and releases.</p>
+      <button class="btn-join" id="joinBtn">Join Now</button>
+      <button class="btn-close" id="closePopup">Already Joined</button>
     </div>
   </div>
 
@@ -74,124 +111,63 @@
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
   <script>
     (function(){
-      const playerEl = document.getElementById('player');
-      const playerContainer = document.getElementById('playerContainer');
-      const errorEl = document.getElementById('error');
-      const popup = document.getElementById('popup');
-      const joinBtn = document.getElementById('joinBtn');
-      const closePopup = document.getElementById('closePopup');
+      const video=document.getElementById('player');
+      const err=document.getElementById('error');
+      const popup=document.getElementById('popup');
+      const join=document.getElementById('joinBtn');
+      const close=document.getElementById('closePopup');
+      join.onclick=()=>window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');
+      close.onclick=()=>popup.style.display='none';
+      setTimeout(()=>popup.style.display='none',70000);
 
-      // Popup handlers (stays on open as requested)
-      joinBtn.addEventListener('click', ()=>{ window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T', '_blank'); });
-      closePopup.addEventListener('click', ()=>{ if(popup) popup.style.display='none'; });
+      const params=new URLSearchParams(location.search);
+      const m3u8=params.get('ios');
+      if(!m3u8){video.style.display='none';err.style.display='block';err.textContent='No video URL. Use ?ios=YOUR_M3U8_URL';return;}
 
-      // Auto-hide popup after 70s (optional, keeps behavior like before)
-      setTimeout(()=>{ if(popup) popup.style.display='none'; }, 70000);
-
-      function showError(msg){
-        errorEl.style.display='block';
-        errorEl.textContent = msg;
-      }
-
-      // Read ?ios= param for m3u8
-      const params = new URLSearchParams(window.location.search);
-      const m3u8 = params.get('ios');
-
-      if(!m3u8){
-        playerEl.style.display = 'none';
-        showError('No video URL provided. Use ?ios=YOUR_M3U8_URL');
-        // Keep popup visible (as requested)
-        if(popup) popup.style.display = 'flex';
-        return;
-      }
-
-      // Plyr options: full customization + native fullscreen
-      const plyrOptions = {
-        controls: [
-          'play-large', 'play', 'progress', 'current-time', 'mute', 'volume',
-          'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-        ],
-        settings: ['quality', 'speed', 'loop'],
-        keyboard: { focused: true, global: true },
-        fullscreen: {
-          enabled: true,
-          fallback: false,     // prefer native fullscreen
-          iosNative: true
-        },
-        clickToPlay: true,
+      const plyrOptions={
+        controls:['play-large','play','progress','current-time','mute','volume','settings','pip','airplay','fullscreen'],
+        settings:['quality','speed'],
+        fullscreen:{enabled:true,fallback:false,iosNative:true},
       };
 
-      // HLS setup with quality detection and integration with Plyr
-      if(window.Hls && Hls.isSupported()){
-        const hls = new Hls({
-          // recommended minimal config
-          maxBufferLength: 30,
-        });
+      if(Hls.isSupported()){
+        const hls=new Hls();
         hls.loadSource(m3u8);
-        hls.attachMedia(playerEl);
+        hls.attachMedia(video);
 
-        hls.on(Hls.Events.MANIFEST_PARSED, function(){
-          // build quality list from levels
-          const qualities = Array.from(new Set(hls.levels.map(l => l.height).filter(Boolean))).sort((a,b)=>a-b);
-          const defaultQuality = 360; // default if available
-
-          // create Plyr instance
-          window.player = new Plyr(playerEl, plyrOptions);
-
-          // Provide quality switching via Plyr UI
-          if(qualities.length){
-            // add quality options to Plyr
-            window.player.options.quality = { default: defaultQuality, options: qualities, forced: true, onChange: (q) => {
-              // find nearest level index for selected height
-              const idx = hls.levels.findIndex(l => l.height === q);
-              if(idx !== -1) hls.currentLevel = idx;
-            }};
-            // set initial level to 360 if available
-            const idx360 = hls.levels.findIndex(l => l.height === 360);
-            if(idx360 !== -1) hls.currentLevel = idx360;
-          }else{
-            // if no level info, still keep Plyr
-          }
-
-          // When entering fullscreen, let browser handle native fullscreen for container
-          // Plyr's fullscreen will request on video element; we ensure container is used for some browsers
-          // (Plyr's native fullscreen config above should suffice)
-        });
-
-        hls.on(Hls.Events.ERROR, function(event, data){
-          console.warn('HLS error', event, data);
-          if(data && data.fatal){
-            switch(data.type){
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                showError('Network error while loading stream.');
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                showError('Media error. Trying to recover...');
-                hls.recoverMediaError();
-                break;
-              default:
-                showError('An unrecoverable error occurred while playing the stream.');
-                hls.destroy();
-                break;
+        hls.on(Hls.Events.MANIFEST_PARSED,function(){
+          const qualities=[...new Set(hls.levels.map(l=>l.height))].filter(Boolean).sort((a,b)=>a-b);
+          const defaultQ=360;
+          const player=new Plyr(video,plyrOptions);
+          player.on('ready',()=>{
+            if(qualities.length){
+              player.quality={default:defaultQ,options:qualities,forced:true,onChange:q=>{
+                const idx=hls.levels.findIndex(l=>l.height===q);
+                if(idx!==-1)hls.currentLevel=idx;
+              }};
+              const idx=hls.levels.findIndex(l=>l.height===360);
+              if(idx!==-1)hls.currentLevel=idx;
             }
-          }
+          });
+
+          // Rotate screen on fullscreen (natural YouTube-like)
+          player.on('enterfullscreen', async ()=>{
+            if(screen.orientation && screen.orientation.lock){
+              try{await screen.orientation.lock('landscape');}catch(e){}
+            }
+          });
+          player.on('exitfullscreen', async ()=>{
+            if(screen.orientation && screen.orientation.unlock){
+              try{await screen.orientation.unlock();}catch(e){}
+            }
+          });
         });
-
-      } else if (playerEl.canPlayType('application/vnd.apple.mpegurl')) {
-        // iOS / native HLS
-        playerEl.src = m3u8;
-        window.player = new Plyr(playerEl, plyrOptions);
-      } else {
-        playerEl.style.display='none';
-        showError('Your browser does not support HLS playback.');
+      }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+        video.src=m3u8;
+        const player=new Plyr(video,plyrOptions);
+      }else{
+        err.style.display='block';err.textContent='Your browser does not support HLS.';
       }
-
-      // Ensure native fullscreen when user clicks fullscreen on many browsers:
-      // (Plyr config uses native fullscreen where possible)
-      // Additional measure: make fullscreen request on container if browser requires
-      document.addEventListener('plyr:fullscreen', (e) => {
-        // If we want to customize behavior later, do it here.
-      });
     })();
   </script>
 </body>
