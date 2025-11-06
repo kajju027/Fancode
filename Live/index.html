@@ -138,19 +138,21 @@
         hls.on(Hls.Events.MANIFEST_PARSED,function(){
           const qualities=[...new Set(hls.levels.map(l=>l.height))].filter(Boolean).sort((a,b)=>a-b);
           const defaultQ=360;
-          const player=new Plyr(video,plyrOptions);
-          player.on('ready',()=>{
-            if(qualities.length){
-              player.quality={default:defaultQ,options:qualities,forced:true,onChange:q=>{
+          const player=new Plyr(video, Object.assign({}, plyrOptions, {
+            quality: {
+              default: defaultQ,
+              options: qualities,
+              forced: true,
+              onChange: q=>{
                 const idx=hls.levels.findIndex(l=>l.height===q);
-                if(idx!==-1)hls.currentLevel=idx;
-              }};
-              const idx=hls.levels.findIndex(l=>l.height===360);
-              if(idx!==-1)hls.currentLevel=idx;
+                if(idx!==-1) hls.currentLevel=idx;
+              }
             }
+          }));
+          player.on('ready',()=>{
+            const idx=hls.levels.findIndex(l=>l.height===defaultQ);
+            if(idx!==-1) hls.currentLevel=idx;
           });
-
-          // Rotate screen on fullscreen (natural YouTube-like)
           player.on('enterfullscreen', async ()=>{
             if(screen.orientation && screen.orientation.lock){
               try{await screen.orientation.lock('landscape');}catch(e){}
@@ -164,7 +166,7 @@
         });
       }else if(video.canPlayType('application/vnd.apple.mpegurl')){
         video.src=m3u8;
-        const player=new Plyr(video,plyrOptions);
+        const player=new Plyr(video, plyrOptions);
       }else{
         err.style.display='block';err.textContent='Your browser does not support HLS.';
       }
