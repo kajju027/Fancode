@@ -5,7 +5,7 @@
   <title>FREE LIVE PLAYER : BY SAYAN OAI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="referrer" content="no-referrer">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
 
   <style>
     :root{
@@ -13,11 +13,25 @@
       --white:#fff;
       --bg:#000;
     }
-    html,body{margin:0;height:100%;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--white);}
-    .wrap{height:100vh;display:flex;align-items:center;justify-content:center;background:#000;}
-    .player-container{width:100%;height:100vh;position:relative;}
-    
-    /* ডিফল্ট অবস্থায় নরমাল ভিডিও */
+    html,body{
+      margin:0;height:100%;
+      background:var(--bg);
+      font-family:Inter,system-ui,sans-serif;
+      color:var(--white);
+      overflow:hidden;
+    }
+    .wrap{
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#000;
+    }
+    .player-container{
+      width:100%;
+      height:100vh;
+      position:relative;
+    }
     video#player{
       width:100%;
       height:100%;
@@ -25,21 +39,8 @@
       background:#000;
       position:relative;
       z-index:1;
-    } 
-    
-    /* ফুলস্ক্রিন মোডে ভিডিওর পজিশন */
-    .player-fixed {
-      position:fixed !important;
-      top:0 !important;
-      left:0 !important;
-      width:100vw !important;
-      height:100vh !important;
-      z-index:9999 !important;
-      object-fit:contain !important;
-      background:#000 !important;
+      transition:all .3s ease;
     }
-
-    /* LIVE ব্যাজ */
     .live-badge{
       position:absolute;
       bottom:12px;
@@ -50,18 +51,12 @@
       border-radius:20px;
       font-weight:700;
       font-size:13px;
-      z-index:10000; /* সর্বদা ভিডিওর ওপরে */
+      z-index:10000;
     }
-
-    /* Plyr Theme */
     :root{--plyr-color-main:var(--accent);}
     .plyr__controls{background:rgba(0,0,0,0.18);backdrop-filter:blur(6px);}
     .plyr__control.plyr__control--overlaid{background:var(--accent)!important;}
-
-    /* Error box */
     .error{padding:12px;text-align:center;background:#1a1a1a;color:#ffb;}
-
-    /* Popup */
     .popup-overlay{
       position:fixed;top:0;left:0;width:100%;height:100%;
       background:rgba(0,0,0,0.7);
@@ -99,14 +94,14 @@
   <div class="popup-overlay" id="popup">
     <div class="popup" role="dialog" aria-modal="true">
       <h2>Support Us!</h2>
-      <p>Join our WhatsApp Channel </p>
+      <p>Join our WhatsApp Channel</p>
       <button class="btn-join" id="joinBtn">Join Now</button>
       <button class="btn-close" id="closePopup">Already Joined</button>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.min.js"></script>
   <script>
     (function(){
       const video=document.getElementById('player');
@@ -127,18 +122,17 @@
       const plyrOptions={
         controls:['play-large','play','progress','current-time','mute','volume','settings','pip','airplay','fullscreen'],
         settings:['quality','speed'],
-        fullscreen:{enabled:true,fallback:false,iosNative:true}, 
+        fullscreen:{enabled:true,fallback:false,iosNative:false}
       };
 
       if(Hls.isSupported()){
         const hls=new Hls();
         hls.loadSource(m3u8);
         hls.attachMedia(video);
-
         hls.on(Hls.Events.MANIFEST_PARSED,function(){
           const qualities=[...new Set(hls.levels.map(l=>l.height))].filter(Boolean).sort((a,b)=>a-b);
-          const defaultQ=360;
-          const player=new Plyr(video, Object.assign({}, plyrOptions, {
+          const defaultQ=480;
+          const player=new Plyr(video,Object.assign({},plyrOptions,{
             quality:{
               default:defaultQ,
               options:qualities,
@@ -149,32 +143,30 @@
               }
             }
           }));
-          player.on('ready',()=>{
-            const idx=hls.levels.findIndex(l=>l.height===defaultQ);
-            if(idx!==-1)hls.currentLevel=idx;
+
+          player.on('enterfullscreen',async()=>{
+            liveBadge.style.zIndex='10000';
+            try{
+              if(screen.orientation && screen.orientation.lock){
+                await screen.orientation.lock('landscape');
+              }
+            }catch(e){console.warn(e);}
+            video.style.objectFit='contain';
           });
 
-          /* === Landscape Lock এবং ভিডিও Fixed Position === */
-          player.on('enterfullscreen', async ()=>{
-            video.classList.add('player-fixed');
-            liveBadge.style.zIndex='10000'; // ব্যাজ সবসময় ওপরে
-            if(screen.orientation && screen.orientation.lock){
-              try{await screen.orientation.lock('landscape');}catch(e){console.warn(e);}
-            }
-          });
-
-          player.on('exitfullscreen', async ()=>{
-            video.classList.remove('player-fixed');
+          player.on('exitfullscreen',async()=>{
             liveBadge.style.zIndex='40';
-            if(screen.orientation && screen.orientation.unlock){
-              try{await screen.orientation.unlock();}catch(e){console.warn(e);}
-            }
+            try{
+              if(screen.orientation && screen.orientation.unlock){
+                await screen.orientation.unlock();
+              }
+            }catch(e){console.warn(e);}
+            video.style.objectFit='contain';
           });
-          /* === শেষ === */
         });
       }else if(video.canPlayType('application/vnd.apple.mpegurl')){
         video.src=m3u8;
-        const player=new Plyr(video, plyrOptions);
+        const player=new Plyr(video,plyrOptions);
       }else{
         err.style.display='block';err.textContent='Your browser does not support HLS.';
       }
