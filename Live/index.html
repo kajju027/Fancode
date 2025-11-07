@@ -17,26 +17,40 @@
     .wrap{height:100vh;display:flex;align-items:center;justify-content:center;background:#000;}
     .player-container{width:100%;height:100vh;position:relative;}
     
-    /* পরিবর্তন: ভিডিও যেন পুরোটা দেখা যায়, কোনো অংশ যেন বাদ না যায় */
-    /* object-fit: cover পরিবর্তন করে object-fit: contain করা হলো */
-    video#player{width:100%;height:100%;object-fit:contain;background:#000;} 
+    /* ডিফল্ট অবস্থায় নরমাল ভিডিও */
+    video#player{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#000;
+      position:relative;
+      z-index:1;
+    } 
     
-    /* ফুলস্ক্রিন মোডের জন্য Plyr এর CSS-এ object-fit পরিবর্তন */
-    .plyr--fullscreen-enabled.plyr--playing .plyr__video-wrapper,
-    .plyr--fullscreen-enabled.plyr--playing .plyr__video-wrapper video {
-        object-fit: contain !important; 
+    /* ফুলস্ক্রিন মোডে ভিডিওর পজিশন */
+    .player-fixed {
+      position:fixed !important;
+      top:0 !important;
+      left:0 !important;
+      width:100vw !important;
+      height:100vh !important;
+      z-index:9999 !important;
+      object-fit:contain !important;
+      background:#000 !important;
     }
 
+    /* LIVE ব্যাজ */
     .live-badge{
       position:absolute;
-      bottom:12px;right:14px;
+      bottom:12px;
+      right:14px;
       background:var(--accent);
       color:#fff;
       padding:6px 12px;
       border-radius:20px;
       font-weight:700;
       font-size:13px;
-      z-index:40;
+      z-index:10000; /* সর্বদা ভিডিওর ওপরে */
     }
 
     /* Plyr Theme */
@@ -47,7 +61,7 @@
     /* Error box */
     .error{padding:12px;text-align:center;background:#1a1a1a;color:#ffb;}
 
-    /* === Popup (exact copy of screenshot style) === */
+    /* Popup */
     .popup-overlay{
       position:fixed;top:0;left:0;width:100%;height:100%;
       background:rgba(0,0,0,0.7);
@@ -62,38 +76,13 @@
       text-align:center;
       width:min(92%,400px);
     }
-    .popup h2{
-      margin:0 0 10px;
-      color:#ff1493;
-      font-size:20px;
-      font-weight:700;
-    }
-    .popup p{
-      color:#ccc;
-      font-size:15px;
-      margin-bottom:18px;
-    }
-    .popup button{
-      display:block;width:100%;
-      padding:12px;border:0;border-radius:10px;
-      font-weight:700;font-size:15px;
-      cursor:pointer;margin-bottom:10px;
-    }
-    .btn-join{
-      background:linear-gradient(90deg,#00b2ff,#a200ff);
-      color:#fff;
-      box-shadow:0 0 15px rgba(255,0,204,0.6);
-    }
-    .btn-close{
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-    }
-    /* hidden visitor counter */
+    .popup h2{margin:0 0 10px;color:#ff1493;font-size:20px;font-weight:700;}
+    .popup p{color:#ccc;font-size:15px;margin-bottom:18px;}
+    .popup button{display:block;width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px;}
+    .btn-join{background:linear-gradient(90deg,#00b2ff,#a200ff);color:#fff;box-shadow:0 0 15px rgba(255,0,204,0.6);}
+    .btn-close{background:rgba(255,255,255,0.05);color:#fff;}
     .visitor{display:none!important;}
-
-    @media(max-width:540px){
-      .popup{width:min(92%,340px);}
-    }
+    @media(max-width:540px){.popup{width:min(92%,340px);}}
   </style>
 </head>
 <body>
@@ -110,7 +99,7 @@
   <div class="popup-overlay" id="popup">
     <div class="popup" role="dialog" aria-modal="true">
       <h2>Support Us!</h2>
-      <p>Join our WhatsApp for the latest news, updates, and releases.</p>
+      <p>Join our WhatsApp Channel </p>
       <button class="btn-join" id="joinBtn">Join Now</button>
       <button class="btn-close" id="closePopup">Already Joined</button>
     </div>
@@ -125,6 +114,8 @@
       const popup=document.getElementById('popup');
       const join=document.getElementById('joinBtn');
       const close=document.getElementById('closePopup');
+      const liveBadge=document.querySelector('.live-badge');
+
       join.onclick=()=>window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');
       close.onclick=()=>popup.style.display='none';
       setTimeout(()=>popup.style.display='none',70000);
@@ -136,7 +127,6 @@
       const plyrOptions={
         controls:['play-large','play','progress','current-time','mute','volume','settings','pip','airplay','fullscreen'],
         settings:['quality','speed'],
-        // iOS-এ নেটিভ ফুলস্ক্রিন ব্যবহারের জন্য iosNative: true রাখা হয়েছে
         fullscreen:{enabled:true,fallback:false,iosNative:true}, 
       };
 
@@ -149,45 +139,38 @@
           const qualities=[...new Set(hls.levels.map(l=>l.height))].filter(Boolean).sort((a,b)=>a-b);
           const defaultQ=360;
           const player=new Plyr(video, Object.assign({}, plyrOptions, {
-            quality: {
-              default: defaultQ,
-              options: qualities,
-              forced: true,
-              onChange: q=>{
+            quality:{
+              default:defaultQ,
+              options:qualities,
+              forced:true,
+              onChange:q=>{
                 const idx=hls.levels.findIndex(l=>l.height===q);
-                if(idx!==-1) hls.currentLevel=idx;
+                if(idx!==-1)hls.currentLevel=idx;
               }
             }
           }));
           player.on('ready',()=>{
             const idx=hls.levels.findIndex(l=>l.height===defaultQ);
-            if(idx!==-1) hls.currentLevel=idx;
+            if(idx!==-1)hls.currentLevel=idx;
           });
-          
-          // === এখানে ল্যান্ডস্কেপ লক করার লজিক আপডেট করা হলো ===
+
+          /* === Landscape Lock এবং ভিডিও Fixed Position === */
           player.on('enterfullscreen', async ()=>{
-            // screen.orientation API সাপোর্ট করে কিনা এবং lock মেথড আছে কিনা চেক করা হচ্ছে
+            video.classList.add('player-fixed');
+            liveBadge.style.zIndex='10000'; // ব্যাজ সবসময় ওপরে
             if(screen.orientation && screen.orientation.lock){
-              try{
-                // ল্যান্ডস্কেপে লক করা হচ্ছে
-                await screen.orientation.lock('landscape'); 
-              }catch(e){
-                // লক করতে না পারলে এরর কনসোলে দেখানো হবে (বা ইগনোর করা হবে)
-                console.error("Could not lock screen to landscape:", e);
-              }
+              try{await screen.orientation.lock('landscape');}catch(e){console.warn(e);}
             }
           });
+
           player.on('exitfullscreen', async ()=>{
+            video.classList.remove('player-fixed');
+            liveBadge.style.zIndex='40';
             if(screen.orientation && screen.orientation.unlock){
-              try{
-                // আনলক করা হচ্ছে, যাতে ইউজার আবার পোর্ট্রেট মোডে যেতে পারে
-                await screen.orientation.unlock(); 
-              }catch(e){
-                console.error("Could not unlock screen orientation:", e);
-              }
+              try{await screen.orientation.unlock();}catch(e){console.warn(e);}
             }
           });
-          // === ল্যান্ডস্কেপ লক করার লজিক শেষ ===
+          /* === শেষ === */
         });
       }else if(video.canPlayType('application/vnd.apple.mpegurl')){
         video.src=m3u8;
