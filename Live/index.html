@@ -120,7 +120,7 @@
   <div class="wrap">
     <div class="player-container">
       <video id="player" controls autoplay playsinline muted></video>
-      <div class="live-badge">LIVE</div>
+      <div class="live-badge">Ꮮɪᴠᴇ</div>
       <div id="error" class="error" style="display:none"></div>
     </div>
   </div>
@@ -154,7 +154,7 @@
 
       const params=new URLSearchParams(location.search);
       const m3u8=params.get('ios');
-      if(!m3u8){video.style.display='none';err.style.display='block';err.textContent='No video URL. Use ?ios=YOUR_M3U8_URL';return;}
+      if(!m3u8){video.style.display='none';err.style.display='block';err.textContent='Use https://famcode.onrender.com/Livr?ios=YOUR_M3U8_URL';return;}
 
       const plyrOptions={
         controls:['play-large','play','progress','current-time','mute','volume','settings','pip','airplay','fullscreen'],
