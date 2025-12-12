@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FAMCODE OFFICIAL VIDEO PLAYER </title>
+    <title>Professional Live Stream Player</title>
     
     <meta name="referrer" content="no-referrer" />
 
@@ -22,7 +22,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
         }
 
-        /* Container to center the player */
         #dplayer-container {
             width: 100%;
             height: 100%;
@@ -50,8 +49,12 @@
         .dplayer-setting-loop { 
             display: none !important; 
         }
+        /* Ensure Danmaku button is hidden (if it accidentally appears) */
+        .dplayer-icons .dplayer-icon.dplayer-danmaku {
+            display: none !important;
+        }
 
-        /* --- CUSTOM LOADING OVERLAY (New Feature) --- */
+        /* --- CUSTOM LOADING OVERLAY --- */
         #loading-message {
             position: absolute;
             top: 0;
@@ -66,7 +69,7 @@
             align-items: center;
             font-size: 1.2rem;
             font-weight: 600;
-            z-index: 1000; /* Above DPlayer, below Popups */
+            z-index: 1000; 
             opacity: 1;
             transition: opacity 0.5s ease;
         }
@@ -76,7 +79,7 @@
         }
         .loading-spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #0078e8; /* Theme color spinner */
+            border-top: 4px solid #0078e8; 
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -94,7 +97,6 @@
             --primary-color: #e30000;
             --text-light: #f1f5f9;
             --text-muted: #94a3b8;
-            --border-color: #2d2d2d;
         }
 
         .popup-backdrop {
@@ -105,9 +107,6 @@
             height: 100%;
             background: rgba(0, 0, 0, 1);
             z-index: 11000;
-            display: block;
-            opacity: 1;
-            transition: opacity 0.5s ease;
         }
         .popup-backdrop.hidden { opacity: 0; pointer-events: none; display: none; }
 
@@ -115,7 +114,7 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%);
             background: var(--popup-bg);
             color: var(--text-light);
             padding: 40px 25px;
@@ -126,19 +125,14 @@
             text-align: center;
             width: 90%;
             max-width: 400px;
-            display: block;
             opacity: 1;
-            transition: all 0.5s cubic-bezier(.2,.9,.2,1);
         }
         .telegram-popup.hidden { display: none; opacity: 0; }
         
-        .telegram-popup h2 { margin-top: 0; color: var(--primary-color); font-size: 1.75rem; margin-bottom: 0.75rem; }
-        .telegram-popup p { font-size: 1rem; color: var(--text-muted); margin-bottom: 1.75rem; }
-        
+        .telegram-popup h2 { margin-top: 0; color: var(--primary-color); font-size: 1.75rem; }
         .telegram-popup button {
             width: 100%; padding: 14px; margin-top: 12px; font-size: 1rem;
             border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
-            transition: transform 0.2s ease;
         }
         .telegram-popup .join-btn { background: #e30000; color: white; }
         .telegram-popup .joined-btn { background: #2d2d2d; color: #f1f5f9; border: 1px solid #b30000; }
@@ -176,7 +170,7 @@
     <script>
         // --- CONSTANTS ---
         const URL_PARAM_KEY = 'ios';
-        const DEFAULT_QUALITY_HEIGHT = 360; // *** UPDATED to 360p ***
+        const DEFAULT_QUALITY_HEIGHT = 360; // 360p as requested
         const THEME_COLOR = '#0078e8'; 
 
         // --- DOM ELEMENTS ---
@@ -207,6 +201,7 @@
             }
         }
 
+        // Event listeners for popup buttons
         joinLink.addEventListener('click', () => { setTimeout(closePopupAndPlay, 500); });
         alreadyJoinedBtn.addEventListener('click', closePopupAndPlay);
 
@@ -274,7 +269,7 @@
                     }
                 });
             } else {
-                // Standard MP4 Fallback
+                // Standard MP4 or non-HLS Fallback
                 initDPlayer(videoUrl, null, 0);
             }
         }
@@ -287,14 +282,16 @@
             const dp = new DPlayer({
                 container: document.getElementById('dplayer-container'),
                 autoplay: true,
-                theme: THEME_COLOR,
+                live: true,          // Essential for live streaming UI
+                danmaku: false,      // *** Requested: Danmaku disabled ***
+                theme: THEME_COLOR,  // #0078e8
                 loop: false,
                 lang: 'en',
                 hotkey: true,
                 preload: 'auto',
                 volume: 0.7,
                 mutex: true,
-                screenshot: false, // Generally good practice to disable for live/professional streams
+                screenshot: false,
                 video: qualityList ? {
                     quality: qualityList,
                     defaultQuality: defaultQualityIndex,
@@ -304,7 +301,6 @@
                             
                             // *** Logic for Quality Switching ***
                             if (hlsInstance) {
-                                // Find the index of the newly selected quality
                                 const currentQualityName = player.quality.name;
                                 const selectedObj = qualityList.find(q => q.name === currentQualityName);
                                 
@@ -329,21 +325,26 @@
                             
                             hlsInstance.on(Hls.Events.ERROR, function (event, data) {
                                 if(data.fatal) {
-                                    // Handle errors after initial load (e.g., stream dropout)
                                     console.error("HLS Fatal Error during playback:", data);
                                     dp.notice('Stream interrupted. Attempting to recover...', 4000);
                                     if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                                         hlsInstance.recoverMediaError();
                                     } else {
-                                        // Destroy and reinitialize if recovery fails
-                                        // Simplification: just show error for now
                                         displayOverlay("Stream Interrupted", "Playback error occurred. Please refresh.");
                                     }
                                 }
                             });
                             
-                            // Hide loading message when video metadata is loaded
-                            video.addEventListener('loadedmetadata', hideLoadingMessage, { once: true });
+                            // Hide loading message when video starts playing (smooth transition)
+                            video.addEventListener('playing', hideLoadingMessage, { once: true });
+
+                            // Fallback for metadata load
+                            video.addEventListener('loadedmetadata', () => {
+                                if (video.paused && !dp.paused) {
+                                    // If player is trying to play but stuck on loading screen
+                                    hideLoadingMessage();
+                                }
+                            }, { once: true });
                         }
                     }
                 } : {
@@ -357,7 +358,7 @@
                 dp.on('loadedmetadata', hideLoadingMessage);
             }
             
-            // --- FULLSCREEN LANDSCAPE LOCK ---
+            // --- FULLSCREEN LANDSCAPE LOCK (Mobile) ---
             dp.on('fullscreen', () => {
                 if (screen.orientation && screen.orientation.lock) {
                     screen.orientation.lock('landscape').catch(() => {});
