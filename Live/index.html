@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Professional Live Player with Popup</title>
+    <title>FAMCODE OFFICIAL VIDEO PLAYER | NEW UPDATE NOW LIVE | SAYAN XMD</title>
 
     <meta name="referrer" content="no-referrer" />
 
@@ -41,8 +41,8 @@
         }
 
         :root {
-            /* Player Theme Color */
-            --plyr-color-main: #e8e8e8; 
+            /* NEW COLOR: #0078e8 */
+            --plyr-color-main: #0078e8; 
             --plyr-control-spacing: 12px;
             --plyr-font-size-time: 14px;
 
@@ -55,6 +55,7 @@
             --border-color: #2d2d2d;
         }
         
+        /* Custom Spinner Color */
         .plyr--loading .plyr__spinner {
             border-top-color: var(--plyr-color-main);
             border-left-color: var(--plyr-color-main);
@@ -73,19 +74,19 @@
             border-radius: 8px;
             z-index: 100;
             border: 1px solid var(--plyr-color-main);
-            box-shadow: 0 0 20px rgba(232, 232, 232, 0.4);
+            box-shadow: 0 0 20px rgba(0, 120, 232, 0.4);
         }
 
-        /* --- POPUP STYLES (Copied & Adapted) --- */
+        /* --- POPUP STYLES --- */
         .popup-backdrop {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 1); /* Full black background initially */
+            background: rgba(0, 0, 0, 1);
             z-index: 11000;
-            display: block; /* Active by default */
+            display: block;
             opacity: 1;
             transition: opacity 0.5s ease;
         }
@@ -111,7 +112,7 @@
             text-align: center;
             width: 90%;
             max-width: 400px;
-            display: block; /* Active by default */
+            display: block;
             opacity: 1;
             transition: all 0.5s cubic-bezier(.2,.9,.2,1);
         }
@@ -171,11 +172,6 @@
             border: 1px solid var(--primary-color-dark);
         }
 
-        /* Helper class to hide content while popup is active */
-        .content-blurred {
-            filter: blur(5px);
-        }
-
         @media (max-width: 480px) {
             .telegram-popup {
                 padding: 30px 20px;
@@ -214,30 +210,24 @@
         const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
         let playerInitialized = false;
 
-        // Function to hide popup and START the player
         function closePopupAndPlay() {
             popupBackdrop.classList.add('hidden');
             telegramPopup.classList.add('hidden');
             
-            // Only initialize player if not done yet
             if (!playerInitialized) {
                 initializePlayer();
                 playerInitialized = true;
             }
         }
 
-        // Event Listeners for Popup Actions
-        // If user clicks "Join Now", we assume they joined, close popup and load video
         joinLink.addEventListener('click', () => {
-            // Slight delay to allow the new tab to open
             setTimeout(closePopupAndPlay, 500); 
         });
 
-        // If user clicks "Already Joined", close popup and load video
         alreadyJoinedBtn.addEventListener('click', closePopupAndPlay);
 
 
-        // --- PLAYER CONFIGURATION & CONSTANTS ---
+        // --- PLAYER CONFIGURATION ---
         const PLAYER_ID = 'player';
         const URL_PARAM_KEY = 'ios';
         const DEFAULT_QUALITY_HEIGHT = 480; 
@@ -256,7 +246,7 @@
             container.innerHTML = `<div class="info-overlay"><h2>${title}</h2><p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">${message}</p></div>`;
         }
 
-        // --- Core Player Initialization (Called only after Popup closes) ---
+        // --- Core Player Initialization ---
 
         function initializePlayer() {
             const videoUrl = getVideoUrlFromQuery();
@@ -278,8 +268,11 @@
                 disableContextMenu: true, 
                 tooltips: { controls: true, seek: true }, 
                 keyboard: { focused: true, global: true }, 
+                // All controls except 'restart', 'rewind', 'fast-forward' for live feel
                 controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
-                settings: ['captions', 'quality', 'speed'], 
+                
+                // --- CRITICAL UPDATE: REMOVED 'speed', KEPT 'quality' ---
+                settings: ['quality', 'captions'], 
             });
 
             // --- 2. HLS Integration ---
@@ -294,7 +287,7 @@
                 hls.loadSource(videoUrl);
                 hls.attachMedia(videoElement);
 
-                // --- FIX: Plyr Quality Integration Logic ---
+                // --- Quality Integration Logic ---
                 hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                     try {
                         const availableQualities = data.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i);
@@ -304,24 +297,30 @@
                             label: `${height}p`,
                         }));
 
+                        // Add Auto Option
                         plyrQualities.unshift({ size: 0, label: 'Auto' });
                         
+                        // Assign to player
                         player.quality = plyrQualities;
 
-                        // Force refresh settings
+                        // Force settings update
                         if (player.elements && player.elements.buttons && player.elements.buttons.settings) {
-                            player.elements.buttons.settings.click(); 
-                            setTimeout(() => player.elements.buttons.settings.click(), 50); 
+                            // Click to open and close to trigger a DOM refresh of the settings menu
+                            // This is a known hack to ensure the quality list renders immediately
+                            const settingsBtn = player.elements.buttons.settings;
+                            settingsBtn.click();
+                            setTimeout(() => settingsBtn.click(), 0);
                         }
                         
-                        // Set Default Quality to 480p
+                        // Set Default 480p
                         const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
                         player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
 
+                        // Handle Change
                         player.on('qualitychange', (e) => {
                             const newQuality = e.detail.quality;
                             if (newQuality === 0) {
-                                hls.currentLevel = -1; 
+                                hls.currentLevel = -1; // Auto
                             } else {
                                 const levelIndex = data.levels.findIndex(level => level.height === newQuality);
                                 if (levelIndex !== -1) {
@@ -331,7 +330,7 @@
                         });
 
                         player.media.play().catch(error => {
-                            console.log("Autoplay failed. User interaction required.");
+                            console.log("Autoplay blocked/failed.");
                         });
                     } catch (e) {
                         console.error("Error setting Plyr quality:", e);
@@ -340,17 +339,16 @@
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
-                         displayOverlay("Stream Loading Error", "Playback failed due to a critical HLS stream error. The link may be expired, geo-restricted, or offline.");
+                         displayOverlay("Stream Loading Error", "Playback failed due to a critical HLS stream error.");
                     }
                 });
 
             } else {
-                // Fallback for non-HLS
+                // Non-HLS Fallback
                 videoElement.src = videoUrl;
                 videoElement.addEventListener('error', (e) => {
-                     displayOverlay("Media Error", "The video link failed to load. Ensure it is a valid MP4/MOV or HLS link.");
+                     displayOverlay("Media Error", "The video link failed to load.");
                 });
-                // Autoplay for non-HLS
                 player.play();
             }
 
@@ -367,9 +365,6 @@
                 }
             });
         }
-        
-        // NOTE: Unlike previous versions, we DO NOT call initializePlayer() here automatically.
-        // It is called inside closePopupAndPlay().
 
     </script>
 
