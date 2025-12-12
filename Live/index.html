@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FAMCODE OFFICIAL VIDEO PLAYER</title>
+    <title>FAMCODE OFFICIAL VIDEO PLAYER</title></title>
     
     <meta name="referrer" content="no-referrer" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <style>
-        /* --- GLOBAL STYLES --- */
+        /* --- GLOBAL & BASE STYLES --- */
         html, body {
             height: 100%;
             margin: 0;
@@ -22,7 +22,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
         }
 
-        #dplayer-container {
+        #player-container {
             width: 100%;
             height: 100%;
             position: absolute;
@@ -30,30 +30,25 @@
             left: 0;
         }
 
-        /* --- DPLAYER CUSTOMIZATION & THEME --- */
+        /* --- JW PLAYER CUSTOMIZATION (Theme: #0078e8) --- */
         
-        /* Theme Color: #0078e8 (Blue) */
-        .dplayer-theme-primary {
+        /* Set primary accent color for controls */
+        .jw-button-color,
+        .jw-controlbar .jw-icon-active,
+        .jw-slider-time .jw-knob {
             color: #0078e8 !important;
         }
-        /* Highlight color in settings menu */
-        .dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-box .dplayer-setting-origin-panel .dplayer-setting-item.dplayer-setting-quality .dplayer-setting-value {
-            color: #0078e8 !important;
-        }
-        /* Settings box background for better visibility */
-        .dplayer-setting-box {
-            background: rgba(20, 20, 20, 0.9) !important;
-        }
-        /* REMOVE SPEED & Loop CONTROL (Customization) */
-        .dplayer-setting-speed, 
-        .dplayer-setting-loop { 
-            display: none !important; 
-        }
-        /* Ensure Danmaku button is hidden (if it accidentally appears) */
-        .dplayer-icons .dplayer-icon.dplayer-danmaku {
-            display: none !important;
+        
+        /* Set color for time slider and volume */
+        .jw-rail-active {
+            background-color: #0078e8 !important;
         }
 
+        /* Hide speed menu item (JW Player doesn't have an easy way, but we hide relevant CSS selectors if present) */
+        .jw-settings-content .jw-settings-item-playbackRate {
+            display: none !important;
+        }
+        
         /* --- CUSTOM LOADING OVERLAY --- */
         #loading-message {
             position: absolute;
@@ -69,7 +64,7 @@
             align-items: center;
             font-size: 1.2rem;
             font-weight: 600;
-            z-index: 1000; 
+            z-index: 10000; /* Above JW Player */
             opacity: 1;
             transition: opacity 0.5s ease;
         }
@@ -79,7 +74,7 @@
         }
         .loading-spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #0078e8; 
+            border-top: 4px solid #0078e8; /* Theme color spinner */
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -96,39 +91,20 @@
             --popup-bg: #000000;
             --primary-color: #e30000;
             --text-light: #f1f5f9;
-            --text-muted: #94a3b8;
         }
-
         .popup-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 1);
-            z-index: 11000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 1); z-index: 11000;
         }
         .popup-backdrop.hidden { opacity: 0; pointer-events: none; display: none; }
-
         .telegram-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--popup-bg);
-            color: var(--text-light);
-            padding: 40px 25px;
-            border-radius: 16px;
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 0 50px 10px rgba(227, 0, 0, 0.5);
-            z-index: 12000;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            opacity: 1;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--popup-bg); color: var(--text-light); padding: 40px 25px;
+            border-radius: 16px; border: 2px solid var(--primary-color);
+            box-shadow: 0 0 50px 10px rgba(227, 0, 0, 0.5); z-index: 12000;
+            text-align: center; width: 90%; max-width: 400px;
         }
         .telegram-popup.hidden { display: none; opacity: 0; }
-        
         .telegram-popup h2 { margin-top: 0; color: var(--primary-color); font-size: 1.75rem; }
         .telegram-popup button {
             width: 100%; padding: 14px; margin-top: 12px; font-size: 1rem;
@@ -141,12 +117,45 @@
         .info-overlay {
             color: #fff; text-align: center; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); padding: 20px 30px;
-            background: rgba(0,0,0,0.8); border: 1px solid #0078e8; border-radius: 8px; z-index: 999;
+            background: rgba(0,0,0,0.8); border: 1px solid #0078e8; border-radius: 8px; z-index: 9999;
+        }
+        
+        /* Custom quality selector styles for HLS integration */
+        .quality-selector {
+            position: absolute;
+            bottom: 60px; /* Adjust based on control bar height */
+            right: 150px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
+            padding: 5px 0;
+            z-index: 999;
+            display: none;
+        }
+        .quality-selector.active {
+            display: block;
+        }
+        .quality-selector button {
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .quality-selector button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .quality-selector button.active {
+            color: #0078e8; /* Theme color */
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+    <script src="https://cdn.jwplayer.com/libraries/YOUR_JWPLAYER_LICENSE_KEY.js"></script>
     <div class="popup-backdrop" id="popupBackdrop"></div>
     <div class="telegram-popup" id="telegramPopup">
         <h2><i class="fa-brands fa-whatsapp"></i> Support Us!</h2>
@@ -157,21 +166,22 @@
         <button class="joined-btn" id="alreadyJoinedBtn">Already Joined</button>
     </div>
 
-    <div id="dplayer-container">
+    <div id="player-container">
+        <div id="jwplayer-instance"></div>
+        
         <div id="loading-message">
             <div class="loading-spinner"></div>
             <span>Loading stream... Please wait.</span>
         </div>
+        
+        <div id="quality-selector" class="quality-selector"></div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
 
     <script>
         // --- CONSTANTS ---
         const URL_PARAM_KEY = 'ios';
         const DEFAULT_QUALITY_HEIGHT = 360; // 360p as requested
-        const THEME_COLOR = '#0078e8'; 
+        const CONTAINER_ID = 'jwplayer-instance';
 
         // --- DOM ELEMENTS ---
         const popupBackdrop = document.getElementById('popupBackdrop');
@@ -179,8 +189,12 @@
         const joinLink = document.getElementById('joinLink');
         const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
         const loadingMessage = document.getElementById('loading-message');
+        const qualitySelector = document.getElementById('quality-selector');
         
         let playerInitialized = false;
+        let hlsInstance = null;
+        let jwPlayerInstance = null;
+        let availableQualities = []; // Store HLS levels
 
         // --- POPUP & LOADER CONTROL ---
 
@@ -192,7 +206,6 @@
             popupBackdrop.classList.add('hidden');
             telegramPopup.classList.add('hidden');
             
-            // Show loading message when we start loading the player
             loadingMessage.classList.remove('hidden'); 
 
             if (!playerInitialized) {
@@ -201,11 +214,10 @@
             }
         }
 
-        // Event listeners for popup buttons
         joinLink.addEventListener('click', () => { setTimeout(closePopupAndPlay, 500); });
         alreadyJoinedBtn.addEventListener('click', closePopupAndPlay);
 
-        // --- UTILITY ---
+        // --- UTILITY & ERROR ---
         function getVideoUrlFromQuery() {
             const urlParams = new URLSearchParams(window.location.search);
             const videoUrl = urlParams.get(URL_PARAM_KEY);
@@ -213,14 +225,13 @@
         }
 
         function displayOverlay(title, message) {
-            const container = document.getElementById('dplayer-container');
-            // Hide loading message before showing error overlay
+            const container = document.getElementById('player-container');
             hideLoadingMessage(); 
             if (document.querySelector('.info-overlay')) return; 
             container.innerHTML += `<div class="info-overlay"><h2>${title}</h2><p style="margin-top:10px; opacity:0.8;">${message}</p></div>`;
         }
 
-        // --- DPLAYER + HLS PRE-LOADER LOGIC ---
+        // --- HLS.js PRE-LOADER & QUALITY SETUP ---
         
         function prepareAndInitPlayer() {
             const videoUrl = getVideoUrlFromQuery();
@@ -235,31 +246,29 @@
                 tempHls.loadSource(videoUrl);
                 
                 tempHls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                    const levels = data.levels;
+                    tempHls.destroy();
                     
-                    let qualityList = levels.map((level, index) => ({
-                        name: level.height + 'p',
-                        url: videoUrl,
-                        type: 'customHls',
-                        index: index 
-                    }));
+                    // Filter unique heights
+                    availableQualities = data.levels
+                        .map((level, index) => ({
+                            height: level.height,
+                            index: index
+                        }))
+                        .filter((v, i, a) => a.findIndex(t => t.height === v.height) === i)
+                        .sort((a, b) => a.height - b.height);
 
-                    qualityList.unshift({
-                        name: 'Auto',
-                        url: videoUrl,
-                        type: 'customHls',
-                        index: -1
-                    });
+                    // Add Auto
+                    availableQualities.unshift({ height: 0, index: -1 });
 
-                    // Determine Default Quality Index (360p)
-                    let defaultQualityIndex = 0; // Default to Auto
-                    const p360Index = qualityList.findIndex(q => q.name === DEFAULT_QUALITY_HEIGHT + 'p');
-                    if (p360Index !== -1) {
-                        defaultQualityIndex = p360Index;
+                    // Determine Default Quality Index
+                    let defaultLevelIndex = -1; // -1 means Auto
+                    const defaultQuality = availableQualities.find(q => q.height === DEFAULT_QUALITY_HEIGHT);
+                    if (defaultQuality) {
+                        defaultLevelIndex = defaultQuality.index;
                     }
                     
-                    tempHls.destroy();
-                    initDPlayer(videoUrl, qualityList, defaultQualityIndex);
+                    // Initialize the actual player
+                    initJWPlayer(videoUrl, defaultLevelIndex);
                 });
 
                 tempHls.on(Hls.Events.ERROR, function (event, data) {
@@ -269,105 +278,117 @@
                     }
                 });
             } else {
-                // Standard MP4 or non-HLS Fallback
-                initDPlayer(videoUrl, null, 0);
+                // Non-HLS Fallback (No custom quality switching here)
+                initJWPlayer(videoUrl, -1);
+                hideLoadingMessage(); // Hide loading immediately for direct links
             }
         }
 
-        // --- DPLAYER INITIALIZATION ---
-        function initDPlayer(url, qualityList, defaultQualityIndex) {
-            
-            let hlsInstance = null;
-
-            const dp = new DPlayer({
-                container: document.getElementById('dplayer-container'),
-                autoplay: true,
-                live: true,          // Essential for live streaming UI
-                danmaku: false,      // *** Requested: Danmaku disabled ***
-                theme: THEME_COLOR,  // #0078e8
-                loop: false,
-                lang: 'en',
-                hotkey: true,
-                preload: 'auto',
-                volume: 0.7,
-                mutex: true,
-                screenshot: false,
-                video: qualityList ? {
-                    quality: qualityList,
-                    defaultQuality: defaultQualityIndex,
-                    type: 'customHls', 
-                    customType: {
-                        customHls: function (video, player) {
-                            
-                            // *** Logic for Quality Switching ***
-                            if (hlsInstance) {
-                                const currentQualityName = player.quality.name;
-                                const selectedObj = qualityList.find(q => q.name === currentQualityName);
-                                
-                                if (selectedObj) {
-                                    hlsInstance.currentLevel = selectedObj.index; 
-                                }
-                                return;
-                            }
-
-                            // *** First Load Initialization ***
-                            hlsInstance = new Hls();
-                            hlsInstance.loadSource(video.src);
-                            hlsInstance.attachMedia(video);
-                            
-                            // Set initial level based on defaultQualityIndex
-                            const startObj = qualityList[defaultQualityIndex];
-                            if(startObj && startObj.index !== -1) {
-                                hlsInstance.startLevel = startObj.index;
-                            } else {
-                                hlsInstance.startLevel = -1; // Auto
-                            }
-                            
-                            hlsInstance.on(Hls.Events.ERROR, function (event, data) {
-                                if(data.fatal) {
-                                    console.error("HLS Fatal Error during playback:", data);
-                                    dp.notice('Stream interrupted. Attempting to recover...', 4000);
-                                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-                                        hlsInstance.recoverMediaError();
-                                    } else {
-                                        displayOverlay("Stream Interrupted", "Playback error occurred. Please refresh.");
-                                    }
-                                }
-                            });
-                            
-                            // Hide loading message when video starts playing (smooth transition)
-                            video.addEventListener('playing', hideLoadingMessage, { once: true });
-
-                            // Fallback for metadata load
-                            video.addEventListener('loadedmetadata', () => {
-                                if (video.paused && !dp.paused) {
-                                    // If player is trying to play but stuck on loading screen
-                                    hideLoadingMessage();
-                                }
-                            }, { once: true });
-                        }
-                    }
-                } : {
-                    url: url,
-                    type: 'auto'
-                }
+        // --- HLS QUALITY SWITCHING FUNCTIONS ---
+        
+        function buildQualityMenu() {
+            qualitySelector.innerHTML = '';
+            availableQualities.forEach(q => {
+                const btn = document.createElement('button');
+                btn.textContent = q.height === 0 ? 'Auto' : `${q.height}p`;
+                btn.dataset.levelIndex = q.index;
+                btn.addEventListener('click', () => switchHlsQuality(q.index, btn.textContent));
+                qualitySelector.appendChild(btn);
             });
+            updateQualityMenuDisplay(hlsInstance ? hlsInstance.currentLevel : -1);
+        }
 
-            // For MP4 Fallback: Hide loading message immediately if no HLS
-            if (!qualityList) {
-                dp.on('loadedmetadata', hideLoadingMessage);
+        function updateQualityMenuDisplay(activeLevelIndex) {
+            Array.from(qualitySelector.children).forEach(btn => {
+                const index = parseInt(btn.dataset.levelIndex);
+                // Highlight the active button
+                btn.classList.toggle('active', index === activeLevelIndex || (index === -1 && activeLevelIndex === -1));
+            });
+        }
+
+        function switchHlsQuality(levelIndex, label) {
+            if (hlsInstance) {
+                hlsInstance.currentLevel = levelIndex;
+                qualitySelector.classList.remove('active');
+                // You might want to update a UI element here to show the current quality
+                jwPlayerInstance.setCaptions({
+                    'enabled': true,
+                    'labels': ['Quality: ' + label],
+                    'defaultId': 0
+                });
             }
+        }
+
+        // --- JW PLAYER INITIALIZATION ---
+        function initJWPlayer(url, defaultLevelIndex) {
+            const videoElement = document.getElementById(CONTAINER_ID);
+            const videoTag = document.createElement('video');
+            videoTag.id = 'hls-video-tag'; // Use a standard video tag for hls.js
+            videoTag.className = 'jw-video-placeholder';
+            videoElement.appendChild(videoTag);
             
-            // --- FULLSCREEN LANDSCAPE LOCK (Mobile) ---
-            dp.on('fullscreen', () => {
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(() => {});
-                }
+            // 1. Initialize HLS.js
+            hlsInstance = new Hls();
+            hlsInstance.loadSource(url);
+            hlsInstance.attachMedia(videoTag);
+            
+            hlsInstance.on(Hls.Events.MEDIA_ATTACHED, function () {
+                // Set the default quality level
+                hlsInstance.startLevel = defaultLevelIndex; 
             });
-            dp.on('fullscreen_cancel', () => {
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
+
+            // 2. Initialize JW Player (using the video tag as the source)
+            jwPlayerInstance = jwplayer(CONTAINER_ID).setup({
+                // Note: The free JW Player does not support advanced live configuration easily.
+                // We use a basic setup relying on hls.js.
+                file: url, // Provide URL for JW's internal config (optional, but good)
+                type: 'hls', // Tells JW that this is HLS
+                width: '100%',
+                height: '100%',
+                autostart: true,
+                stretching: 'uniform',
+                controls: true,
+                repeat: false,
+                displaytitle: false,
+                // We must use a source that JW can handle, but the actual playback will be the HTML5 video tag.
+                // Since we attached HLS.js to a specific video tag, we can try to use a dummy config for JW
+                // and rely on events.
+                primary: 'html5',
+                live: true, // Show live indicator
+            });
+            
+            // 3. Custom HLS and Player Interaction
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, buildQualityMenu);
+
+            jwPlayerInstance.on('ready', function() {
+                // Force play if needed
+                jwPlayerInstance.play();
+
+                // Create a Quality Button in the JW Control Bar
+                this.addButton(
+                    'https://cdn.jwplayer.com/players/assets/settings-icon.svg', 
+                    'Quality', 
+                    function() {
+                        qualitySelector.classList.toggle('active');
+                    },
+                    'quality-button'
+                );
+                
+                // Hide loading message when JW Player starts playing
+                this.on('play', hideLoadingMessage);
+                
+                // Fullscreen Lock for Mobile
+                this.on('fullscreen', function(event) {
+                    if (event.fullscreen && screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(() => {});
+                    } else if (!event.fullscreen && screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                });
+            });
+
+            jwPlayerInstance.on('error', function() {
+                 displayOverlay("Playback Failed", "The stream could not be loaded by the player.");
             });
         }
     </script>
