@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Video Player</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer@1.26.0/dist/DPlayer.min.css">
+    <title>Live Video Player with WebSocket Danmaku</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer@latest/dist/DPlayer.min.css">
     <style>
-        /* Simple styling to center the player */
         body {
-            background-color: #000;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden; /* Prevent scrolling */
+            flex-direction: column;
         }
         #dplayer {
-            width: 100%;
-            height: 100%;
-            /* Max width for desktop viewing, adjust as needed */
-            max-width: 1000px; 
-            max-height: 562px; /* For 16:9 aspect ratio */
+            width: 80%;
+            max-width: 900px;
+            height: 500px;
+            margin-bottom: 20px;
         }
-        /* Ensure player takes up full screen when in fullscreen mode */
-        .dplayer-mobile-play-btn,
-        .dplayer-paused .dplayer-video-wrap {
-            /* Hide the large play button on mobile for a cleaner look if you prefer, 
-               but often better to leave it for user experience. */
-            /* display: none; */ 
+        .info-box {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 900px;
         }
     </style>
 </head>
@@ -36,101 +36,83 @@
 
     <div id="dplayer"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/dplayer@1.26.0/dist/DPlayer.min.js"></script>
+    <div class="info-box">
+        <h3>Danmaku Simulation</h3>
+        <p>ভিডিও প্লেয়ারের ডানদিকে থাকা টগল বোতামে ক্লিক করলে প্লেয়ারে একটি নকল WebSocket Danmaku দেখাবে।</p>
+        <button id="send-danmaku-btn">Send Simulated Danmaku</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> <script src="https://cdn.jsdelivr.net/npm/dplayer@latest/dist/DPlayer.min.js"></script>
     <script>
-        // --- Configuration Variables ---
-        const PLAYER_CONTAINER_ID = 'dplayer';
-        const URL_PARAM_KEY = 'ios';
-        const DEFAULT_QUALITY_LABEL = '360p';
+        const videoURL = 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'; // Sintel Demo HLS Link
+        
+        // --- 1. DPlayer Initialization ---
+        const dp = new DPlayer({
+            container: document.getElementById('dplayer'),
+            live: true,          // Enable Live Mode (shows 'LIVE' indicator)
+            danmaku: true,       // Enable Danmaku
+            apiBackend: {
+                // This function is usually called by DPlayer to fetch historical danmaku from the server.
+                read: function (options) {
+                    console.log('API Backend: Pretend to connect and fetch historical Danmaku via WebSocket or API...');
+                    // options.success() must be called with an array of danmaku objects.
+                    // For live streams, you usually return an empty array or the last few messages.
+                    options.success([]); 
+                },
+                // This function is called when a user sends a new danmaku from the player input box.
+                send: function (options) {
+                    console.log('API Backend: Pretend to send Danmaku via WebSocket/API:', options.data);
+                    // After successfully sending, call options.success()
+                    options.success(); 
+                },
+            },
+            video: {
+                url: videoURL,
+                type: 'hls',     // Must specify 'hls' for M3U8 links
+                // poster: 'image_url.jpg', // Optional: Poster image for before playback
+            },
+        });
 
-        /**
-         * Function to get the video URL from the query parameter.
-         * @returns {string | null} The video URL or null if not found.
-         */
-        function getVideoUrlFromQuery() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(URL_PARAM_KEY);
+        // --- 2. Live Danmaku Drawing Logic (Simulation) ---
+        
+        // Define the danmaku object structure
+        const danmakuData = {
+            text: 'WebSocket Danmaku: লাইভ কমেন্ট দেখানো হচ্ছে!',
+            color: '#FF0000', // Red color
+            type: 'right',    // Scrolls from right to left (Type 0/right, 1/top, 2/bottom)
+            // time: dp.video.currentTime, // For real-time, time is optional but good practice
+        };
+
+        // Function to draw the danmaku on the player
+        function drawSimulatedDanmaku() {
+            // Get the current time of the video to ensure the danmaku is displayed instantly
+            danmakuData.time = dp.video.currentTime + 0.1; 
+            
+            // Use the DPlayer API to draw the danmaku directly
+            dp.danmaku.draw(danmakuData);
+
+            console.log('Danmaku drawn successfully:', danmakuData.text);
         }
 
-        /**
-         * Main function to initialize the DPlayer.
-         */
-        function initializePlayer() {
-            const videoUrl = getVideoUrlFromQuery();
+        // Attach the drawing function to the button click for demonstration
+        document.getElementById('send-danmaku-btn').addEventListener('click', drawSimulatedDanmaku);
 
-            if (!videoUrl) {
-                // Handle case where URL is missing (e.g., show a message or a blank player)
-                console.error(`Missing video URL. Please use the format: ?${URL_PARAM_KEY}=<YOUR_VIDEO_LINK>`);
-                document.getElementById(PLAYER_CONTAINER_ID).innerHTML = 
-                    '<p style="color:white; text-align:center; padding-top: 50px;">Please provide a video URL using the <strong>?ios=</strong> parameter.</p>';
-                return;
+
+        // --- REAL-WORLD SCENARIO ---
+        // In a real application, you would connect to a WebSocket server:
+        /*
+        const ws = new WebSocket('ws://your-danmaku-server.com/ws');
+        ws.onmessage = function(event) {
+            try {
+                const receivedDanmaku = JSON.parse(event.data);
+                // The received data must match the danmaku object structure
+                receivedDanmaku.time = dp.video.currentTime + 0.1; // Ensure it shows now
+                dp.danmaku.draw(receivedDanmaku);
+            } catch (e) {
+                console.error('Failed to parse Danmaku data:', e);
             }
-
-            // --- DPlayer Configuration ---
-            const dp = new DPlayer({
-                container: document.getElementById(PLAYER_CONTAINER_ID),
-                autoplay: true,
-                live: false, // Set to true if it's a live stream
-                theme: '#FADFA3',
-                loop: false,
-                lang: 'en',
-                screenshot: false,
-                hotkey: true,
-                volume: 0.7,
-                mutex: true,
-                video: {
-                    quality: [
-                        // You can add more qualities here if the link supports adaptive streaming (HLS/DASH)
-                        // If 'videoUrl' is a direct MP4/MOV, this quality list might not be fully functional
-                        // as DPlayer expects different quality sources for each entry.
-                        // However, we set up one source with the desired label/default.
-                        {
-                            name: 'Auto',
-                            url: videoUrl,
-                            type: 'auto', // DPlayer detects type (e.g., 'hls' if .m3u8, 'normal' if .mp4)
-                        },
-                        {
-                            name: DEFAULT_QUALITY_LABEL,
-                            url: videoUrl,
-                            type: 'auto',
-                            default: true, // Set this as the default quality on load
-                        }
-                    ],
-                    defaultQuality: 1, // Index of the default quality (1 is the '360p' entry above)
-                }
-            });
-
-            // --- Custom Fullscreen/Landscape Logic ---
-
-            // DPlayer's fullscreen button is usually sufficient, but to attempt 
-            // a landscape rotation on mobile, we can listen for the fullscreen event.
-            dp.on('fullscreen', () => {
-                console.log('Player entered Fullscreen mode.');
-                // This line attempts to lock the screen to landscape.
-                // It is a modern API and might be restricted by the browser/OS for security.
-                // It works best on Progressive Web Apps (PWAs) or in certain mobile browsers.
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch((error) => {
-                        console.warn('Could not lock screen orientation:', error);
-                        // The player will still be fullscreen, just not guaranteed landscape.
-                    });
-                } else if (window.orientation !== undefined) {
-                    // Fallback for older browsers (less effective)
-                    console.log('Using legacy orientation API.');
-                }
-            });
-
-            dp.on('fullscreen_cancel', () => {
-                console.log('Player exited Fullscreen mode.');
-                // Attempt to unlock the screen orientation when exiting fullscreen
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
-            });
-        }
-
-        // Initialize the player when the page loads
-        document.addEventListener('DOMContentLoaded', initializePlayer);
+        };
+        */
     </script>
 
 </body>
