@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FANCODE CNP WEB</title>
+    <title>Professional Plyr Player (CORS Ready)</title>
 
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
@@ -13,11 +13,10 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevent body scroll */
+            overflow: hidden; 
             background-color: #000;
         }
 
-        /* Video container to ensure it covers the whole screen */
         .video-container {
             width: 100%;
             height: 100%;
@@ -30,7 +29,7 @@
         /* Custom Color Theme for Plyr Controls */
         /* ------------------------------------------- */
         :root {
-            /* Set the primary color for controls (Volume, Progress Bar, etc.) */
+            /* Set the primary color for controls: #4393c4 */
             --plyr-color-main: #4393c4; 
         }
 
@@ -47,6 +46,7 @@
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 8px;
             max-width: 90%;
+            z-index: 100;
         }
     </style>
 </head>
@@ -63,35 +63,29 @@
         // --- CONFIGURATION ---
         const PLAYER_ID = 'player';
         const URL_PARAM_KEY = 'ios';
-        // Plyr does not handle quality switching based on labels like DPlayer.
-        // It relies on the HLS stream (M3U8) to provide the default quality selection.
-        // We will try to set the default quality using hls.js settings.
-        const DEFAULT_QUALITY_HEIGHT = 480; 
+        
+        // **IMPORTANT**: If the video link causes CORS error, you MUST use a proxy server.
+        // If you set up a proxy at /proxy?url=YOUR_VIDEO_LINK, uncomment the line below:
+        // const PROXY_BASE_URL = 'https://famcode.onrender.com/proxy?url='; 
+        const PROXY_BASE_URL = ''; // Leave blank if no proxy is used
 
-        /**
-         * Function to get the video URL from the query parameter.
-         * @returns {string | null} The video URL or null if not found.
-         */
+        // --- Utility Functions ---
+
         function getVideoUrlFromQuery() {
             const urlParams = new URLSearchParams(window.location.search);
             const videoUrl = urlParams.get(URL_PARAM_KEY);
             return videoUrl ? decodeURIComponent(videoUrl) : null;
         }
 
-        /**
-         * Function to display a user-friendly error message.
-         * @param {string} message The error message to display.
-         */
         function displayError(message) {
             const container = document.querySelector('.video-container');
             container.innerHTML = `<div class="error-message"><h2>Video Error</h2><p>${message}</p><p>Please use the format: <code>?${URL_PARAM_KEY}=YOUR_VIDEO_LINK</code></p></div>`;
         }
 
-        /**
-         * Function to set up the video source and initialize Plyr.
-         */
+        // --- Core Player Initialization ---
+
         function initializePlayer() {
-            const videoUrl = getVideoUrlFromQuery();
+            let videoUrl = getVideoUrlFromQuery();
             const videoElement = document.getElementById(PLAYER_ID);
 
             if (!videoUrl) {
@@ -99,56 +93,76 @@
                 return;
             }
 
+            // Apply Proxy if configured (This is the solution for CORS)
+            if (PROXY_BASE_URL) {
+                // Example: /proxy?url=https://original-link.m3u8
+                videoUrl = PROXY_BASE_URL + encodeURIComponent(videoUrl);
+                console.log("Using Proxy URL:", videoUrl);
+            }
+
             // --- 1. Initialize Plyr Player ---
             const player = new Plyr(videoElement, {
-                // Ensure playsinline is respected on iOS
                 playsinline: true, 
-                // Only show essential controls (hiding settings if quality is handled by HLS)
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
                 muted: true, // Default to muted as requested
-                autoplay: true, // Attempt to autoplay (subject to browser policies, needs interaction if not muted)
+                autoplay: true, // Attempt to autoplay
                 loop: { active: false },
                 clickToPlay: true,
+                // Include ALL controls, including 'settings' for quality change
+                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
+                settings: ['captions', 'quality', 'speed'], // Ensure 'quality' is available in settings
             });
 
 
-            // --- 2. HLS Integration and Default Quality Setting ---
+            // --- 2. HLS Integration for Streaming ---
             if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
-                const hls = new Hls();
-
-                // Set default quality preference via HLS config
-                hls.config.defaultInitPTSFound = false;
-                // Find the first quality level that is <= 480p and set it to autoplay.
-                hls.config.startLevel = -1; // -1 means auto level selection
-                // The HLS library handles quality switching automatically based on bandwidth,
-                // but setting a preferred start level can force 480p if available.
+                const hls = new Hls({
+                    // Set a low initial buffer/start time for better live performance
+                    liveDurationInfinity: true,
+                    // Force HLS to load the stream as a cross-origin resource 
+                    // (This setting is often redundant but sometimes helps with custom headers)
+                    crossOrigin: 'anonymous', 
+                });
 
                 hls.loadSource(videoUrl);
                 hls.attachMedia(videoElement);
 
-                // Event to try and set 480p quality once levels are loaded
+                // Wait for HLS to parse the manifest, then wire it up to Plyr's quality settings
                 hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                    const availableLevels = data.levels;
-                    let defaultLevelIndex = -1;
+                    const availableQualities = data.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i);
 
-                    // Find the closest level to 480p (or the highest quality <= 480p)
-                    for (let i = 0; i < availableLevels.length; i++) {
-                        if (availableLevels[i].height === DEFAULT_QUALITY_HEIGHT) {
-                            defaultLevelIndex = i;
-                            break;
-                        }
-                    }
+                    // Map HLS qualities to Plyr's expected format
+                    const plyrQualities = availableQualities.map((height, index) => ({
+                        size: height,
+                        label: `${height}p`,
+                    }));
+
+                    // Add 'Auto' quality option
+                    plyrQualities.unshift({ size: 0, label: 'Auto' });
                     
-                    if (defaultLevelIndex !== -1) {
-                         // Set the starting level for playback
-                        hls.currentLevel = defaultLevelIndex;
-                        console.log(`Default quality set to ${DEFAULT_QUALITY_HEIGHT}p.`);
-                    } else {
-                        console.log(`Could not find a perfect ${DEFAULT_QUALITY_HEIGHT}p quality level in the stream.`);
-                    }
+                    player.quality = plyrQualities;
+                    
+                    // Wire up the Plyr quality change event to HLS
+                    player.on('qualitychange', (e) => {
+                        const newQuality = e.detail.quality;
+                        if (newQuality === 0) {
+                            hls.currentLevel = -1; // Auto
+                        } else {
+                            // Find the level index based on the height (quality value)
+                            const levelIndex = data.levels.findIndex(level => level.height === newQuality);
+                            if (levelIndex !== -1) {
+                                hls.currentLevel = levelIndex;
+                            }
+                        }
+                    });
 
-                    // Once HLS is ready, tell Plyr to load
-                    player.media.play();
+                    // Set default quality (e.g., to 480p, if available)
+                    const default480p = plyrQualities.find(q => q.size === 480);
+                    if (default480p) {
+                         player.quality = 480;
+                         // This will trigger the qualitychange event above and set hls.currentLevel
+                    } else {
+                         player.quality = 0; // Fallback to Auto
+                    }
                 });
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
@@ -158,10 +172,8 @@
                     }
                 });
 
-            } else if (videoUrl.toLowerCase().endsWith('.m3u8')) {
-                displayError("HLS is not supported in this browser.");
             } else {
-                // For standard MP4 or other direct links
+                // Fallback for standard MP4 or if HLS is not supported/needed
                 videoElement.src = videoUrl;
             }
 
@@ -169,30 +181,28 @@
             // --- 3. Custom Fullscreen/Landscape Logic (Mobile Optimization) ---
 
             player.on('enterfullscreen', () => {
-                console.log('Plyr entered Fullscreen mode. Attempting to lock screen to landscape.');
                 // Attempt to use the Screen Orientation API
                 if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch((error) => {
-                        // This might be restricted by the OS/Browser policies
-                        console.warn('Could not lock screen orientation (This is common):', error);
+                    screen.orientation.lock('landscape').catch(() => {
+                        // console.warn('Could not lock screen orientation');
                     });
                 }
             });
 
             player.on('exitfullscreen', () => {
-                console.log('Plyr exited Fullscreen mode. Unlocking screen.');
                 if (screen.orientation && screen.orientation.unlock) {
                     screen.orientation.unlock();
                 }
             });
             
-            // Log when sound is enabled
-            player.on('unmute', () => {
-                console.log('Player has been unmuted. Sound is now playing.');
+            // Initial unmuting logic for better UX
+            player.on('ready', () => {
+                // In some browsers, starting with muted=true means you can immediately call .play()
+                // Then, the user can unmute.
+                player.play(); 
             });
         }
 
-        // Initialize the player when the page loads
         document.addEventListener('DOMContentLoaded', initializePlayer);
     </script>
 
