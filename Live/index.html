@@ -3,62 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>99999 Fixed Professional Live Player</title>
+    <title>Ultimate Full Customized Live Player</title>
 
     <meta name="referrer" content="no-referrer" />
-
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
     <style>
         html, body {
             height: 100%;
             margin: 0;
-            padding: 0;
-            overflow: hidden; 
-            background-color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background: #000;
+            overflow: hidden;
         }
 
         .video-container {
+            position: absolute;
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .plyr {
             width: 100%;
             height: 100%;
-            max-height: 100%;
         }
 
         :root {
-            --plyr-color-main: #4393c4; 
-        }
-
-        .info-overlay {
-            color: #fff;
-            text-align: center;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 30px;
-            background-color: rgba(0, 0, 0, 0.8);
-            border-radius: 8px;
-            z-index: 100;
-            border: 1px solid var(--plyr-color-main);
+            --plyr-color-main: #00adee;
         }
     </style>
 </head>
 <body>
 
     <div class="video-container">
-        <video id="player" playsinline muted controls></video>
+        <video id="player" playsinline controls></video>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -66,62 +43,84 @@
 
     <script>
 
-        const URL_PARAM_KEY = 'ios';
-
-        function getVideoUrlFromQuery() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const videoUrl = urlParams.get(URL_PARAM_KEY);
-            return videoUrl ? decodeURIComponent(videoUrl) : null;
+        function getVideo() {
+            const p = new URLSearchParams(window.location.search);
+            return p.get("ios") ? decodeURIComponent(p.get("ios")) : null;
         }
 
-        function initializePlayer() {
-            const videoUrl = getVideoUrlFromQuery();
-            const videoElement = document.getElementById('player');
+        function initPlayer() {
 
-            if (!videoUrl) {
-                alert("Missing video URL. Use ?ios=LINK");
+            const videoURL = getVideo();
+            const video = document.getElementById("player");
+
+            if (!videoURL) {
+                alert("Missing video URL. Use ?ios=YOUR_LINK");
                 return;
             }
 
-            const player = new Plyr(videoElement, {
+            const player = new Plyr(video, {
                 controls: [
-                    'play-large', 'play', 'progress', 'current-time',
-                    'mute', 'volume', 'settings', 'fullscreen'
+                    'play-large',
+                    'restart',
+                    'rewind',
+                    'play',
+                    'fast-forward',
+                    'progress',
+                    'current-time',
+                    'duration',
+                    'mute',
+                    'volume',
+                    'captions',
+                    'settings',
+                    'pip',
+                    'airplay',
+                    'download',
+                    'fullscreen'
                 ],
-                settings: ['quality'], 
+
+                settings: [
+                    'captions',
+                    'quality',
+                    'speed',
+                    'loop'
+                ],
+
+                speed: { selected: 1, options: [0.25,0.5,0.75,1,1.25,1.5,2] },
+                tooltips: { controls: true, seek: true },
+                clickToPlay: true
             });
 
-            if (Hls.isSupported() && videoUrl.endsWith(".m3u8")) {
-                const hls = new Hls();
-                hls.loadSource(videoUrl);
-                hls.attachMedia(videoElement);
+            if (Hls.isSupported() && videoURL.includes(".m3u8")) {
 
-                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                const hls = new Hls({ maxMaxBufferLength: 60 });
+                hls.loadSource(videoURL);
+                hls.attachMedia(video);
 
-                    const hlsQualities = data.levels.map((l) => l.height);
-                    const uniqueQualities = hlsQualities.filter((v, i, a) => a.indexOf(v) === i);
+                hls.on(Hls.Events.MANIFEST_PARSED, (e, data) => {
 
-                    uniqueQualities.sort((a, b) => b - a);
+                    const qualities = data.levels.map(l => l.height)
+                        .filter((v, i, a) => a.indexOf(v) === i)
+                        .sort((a, b) => b - a);
 
                     player.options.quality = {
-                        default: uniqueQualities[0],
-                        options: uniqueQualities,
+                        default: qualities[0],
+                        options: qualities,
                         forced: true,
-                        onChange: (newQuality) => {
-                            const levelIndex = data.levels.findIndex(l => l.height == newQuality);
-                            hls.currentLevel = levelIndex;
+                        onChange: q => {
+                            const idx = data.levels.findIndex(x => x.height === q);
+                            hls.currentLevel = idx;
                         }
                     };
 
-                    player.quality = uniqueQualities[0];
+                    player.quality = qualities[0];
                 });
 
             } else {
-                videoElement.src = videoUrl;
+                video.src = videoURL;
             }
         }
 
-        document.addEventListener('DOMContentLoaded', initializePlayer);
+        document.addEventListener("DOMContentLoaded", initPlayer);
     </script>
 
 </body>
