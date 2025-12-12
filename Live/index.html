@@ -2,117 +2,198 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Video Player with WebSocket Danmaku</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer@latest/dist/DPlayer.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Custom Plyr Video Player</title>
+
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        /* Base styling for a clean, full-screen player experience */
+        html, body {
+            height: 100%;
             margin: 0;
-            flex-direction: column;
+            padding: 0;
+            overflow: hidden; /* Prevent body scroll */
+            background-color: #000;
         }
-        #dplayer {
-            width: 80%;
-            max-width: 900px;
-            height: 500px;
-            margin-bottom: 20px;
+
+        /* Video container to ensure it covers the whole screen */
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
-        .info-box {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 80%;
-            max-width: 900px;
+
+        /* ------------------------------------------- */
+        /* Custom Color Theme for Plyr Controls */
+        /* ------------------------------------------- */
+        :root {
+            /* Set the primary color for controls (Volume, Progress Bar, etc.) */
+            --plyr-color-main: #4393c4; 
+        }
+
+        /* Styling for the error message display */
+        .error-message {
+            color: #fff;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            max-width: 90%;
         }
     </style>
 </head>
 <body>
 
-    <div id="dplayer"></div>
-
-    <div class="info-box">
-        <h3>Danmaku Simulation</h3>
-        <p>ভিডিও প্লেয়ারের ডানদিকে থাকা টগল বোতামে ক্লিক করলে প্লেয়ারে একটি নকল WebSocket Danmaku দেখাবে।</p>
-        <button id="send-danmaku-btn">Send Simulated Danmaku</button>
+    <div class="video-container">
+        <video id="player" playsinline muted controls></video>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> <script src="https://cdn.jsdelivr.net/npm/dplayer@latest/dist/DPlayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+
     <script>
-        const videoURL = 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'; // Sintel Demo HLS Link
-        
-        // --- 1. DPlayer Initialization ---
-        const dp = new DPlayer({
-            container: document.getElementById('dplayer'),
-            live: true,          // Enable Live Mode (shows 'LIVE' indicator)
-            danmaku: true,       // Enable Danmaku
-            apiBackend: {
-                // This function is usually called by DPlayer to fetch historical danmaku from the server.
-                read: function (options) {
-                    console.log('API Backend: Pretend to connect and fetch historical Danmaku via WebSocket or API...');
-                    // options.success() must be called with an array of danmaku objects.
-                    // For live streams, you usually return an empty array or the last few messages.
-                    options.success([]); 
-                },
-                // This function is called when a user sends a new danmaku from the player input box.
-                send: function (options) {
-                    console.log('API Backend: Pretend to send Danmaku via WebSocket/API:', options.data);
-                    // After successfully sending, call options.success()
-                    options.success(); 
-                },
-            },
-            video: {
-                url: videoURL,
-                type: 'hls',     // Must specify 'hls' for M3U8 links
-                // poster: 'image_url.jpg', // Optional: Poster image for before playback
-            },
-        });
+        // --- CONFIGURATION ---
+        const PLAYER_ID = 'player';
+        const URL_PARAM_KEY = 'ios';
+        // Plyr does not handle quality switching based on labels like DPlayer.
+        // It relies on the HLS stream (M3U8) to provide the default quality selection.
+        // We will try to set the default quality using hls.js settings.
+        const DEFAULT_QUALITY_HEIGHT = 480; 
 
-        // --- 2. Live Danmaku Drawing Logic (Simulation) ---
-        
-        // Define the danmaku object structure
-        const danmakuData = {
-            text: 'WebSocket Danmaku: লাইভ কমেন্ট দেখানো হচ্ছে!',
-            color: '#FF0000', // Red color
-            type: 'right',    // Scrolls from right to left (Type 0/right, 1/top, 2/bottom)
-            // time: dp.video.currentTime, // For real-time, time is optional but good practice
-        };
-
-        // Function to draw the danmaku on the player
-        function drawSimulatedDanmaku() {
-            // Get the current time of the video to ensure the danmaku is displayed instantly
-            danmakuData.time = dp.video.currentTime + 0.1; 
-            
-            // Use the DPlayer API to draw the danmaku directly
-            dp.danmaku.draw(danmakuData);
-
-            console.log('Danmaku drawn successfully:', danmakuData.text);
+        /**
+         * Function to get the video URL from the query parameter.
+         * @returns {string | null} The video URL or null if not found.
+         */
+        function getVideoUrlFromQuery() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoUrl = urlParams.get(URL_PARAM_KEY);
+            return videoUrl ? decodeURIComponent(videoUrl) : null;
         }
 
-        // Attach the drawing function to the button click for demonstration
-        document.getElementById('send-danmaku-btn').addEventListener('click', drawSimulatedDanmaku);
+        /**
+         * Function to display a user-friendly error message.
+         * @param {string} message The error message to display.
+         */
+        function displayError(message) {
+            const container = document.querySelector('.video-container');
+            container.innerHTML = `<div class="error-message"><h2>Video Error</h2><p>${message}</p><p>Please use the format: <code>?${URL_PARAM_KEY}=YOUR_VIDEO_LINK</code></p></div>`;
+        }
 
+        /**
+         * Function to set up the video source and initialize Plyr.
+         */
+        function initializePlayer() {
+            const videoUrl = getVideoUrlFromQuery();
+            const videoElement = document.getElementById(PLAYER_ID);
 
-        // --- REAL-WORLD SCENARIO ---
-        // In a real application, you would connect to a WebSocket server:
-        /*
-        const ws = new WebSocket('ws://your-danmaku-server.com/ws');
-        ws.onmessage = function(event) {
-            try {
-                const receivedDanmaku = JSON.parse(event.data);
-                // The received data must match the danmaku object structure
-                receivedDanmaku.time = dp.video.currentTime + 0.1; // Ensure it shows now
-                dp.danmaku.draw(receivedDanmaku);
-            } catch (e) {
-                console.error('Failed to parse Danmaku data:', e);
+            if (!videoUrl) {
+                displayError("Missing video URL. Please provide a link in the query parameter.");
+                return;
             }
-        };
-        */
+
+            // --- 1. Initialize Plyr Player ---
+            const player = new Plyr(videoElement, {
+                // Ensure playsinline is respected on iOS
+                playsinline: true, 
+                // Only show essential controls (hiding settings if quality is handled by HLS)
+                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+                muted: true, // Default to muted as requested
+                autoplay: true, // Attempt to autoplay (subject to browser policies, needs interaction if not muted)
+                loop: { active: false },
+                clickToPlay: true,
+            });
+
+
+            // --- 2. HLS Integration and Default Quality Setting ---
+            if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
+                const hls = new Hls();
+
+                // Set default quality preference via HLS config
+                hls.config.defaultInitPTSFound = false;
+                // Find the first quality level that is <= 480p and set it to autoplay.
+                hls.config.startLevel = -1; // -1 means auto level selection
+                // The HLS library handles quality switching automatically based on bandwidth,
+                // but setting a preferred start level can force 480p if available.
+
+                hls.loadSource(videoUrl);
+                hls.attachMedia(videoElement);
+
+                // Event to try and set 480p quality once levels are loaded
+                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                    const availableLevels = data.levels;
+                    let defaultLevelIndex = -1;
+
+                    // Find the closest level to 480p (or the highest quality <= 480p)
+                    for (let i = 0; i < availableLevels.length; i++) {
+                        if (availableLevels[i].height === DEFAULT_QUALITY_HEIGHT) {
+                            defaultLevelIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (defaultLevelIndex !== -1) {
+                         // Set the starting level for playback
+                        hls.currentLevel = defaultLevelIndex;
+                        console.log(`Default quality set to ${DEFAULT_QUALITY_HEIGHT}p.`);
+                    } else {
+                        console.log(`Could not find a perfect ${DEFAULT_QUALITY_HEIGHT}p quality level in the stream.`);
+                    }
+
+                    // Once HLS is ready, tell Plyr to load
+                    player.media.play();
+                });
+                
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                         displayError("Stream Loading Failed (HLS Error). Check link and CORS settings.");
+                         console.error("HLS Fatal Error:", data);
+                    }
+                });
+
+            } else if (videoUrl.toLowerCase().endsWith('.m3u8')) {
+                displayError("HLS is not supported in this browser.");
+            } else {
+                // For standard MP4 or other direct links
+                videoElement.src = videoUrl;
+            }
+
+
+            // --- 3. Custom Fullscreen/Landscape Logic (Mobile Optimization) ---
+
+            player.on('enterfullscreen', () => {
+                console.log('Plyr entered Fullscreen mode. Attempting to lock screen to landscape.');
+                // Attempt to use the Screen Orientation API
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch((error) => {
+                        // This might be restricted by the OS/Browser policies
+                        console.warn('Could not lock screen orientation (This is common):', error);
+                    });
+                }
+            });
+
+            player.on('exitfullscreen', () => {
+                console.log('Plyr exited Fullscreen mode. Unlocking screen.');
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            });
+            
+            // Log when sound is enabled
+            player.on('unmute', () => {
+                console.log('Player has been unmuted. Sound is now playing.');
+            });
+        }
+
+        // Initialize the player when the page loads
+        document.addEventListener('DOMContentLoaded', initializePlayer);
     </script>
 
 </body>
