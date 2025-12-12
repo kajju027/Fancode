@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate Plyr Live Stream Player</title>
+    <title>FAMCODE OFFICIAL VIDEO PLAYER </title>
 
     <meta name="referrer" content="no-referrer" />
 
@@ -169,7 +170,7 @@
         // --- CONSTANTS ---
         const PLAYER_ID = 'player';
         const URL_PARAM_KEY = 'ios';
-        const DEFAULT_QUALITY_HEIGHT = 360; // 360p as requested
+        // const DEFAULT_QUALITY_HEIGHT = 360; // 360p as requested (এই অংশটি কোডটি থেকে সরিয়ে দেওয়া হলো)
 
         // --- DOM ELEMENTS ---
         const popupBackdrop = document.getElementById('popupBackdrop');
@@ -243,8 +244,8 @@
                 // Control Bar: play/pause, time, volume, settings, fullscreen. (Live feel)
                 controls: ['play-large', 'play', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
                 
-                // CRITICAL: REMOVED 'speed', KEPT 'quality'
-                settings: ['quality', 'captions'], 
+                // CRITICAL: Set 'quality' and 'speed' in settings
+                settings: ['quality', 'speed', 'captions'], 
             });
 
             // --- 2. HLS Integration & Quality Switching ---
@@ -259,54 +260,52 @@
                 hlsInstance.loadSource(videoUrl);
                 hlsInstance.attachMedia(videoElement);
                 
-                // --- Quality Integration Logic ---
+                // --- Quality Integration Logic (New/Updated) ---
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                     try {
                         // Filter unique heights for Plyr compatibility
-                        const availableQualities = data.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i);
-
-                        const plyrQualities = availableQualities.map((height) => ({
-                            size: height,
-                            label: `${height}p`,
-                        }));
-
-                        // Add Auto Option
-                        plyrQualities.unshift({ size: 0, label: 'Auto' });
+                        // **ADDED: Speed options from your second code**
+                        const availableQualities = [...new Set(data.levels.map(l=>l.height))].filter(Boolean).sort((a,b)=>a-b);
+                        const defaultQuality = availableQualities.find(q => q === 480) || 0; // আপনার দ্বিতীয় কোড থেকে 480p ডিফল্ট হিসাবে নেওয়া হয়েছে
                         
-                        // Assign to player
-                        plyrInstance.quality = plyrQualities;
-
-                        // Set Default 360p
-                        const default360p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
-                        plyrInstance.quality = default360p ? DEFAULT_QUALITY_HEIGHT : 0; // Default to 360p or Auto
-                        
-                        // Force settings DOM refresh (Plyr bugfix)
-                        const settingsBtn = plyrInstance.elements.buttons.settings;
-                        if (settingsBtn) {
-                            settingsBtn.click();
-                            setTimeout(() => settingsBtn.click(), 50);
-                        }
-
-                        // Handle Quality Change
-                        plyrInstance.on('qualitychange', (e) => {
-                            const newQuality = e.detail.quality;
-                            if (newQuality === 0) {
-                                hlsInstance.currentLevel = -1; // Auto
-                            } else {
-                                // Find the index that corresponds to the selected height
-                                const levelIndex = data.levels.findIndex(level => level.height === newQuality);
-                                if (levelIndex !== -1) {
-                                    hlsInstance.currentLevel = levelIndex;
+                        plyrInstance.config.quality = {
+                            default: defaultQuality,
+                            options: availableQualities,
+                            forced: true,
+                            onChange: (q) => {
+                                if (q === 0) {
+                                    hlsInstance.currentLevel = -1; // Auto
+                                } else {
+                                    const levelIndex = data.levels.findIndex(level => level.height === q);
+                                    if (levelIndex !== -1) {
+                                        hlsInstance.currentLevel = levelIndex;
+                                    }
                                 }
                             }
-                        });
+                        };
 
+                        // **ADDED: Speed options from your second code**
+                        plyrInstance.config.speed = {
+                            selected: 1,
+                            options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+                        };
+
+                        // Re-initialize Plyr to apply new settings, or manually update
+                        if (plyrInstance.settings && plyrInstance.settings.active) {
+                            // Manually closing and reopening settings for refresh
+                            const settingsBtn = plyrInstance.elements.buttons.settings;
+                            if (settingsBtn) {
+                                settingsBtn.click();
+                                setTimeout(() => settingsBtn.click(), 50);
+                            }
+                        }
+                        
                         // Start playing and hide loader
                         videoElement.play().catch(error => {
                             console.log("Autoplay blocked/failed. User interaction required.");
                         });
                     } catch (e) {
-                        console.error("Error setting Plyr quality:", e);
+                        console.error("Error setting Plyr quality/config:", e);
                     }
                 });
 
@@ -342,7 +341,7 @@
             plyrInstance.on('canplay', hideLoading);
 
 
-            // --- Fullscreen Landscape Lock ---
+            // --- Fullscreen Landscape Lock (Kept from original code) ---
             plyrInstance.on('enterfullscreen', () => {
                 if (screen.orientation && screen.orientation.lock) {
                     screen.orientation.lock('landscape').catch(() => {});
