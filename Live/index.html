@@ -3,211 +3,106 @@
 <head>
   <meta charset="utf-8">
   <title>FREE LIVE PLAYER : BY SAYAN OAI</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+
+  <!-- JW Player 7 (NO KEY REQUIRED) -->
+  <script src="https://cdn.jsdelivr.net/gh/iamsayan777/jw7-free/jwplayer.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iamsayan777/jw7-free/skins/five.css">
 
   <style>
-    :root {
-      --accent:#ff0033;
-      --white:#fff;
-      --bg:#000;
+    html,body{
+      margin:0;background:#000;height:100%;color:#fff;overflow:hidden;
+      font-family:Inter,system-ui;
     }
-    html,body {
-      margin:0;
-      height:100%;
-      background:var(--bg);
-      font-family:Inter,system-ui,sans-serif;
-      color:var(--white);
-      overflow:hidden;
+    .wrap{
+      height:100vh;display:flex;align-items:flex-start;
+      justify-content:center;padding-top:35px;
     }
-
-    .wrap {
-      height:100vh;
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      background:#000;
-      padding-top:35px; /* ভিডিও নিচে নামানো */
-      position:relative;
+    .player-container{
+      width:95%;height:85vh;border-radius:12px;overflow:hidden;
     }
-
-    .player-container {
-      width:95%;
-      height:85vh;
-      position:relative;
-      border-radius:12px;
-      overflow:hidden;
-      /* 🔴 লাল glow রিমুভ করা হয়েছে */
-      box-shadow:none;
+    #jwplayer{
+      width:100%;height:100%;border-radius:12px;
     }
-
-    video#player {
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      background:#000;
-      position:relative;
-      z-index:1;
-      transition:all .3s ease;
-      border-radius:12px;
+    .error{
+      padding:12px;text-align:center;background:#1a1a1a;color:#ffb;
+      display:none;
     }
-
-    /* 🔴 LIVE ব্যাজ */
-    .live-badge {
-      position:absolute;
-      top:12px;
-      right:14px;
-      background:var(--accent);
-      color:#fff;
-      padding:6px 14px;
-      border-radius:20px;
-      font-weight:700;
-      font-size:13px;
-      z-index:10000;
-      box-shadow:0 0 10px rgba(255,0,0,0.8), 0 0 20px rgba(255,50,50,0.6);
-      animation:glowPulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes glowPulse {
-      0% { box-shadow:0 0 8px rgba(255,0,0,0.8),0 0 16px rgba(255,0,0,0.5); }
-      50% { box-shadow:0 0 16px rgba(255,50,50,1),0 0 28px rgba(255,0,0,0.8); }
-      100% { box-shadow:0 0 8px rgba(255,0,0,0.8),0 0 16px rgba(255,0,0,0.5); }
-    }
-
-    /* Plyr থিম */
-    :root { --plyr-color-main:var(--accent); }
-    .plyr__controls { background:rgba(0,0,0,0.18); backdrop-filter:blur(6px); }
-    .plyr__control.plyr__control--overlaid { background:var(--accent)!important; }
-
-    .error { padding:12px;text-align:center;background:#1a1a1a;color:#ffb; }
-
-    /* Popup */
-    .popup-overlay {
+    /* Popup styles unchanged */
+    .popup-overlay{
       position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.7);
-      display:flex;align-items:center;justify-content:center;
-      z-index:999;
+      background:rgba(0,0,0,0.7);display:flex;align-items:center;
+      justify-content:center;z-index:999;
     }
-    .popup {
-      background:rgba(17,17,17,0.9);
-      border-radius:16px;
+    .popup{
+      background:rgba(17,17,17,0.9);border-radius:16px;
       box-shadow:0 0 25px rgba(255,0,102,0.6);
-      padding:24px;
-      text-align:center;
-      width:min(92%,400px);
+      padding:24px;text-align:center;width:min(92%,400px);
     }
-    .popup h2 {margin:0 0 10px;color:#ff1493;font-size:20px;font-weight:700;}
-    .popup p {color:#ccc;font-size:15px;margin-bottom:18px;}
-    .popup button {display:block;width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px;}
-    .btn-join {background:linear-gradient(90deg,#00b2ff,#a200ff);color:#fff;box-shadow:0 0 15px rgba(255,0,204,0.6);}
-    .btn-close {background:rgba(255,255,255,0.05);color:#fff;}
-    @media(max-width:540px){.popup{width:min(92%,340px);}}
-
-    /* 👁️ Visitor counter invisible but running */
-    .visitor-bg {
-      display:block;
-      position:absolute;
-      opacity:0; /* অদৃশ্য করা হয়েছে */
-      width:1px;
-      height:1px;
-      pointer-events:none;
-      z-index:-1;
+    .popup h2{margin:0 0 10px;color:#ff1493;font-size:20px;font-weight:700;}
+    .popup p{color:#ccc;font-size:15px;margin-bottom:18px;}
+    .popup button{
+      display:block;width:100%;padding:12px;border:0;border-radius:10px;
+      font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px;
     }
+    .btn-join{background:linear-gradient(90deg,#00b2ff,#a200ff);color:#fff;}
+    .btn-close{background:rgba(255,255,255,0.05);color:#fff;}
   </style>
+
 </head>
 <body>
-  <div class="wrap">
-    <div class="player-container">
-      <video id="player" controls autoplay playsinline muted></video>
-      <div class="live-badge">Ꮮɪᴠᴇ</div>
-      <div id="error" class="error" style="display:none"></div>
-    </div>
+
+<div class="wrap">
+  <div class="player-container">
+    <div id="jwplayer"></div>
+    <div id="error" class="error"></div>
   </div>
+</div>
 
-  <!-- 👁️ Visitor counter hidden but functional -->
-  <img class="visitor-bg" src="https://www.counter12.com/img-9205Yd3W54Z3y43Z-5.gif" alt="visitor counter">
-
-  <div class="popup-overlay" id="popup">
-    <div class="popup" role="dialog" aria-modal="true">
-      <h2>Support Us!</h2>
-      <p>Join our WhatsApp Channel</p>
-      <button class="btn-join" id="joinBtn">Join Now</button>
-      <button class="btn-close" id="closePopup">Already Joined</button>
-    </div>
+<div class="popup-overlay" id="popup">
+  <div class="popup">
+    <h2>Support Us!</h2>
+    <p>Join our WhatsApp Channel</p>
+    <button class="btn-join" id="joinBtn">Join Now</button>
+    <button class="btn-close" id="closePopup">Already Joined</button>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.min.js"></script>
-  <script>
-    (function(){
-      const video=document.getElementById('player');
-      const err=document.getElementById('error');
-      const popup=document.getElementById('popup');
-      const join=document.getElementById('joinBtn');
-      const close=document.getElementById('closePopup');
-      const liveBadge=document.querySelector('.live-badge');
+<script>
+(function(){
 
-      join.onclick=()=>window.open('https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T','_blank');
-      close.onclick=()=>popup.style.display='none';
-      setTimeout(()=>popup.style.display='none',70000);
+  const popup=document.getElementById('popup');
+  document.getElementById('joinBtn').onclick=
+    ()=>window.open("https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T","_blank");
+  document.getElementById('closePopup').onclick=()=>popup.style.display="none";
+  setTimeout(()=>popup.style.display="none",70000);
 
-      const params=new URLSearchParams(location.search);
-      const m3u8=params.get('ios');
-      if(!m3u8){video.style.display='none';err.style.display='block';err.textContent='Use https://famcode.onrender.com/Livr?ios=YOUR_M3U8_URL';return;}
+  const params=new URLSearchParams(location.search);
+  const m3u8=params.get('ios');
+  const errorBox=document.getElementById('error');
 
-      const plyrOptions={
-        controls:['play-large','play','progress','current-time','mute','volume','settings','pip','airplay','fullscreen'],
-        settings:['quality','speed'],
-        fullscreen:{enabled:true,fallback:false,iosNative:false}
-      };
+  if(!m3u8){
+    errorBox.style.display="block";
+    errorBox.textContent="Use ?ios=YOUR_M3U8_URL";
+    return;
+  }
 
-      if(Hls.isSupported()){
-        const hls=new Hls();
-        hls.loadSource(m3u8);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED,function(){
-          const qualities=[...new Set(hls.levels.map(l=>l.height))].filter(Boolean).sort((a,b)=>a-b);
-          const defaultQ=480;
-          const player=new Plyr(video,Object.assign({},plyrOptions,{
-            quality:{
-              default:defaultQ,
-              options:qualities,
-              forced:true,
-              onChange:q=>{
-                const idx=hls.levels.findIndex(l=>l.height===q);
-                if(idx!==-1)hls.currentLevel=idx;
-              }
-            }
-          }));
+  jwplayer("jwplayer").setup({
+    file:m3u8,
+    type:"hls",
+    width:"100%",
+    height:"100%",
+    autostart:true,
+    mute:false,
+    controls:true,
+    skin:{ name:"five" },
+    stretching:"uniform",
+    androidhls:true
+  });
 
-          player.on('enterfullscreen',async()=>{
-            liveBadge.style.zIndex='10000';
-            try{
-              if(screen.orientation && screen.orientation.lock){
-                await screen.orientation.lock('landscape');
-              }
-            }catch(e){console.warn(e);}
-            video.style.objectFit='contain';
-          });
+})();
+</script>
 
-          player.on('exitfullscreen',async()=>{
-            liveBadge.style.zIndex='40';
-            try{
-              if(screen.orientation && screen.orientation.unlock){
-                await screen.orientation.unlock();
-              }
-            }catch(e){console.warn(e);}
-            video.style.objectFit='contain';
-          });
-        });
-      }else if(video.canPlayType('application/vnd.apple.mpegurl')){
-        video.src=m3u8;
-        const player=new Plyr(video,plyrOptions);
-      }else{
-        err.style.display='block';err.textContent='Your browser does not support HLS.';
-      }
-    })();
-  </script>
 </body>
 </html>
