@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Professional DPlayer Stream</title>
+    <title>FAMCODE OFFICIAL VIDEO PLAYER </title>
     
     <meta name="referrer" content="no-referrer" />
 
@@ -31,28 +31,64 @@
             left: 0;
         }
 
-        /* --- DPLAYER CUSTOMIZATION --- */
+        /* --- DPLAYER CUSTOMIZATION & THEME --- */
         
-        /* 1. Theme Color Update (#0078e8) */
+        /* Theme Color: #0078e8 (Blue) */
         .dplayer-theme-primary {
             color: #0078e8 !important;
         }
+        /* Highlight color in settings menu */
         .dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-box .dplayer-setting-origin-panel .dplayer-setting-item.dplayer-setting-quality .dplayer-setting-value {
             color: #0078e8 !important;
         }
-
-        /* 2. REMOVE SPEED CONTROL (As requested) */
+        /* Settings box background for better visibility */
+        .dplayer-setting-box {
+            background: rgba(20, 20, 20, 0.9) !important;
+        }
+        /* REMOVE SPEED & Loop CONTROL (Customization) */
         .dplayer-setting-speed, 
         .dplayer-setting-loop { 
             display: none !important; 
         }
 
-        /* 3. Force Quality Menu to be visible/styled nicely */
-        .dplayer-setting-box {
-            background: rgba(20, 20, 20, 0.9) !important;
+        /* --- CUSTOM LOADING OVERLAY (New Feature) --- */
+        #loading-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            z-index: 1000; /* Above DPlayer, below Popups */
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        #loading-message.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #0078e8; /* Theme color spinner */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* --- POPUP STYLES (Retained from previous code) --- */
+        /* --- POPUP STYLES (Retained) --- */
         :root {
             --popup-bg: #000000;
             --primary-color: #e30000;
@@ -104,8 +140,6 @@
             border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
             transition: transform 0.2s ease;
         }
-        .telegram-popup button:hover { transform: translateY(-2px); }
-        
         .telegram-popup .join-btn { background: #e30000; color: white; }
         .telegram-popup .joined-btn { background: #2d2d2d; color: #f1f5f9; border: 1px solid #b30000; }
 
@@ -129,7 +163,12 @@
         <button class="joined-btn" id="alreadyJoinedBtn">Already Joined</button>
     </div>
 
-    <div id="dplayer-container"></div>
+    <div id="dplayer-container">
+        <div id="loading-message">
+            <div class="loading-spinner"></div>
+            <span>Loading stream... Please wait.</span>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
@@ -137,21 +176,32 @@
     <script>
         // --- CONSTANTS ---
         const URL_PARAM_KEY = 'ios';
-        const DEFAULT_QUALITY_HEIGHT = 480;
-        const THEME_COLOR = '#0078e8'; // New Blue Color
+        const DEFAULT_QUALITY_HEIGHT = 360; // *** UPDATED to 360p ***
+        const THEME_COLOR = '#0078e8'; 
 
-        // --- POPUP LOGIC ---
+        // --- DOM ELEMENTS ---
         const popupBackdrop = document.getElementById('popupBackdrop');
         const telegramPopup = document.getElementById('telegramPopup');
         const joinLink = document.getElementById('joinLink');
         const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
+        const loadingMessage = document.getElementById('loading-message');
+        
         let playerInitialized = false;
+
+        // --- POPUP & LOADER CONTROL ---
+
+        function hideLoadingMessage() {
+             loadingMessage.classList.add('hidden');
+        }
 
         function closePopupAndPlay() {
             popupBackdrop.classList.add('hidden');
             telegramPopup.classList.add('hidden');
+            
+            // Show loading message when we start loading the player
+            loadingMessage.classList.remove('hidden'); 
+
             if (!playerInitialized) {
-                // Start the logic to verify link and load player
                 prepareAndInitPlayer(); 
                 playerInitialized = true;
             }
@@ -169,13 +219,13 @@
 
         function displayOverlay(title, message) {
             const container = document.getElementById('dplayer-container');
+            // Hide loading message before showing error overlay
+            hideLoadingMessage(); 
             if (document.querySelector('.info-overlay')) return; 
-            container.innerHTML = `<div class="info-overlay"><h2>${title}</h2><p style="margin-top:10px; opacity:0.8;">${message}</p></div>`;
+            container.innerHTML += `<div class="info-overlay"><h2>${title}</h2><p style="margin-top:10px; opacity:0.8;">${message}</p></div>`;
         }
 
         // --- DPLAYER + HLS PRE-LOADER LOGIC ---
-        // This function parses the HLS levels BEFORE initializing DPlayer
-        // This is the only way to ensure Quality Buttons appear correctly in DPlayer for HLS
         
         function prepareAndInitPlayer() {
             const videoUrl = getVideoUrlFromQuery();
@@ -185,27 +235,20 @@
                 return;
             }
 
-            // Step 1: Pre-load HLS to get levels (if .m3u8)
             if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
                 const tempHls = new Hls();
                 tempHls.loadSource(videoUrl);
                 
                 tempHls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                    // Extract levels
                     const levels = data.levels;
-                    
-                    // Build Quality Array for DPlayer
-                    // Note: DPlayer expects 'type: hls' usually, but to use custom switching we use 'customHls'
-                    // We map all levels to the SAME url, but we will handle switching internally
                     
                     let qualityList = levels.map((level, index) => ({
                         name: level.height + 'p',
                         url: videoUrl,
-                        type: 'customHls', // Custom type handler
-                        index: index // Store index for switching
+                        type: 'customHls',
+                        index: index 
                     }));
 
-                    // Add 'Auto' option at the top
                     qualityList.unshift({
                         name: 'Auto',
                         url: videoUrl,
@@ -213,14 +256,13 @@
                         index: -1
                     });
 
-                    // Determine Default Quality Index (480p)
+                    // Determine Default Quality Index (360p)
                     let defaultQualityIndex = 0; // Default to Auto
-                    const p480Index = qualityList.findIndex(q => q.name === '480p');
-                    if (p480Index !== -1) {
-                        defaultQualityIndex = p480Index;
+                    const p360Index = qualityList.findIndex(q => q.name === DEFAULT_QUALITY_HEIGHT + 'p');
+                    if (p360Index !== -1) {
+                        defaultQualityIndex = p360Index;
                     }
-
-                    // Destroy temp instance and Init Real Player
+                    
                     tempHls.destroy();
                     initDPlayer(videoUrl, qualityList, defaultQualityIndex);
                 });
@@ -232,7 +274,7 @@
                     }
                 });
             } else {
-                // Standard MP4 or No HLS support
+                // Standard MP4 Fallback
                 initDPlayer(videoUrl, null, 0);
             }
         }
@@ -240,41 +282,39 @@
         // --- DPLAYER INITIALIZATION ---
         function initDPlayer(url, qualityList, defaultQualityIndex) {
             
-            // Shared HLS instance for the player
             let hlsInstance = null;
 
             const dp = new DPlayer({
                 container: document.getElementById('dplayer-container'),
                 autoplay: true,
-                theme: THEME_COLOR, // #0078e8
+                theme: THEME_COLOR,
                 loop: false,
                 lang: 'en',
                 hotkey: true,
                 preload: 'auto',
                 volume: 0.7,
                 mutex: true,
-                // If quality list exists, use it. Otherwise just use simple url
+                screenshot: false, // Generally good practice to disable for live/professional streams
                 video: qualityList ? {
                     quality: qualityList,
                     defaultQuality: defaultQualityIndex,
-                    type: 'customHls', // Trigger custom handler
+                    type: 'customHls', 
                     customType: {
                         customHls: function (video, player) {
-                            // If HLS already exists (quality switch), just switch level
+                            
+                            // *** Logic for Quality Switching ***
                             if (hlsInstance) {
-                                // Find the index from the qualityList based on the *name* (DPlayer limitation)
-                                // But simpler: we check the currently selected quality index from DPlayer
-                                const currentQualityName = player.quality.name; // e.g., '480p'
+                                // Find the index of the newly selected quality
+                                const currentQualityName = player.quality.name;
                                 const selectedObj = qualityList.find(q => q.name === currentQualityName);
                                 
                                 if (selectedObj) {
-                                    console.log("Switching to Level: " + selectedObj.index);
                                     hlsInstance.currentLevel = selectedObj.index; 
                                 }
                                 return;
                             }
 
-                            // First Load initialization
+                            // *** First Load Initialization ***
                             hlsInstance = new Hls();
                             hlsInstance.loadSource(video.src);
                             hlsInstance.attachMedia(video);
@@ -286,6 +326,24 @@
                             } else {
                                 hlsInstance.startLevel = -1; // Auto
                             }
+                            
+                            hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                                if(data.fatal) {
+                                    // Handle errors after initial load (e.g., stream dropout)
+                                    console.error("HLS Fatal Error during playback:", data);
+                                    dp.notice('Stream interrupted. Attempting to recover...', 4000);
+                                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                        hlsInstance.recoverMediaError();
+                                    } else {
+                                        // Destroy and reinitialize if recovery fails
+                                        // Simplification: just show error for now
+                                        displayOverlay("Stream Interrupted", "Playback error occurred. Please refresh.");
+                                    }
+                                }
+                            });
+                            
+                            // Hide loading message when video metadata is loaded
+                            video.addEventListener('loadedmetadata', hideLoadingMessage, { once: true });
                         }
                     }
                 } : {
@@ -294,6 +352,11 @@
                 }
             });
 
+            // For MP4 Fallback: Hide loading message immediately if no HLS
+            if (!qualityList) {
+                dp.on('loadedmetadata', hideLoadingMessage);
+            }
+            
             // --- FULLSCREEN LANDSCAPE LOCK ---
             dp.on('fullscreen', () => {
                 if (screen.orientation && screen.orientation.lock) {
@@ -305,9 +368,6 @@
                     screen.orientation.unlock();
                 }
             });
-
-            // Ensure Speed Menu is hidden (CSS handles it, but just in case)
-            // DPlayer creates menu items dynamically. CSS is the best way to hide them.
         }
     </script>
 </body>
