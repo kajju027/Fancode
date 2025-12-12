@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fixed Plyr Video Player</title>
+    <title>Ultimate Professional Live Player</title>
 
     <meta name="referrer" content="no-referrer" />
 
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
     <style>
-        /* Base styling for a clean, full-screen player experience */
+        /* Base Styling for Full-Screen, Professional Look */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden; 
             background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
         }
 
         .video-container {
@@ -25,27 +26,47 @@
             position: absolute;
             top: 0;
             left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Custom Color Theme: #4393c4 */
+        /* ------------------------------------------- */
+        /* CUSTOM COLOR THEME: #4393c4 */
+        /* ------------------------------------------- */
         :root {
-            --plyr-color-main: #4393c4; 
+            --plyr-color-main: #4393c4; /* Accent color for progress, volume, etc. */
+            --plyr-control-spacing: 12px; /* Adjust spacing between controls */
+            --plyr-font-size-time: 14px; /* Time font size */
+        }
+        
+        /* Custom Loading Spinner for professional touch */
+        .plyr--loading .plyr__spinner {
+            border-top-color: var(--plyr-color-main);
+            border-left-color: var(--plyr-color-main);
+            border-right-color: var(--plyr-color-main);
         }
 
-        /* Styling for the error message display */
-        .error-message {
+        /* Error/Info Message Styling */
+        .info-overlay {
             color: #fff;
             text-align: center;
-            font-family: Arial, sans-serif;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px 30px;
+            background-color: rgba(0, 0, 0, 0.8);
             border-radius: 8px;
             max-width: 90%;
             z-index: 100;
+            border: 1px solid var(--plyr-color-main);
+            box-shadow: 0 0 20px rgba(67, 147, 196, 0.4);
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
     </style>
 </head>
@@ -59,25 +80,30 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- CONFIGURATION & CONSTANTS ---
         const PLAYER_ID = 'player';
         const URL_PARAM_KEY = 'ios';
         const DEFAULT_QUALITY_HEIGHT = 480; 
 
         // --- Utility Functions ---
 
+        /**
+         * Extracts and decodes the video URL from the ?ios= query parameter.
+         */
         function getVideoUrlFromQuery() {
             const urlParams = new URLSearchParams(window.location.search);
             const videoUrl = urlParams.get(URL_PARAM_KEY);
             return videoUrl ? decodeURIComponent(videoUrl) : null;
         }
 
-        function displayError(message) {
+        /**
+         * Displays a highly visible, custom error or information message.
+         */
+        function displayOverlay(title, message) {
             const container = document.querySelector('.video-container');
-            // Check if the error message is already visible to prevent duplication
-            if (document.querySelector('.error-message')) return; 
+            if (document.querySelector('.info-overlay')) return; // Avoid stacking overlays
             
-            container.innerHTML = `<div class="error-message"><h2>Video Playback Error</h2><p>${message}</p><p>Please check the stream link and try again.</p></div>`;
+            container.innerHTML = `<div class="info-overlay"><h2>${title}</h2><p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">${message}</p></div>`;
         }
 
         // --- Core Player Initialization ---
@@ -87,46 +113,50 @@
             const videoElement = document.getElementById(PLAYER_ID);
 
             if (!videoUrl) {
-                displayError("Missing video URL. Please provide a link in the query parameter.");
+                displayOverlay("Configuration Error", "Missing video URL. Please provide a link in the query parameter: <code>?ios=YOUR_VIDEO_LINK</code>");
                 return;
             }
 
-            // --- 1. Initialize Plyr Player ---
+            // --- 1. Plyr Initialization ---
             const player = new Plyr(videoElement, {
                 playsinline: true, 
-                muted: true, 
-                autoplay: true, 
+                muted: true, // Required: Default to muted
+                autoplay: true, // Required: Attempt to autoplay
                 loop: { active: false },
                 clickToPlay: true,
-                // Include all controls for full customization
-                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
-                settings: ['captions', 'quality', 'speed'], 
+                disableContextMenu: true, // Disables right-click menu for a cleaner look
+                tooltips: { controls: true, seek: true }, // Show tooltips on hover
+                keyboard: { focused: true, global: true }, // Enable global keyboard shortcuts
+                
+                // Include ALL controls for full customization
+                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
+                settings: ['captions', 'quality', 'speed'], // Ensure all settings are available
             });
 
-
-            // --- 2. HLS Integration for Streaming (FIXED for Fancode/Referrer issues) ---
+            // --- 2. HLS Integration for Streaming (Quality Changer & Stability) ---
             if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
                 const hls = new Hls({
-                    // FIX 2: Set crossOrigin to anonymous and ensure no credentials are sent
-                    // This is essential for streams that rely on CORS headers but may be blocked by cookies/auth.
+                    // Set crossOrigin to anonymous and ensure no credentials are sent (Helps with blocking issues)
                     crossOrigin: 'anonymous', 
                     withCredentials: false, 
-                    // Other HLS settings for live streaming stability
+                    // Optimized settings for live streams
                     liveDurationInfinity: true,
+                    lowLatencyMode: true, // Enable low latency if supported by the stream
                 });
 
                 hls.loadSource(videoUrl);
                 hls.attachMedia(videoElement);
 
-                // --- Plyr Quality Integration ---
+                // --- Plyr Quality Integration Logic ---
                 hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                     const availableQualities = data.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i);
 
-                    const plyrQualities = availableQualities.map((height, index) => ({
+                    const plyrQualities = availableQualities.map((height) => ({
                         size: height,
                         label: `${height}p`,
                     }));
 
+                    // Always add the 'Auto' option
                     plyrQualities.unshift({ size: 0, label: 'Auto' });
                     player.quality = plyrQualities;
                     
@@ -134,8 +164,9 @@
                     player.on('qualitychange', (e) => {
                         const newQuality = e.detail.quality;
                         if (newQuality === 0) {
-                            hls.currentLevel = -1; // Auto
+                            hls.currentLevel = -1; // Auto selection
                         } else {
+                            // Find the level index based on the height (quality value)
                             const levelIndex = data.levels.findIndex(level => level.height === newQuality);
                             if (levelIndex !== -1) {
                                 hls.currentLevel = levelIndex;
@@ -143,19 +174,20 @@
                         }
                     });
 
-                    // Set default quality (480p) if available
+                    // Set default quality (480p) if available, otherwise 'Auto'
                     const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
                     player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
                     
-                    // Start playback
-                    player.media.play();
+                    // Start playback and hide the initial loading state
+                    player.media.play().catch(error => {
+                        console.log("Autoplay failed, user interaction needed.", error);
+                    });
                 });
                 
                 // --- Critical HLS Error Handling ---
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
-                        // Display the error based on HLS events, confirming load failure
-                         displayError("Stream Failed to Load. This might be due to geo-blocking, HLS error, or stream being offline.");
+                         displayOverlay("Stream Loading Error", "Playback failed due to a critical HLS stream error. The link may be expired, geo-restricted, or offline.");
                          console.error("HLS Fatal Error:", data);
                     }
                 });
@@ -164,16 +196,20 @@
                 // Fallback for standard MP4 or non-HLS links
                 videoElement.src = videoUrl;
                 videoElement.addEventListener('error', (e) => {
-                     displayError("Video playback error (Non-HLS). Check the file link.");
+                     displayOverlay("Media Error", "The video link failed to load. Ensure it is a valid MP4/MOV or HLS link.");
                 });
             }
 
 
-            // --- 3. Custom Fullscreen/Landscape Logic ---
+            // --- 3. Custom Events & UX Enhancements ---
 
+            // Required: Fullscreen/Landscape Mobile Logic
             player.on('enterfullscreen', () => {
+                // Attempt to lock screen to landscape (device/browser dependent)
                 if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(() => {});
+                    screen.orientation.lock('landscape').catch(() => {
+                        // console.warn('Could not lock screen orientation');
+                    });
                 }
             });
 
@@ -183,12 +219,15 @@
                 }
             });
             
-            player.on('ready', () => {
-                // Attempt to play after Plyr is ready, ensures mute state is active
-                player.play().catch(error => {
-                    // Autoplay blocked - requires user interaction
-                    console.log("Autoplay blocked. User interaction required.");
-                }); 
+            // Notification when user unmutes the video
+            player.on('unmute', () => {
+                console.log('Player unmuted by user.');
+            });
+
+            // Notification when the video successfully plays
+            player.on('playing', () => {
+                console.log('Video is now playing.');
+                // Optional: Remove any temporary loading/info messages here if you added one manually.
             });
         }
 
