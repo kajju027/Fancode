@@ -1,108 +1,392 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>LIVE PLAYER : BY SAYAN OAI </title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="referrer" content="no-referrer">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>FANCODE VIDEO PLAYER : SAYAN OAI </title>
 
-  <!-- JW Player 7 (NO KEY REQUIRED) -->
-  <script src="https://cdn.jsdelivr.net/gh/iamsayan777/jw7-free/jwplayer.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iamsayan777/jw7-free/skins/five.css">
+  <!-- DPlayer CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer@1.26.0/dist/DPlayer.min.css">
 
   <style>
     html,body{
-      margin:0;background:#000;height:100%;color:#fff;overflow:hidden;
-      font-family:Inter,system-ui;
+      height:100%;
+      margin:0;
+      background:#111;
+      color:#eee;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
     .wrap{
-      height:100vh;display:flex;align-items:flex-start;
-      justify-content:center;padding-top:35px;
+      max-width:980px;
+      margin:20px auto;
+      padding:12px;
     }
-    .player-container{
-      width:95%;height:85vh;border-radius:12px;overflow:hidden;
+    .player-wrap{
+      position:relative;
+      border-radius:8px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,0.6);
     }
-    #jwplayer{
-      width:100%;height:100%;border-radius:12px;
+    .controls-bar{
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+      align-items:center;
+      flex-wrap:wrap;
     }
-    .error{
-      padding:12px;text-align:center;background:#1a1a1a;color:#ffb;
+    button, select {
+      background:#222;
+      color:#eee;
+      border:1px solid #333;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    button:active{ transform: translateY(1px); }
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:20px;
+      background:rgba(0,0,0,0.75);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:6px;
       display:none;
+      z-index:9999;
     }
-    /* Popup styles unchanged */
-    .popup-overlay{
-      position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.7);display:flex;align-items:center;
-      justify-content:center;z-index:999;
+    /* small UI for Add quality modal */
+    .modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      background: #111;
+      border: 1px solid #333;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      display: none;
+      z-index: 9998;
+      width: 90%;
+      max-width: 480px;
     }
-    .popup{
-      background:rgba(17,17,17,0.9);border-radius:16px;
-      box-shadow:0 0 25px rgba(255,0,102,0.6);
-      padding:24px;text-align:center;width:min(92%,400px);
+    .modal input[type=text]{
+      width:100%;
+      padding:8px;
+      margin:6px 0 12px;
+      border-radius:6px;
+      border:1px solid #333;
+      background:#0e0e0e;
+      color:#fff;
     }
-    .popup h2{margin:0 0 10px;color:#ff1493;font-size:20px;font-weight:700;}
-    .popup p{color:#ccc;font-size:15px;margin-bottom:18px;}
-    .popup button{
-      display:block;width:100%;padding:12px;border:0;border-radius:10px;
-      font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px;
+    .modal .row { display:flex; gap:8px; }
+    footer { margin-top:18px; font-size:13px; color:#bbb; }
+    .small {
+      font-size:12px;
+      color:#bbb;
     }
-    .btn-join{background:linear-gradient(90deg,#00b2ff,#a200ff);color:#fff;}
-    .btn-close{background:rgba(255,255,255,0.05);color:#fff;}
   </style>
-
 </head>
 <body>
+  <div class="wrap">
+    <h2 style="margin:0 0 12px">DPlayer multi-quality page (default 360p from ?ios=)</h2>
 
-<div class="wrap">
-  <div class="player-container">
-    <div id="jwplayer"></div>
-    <div id="error" class="error"></div>
+    <div class="player-wrap" id="player-wrap">
+      <div id="dplayer"></div>
+    </div>
+
+    <div class="controls-bar" role="toolbar" aria-label="player controls">
+      <label class="small" style="margin-right:auto">Quality:</label>
+      <select id="quality-select" aria-label="quality selector">
+        <option value="" disabled selected>Loading...</option>
+      </select>
+
+      <button id="guess-btn" title="Try guessing other resolutions from filename">Try guess other resolutions</button>
+      <button id="add-quality-btn">Add quality</button>
+      <button id="enter-fullscreen-btn">Fullscreen (Landscape)</button>
+    </div>
+
+    <footer>
+      <div class="small">Instructions: Open the page with <code>?ios=&lt;encoded-url&gt;</code>. Example: <code>?ios=https%3A%2F%2Fexample.com%2Fvideo-360.m3u8</code>. Default quality will be 360p. Use Add quality to add 480p/720p/1080p URLs manually. Fullscreen button attempts to rotate to landscape on supported mobile browsers.</div>
+    </footer>
   </div>
-</div>
 
-<div class="popup-overlay" id="popup">
-  <div class="popup">
-    <h2>Support Us!</h2>
-    <p>Join our WhatsApp Channel</p>
-    <button class="btn-join" id="joinBtn">Join Now</button>
-    <button class="btn-close" id="closePopup">Already Joined</button>
+  <!-- Add quality modal -->
+  <div class="modal" id="modal">
+    <h3 style="margin:0 0 8px">Add quality</h3>
+    <label class="small">Quality label (e.g., 480p, 720p)</label>
+    <input type="text" id="new-quality-label" placeholder="e.g. 720p" />
+    <label class="small">Direct video URL (HLS or MP4)</label>
+    <input type="text" id="new-quality-url" placeholder="https://example.com/video-720.m3u8" />
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button id="modal-cancel">Cancel</button>
+      <button id="modal-add">Add</button>
+    </div>
   </div>
-</div>
 
-<script>
-(function(){
+  <div class="toast" id="toast"></div>
 
-  const popup=document.getElementById('popup');
-  document.getElementById('joinBtn').onclick=
-    ()=>window.open("https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T","_blank");
-  document.getElementById('closePopup').onclick=()=>popup.style.display="none";
-  setTimeout(()=>popup.style.display="none",70000);
+  <!-- include HLS (for hls.js playback) -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- DPlayer -->
+  <script src="https://cdn.jsdelivr.net/npm/dplayer@1.26.0/dist/DPlayer.min.js"></script>
 
-  const params=new URLSearchParams(location.search);
-  const m3u8=params.get('ios');
-  const errorBox=document.getElementById('error');
+  <script>
+  (function () {
+    // Helpers
+    function $(sel){ return document.querySelector(sel); }
+    function qs(sel){ return document.querySelectorAll(sel); }
+    function toast(msg, timeout=3000){
+      const el = $('#toast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(()=> el.style.display='none', timeout);
+    }
 
-  if(!m3u8){
-    errorBox.style.display="block";
-    errorBox.textContent="Use ?ios=YOUR_M3U8_URL";
-    return;
-  }
+    // Parse ?ios= param
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
 
-  jwplayer("jwplayer").setup({
-    file:m3u8,
-    type:"hls",
-    width:"100%",
-    height:"100%",
-    autostart:true,
-    mute:false,
-    controls:true,
-    skin:{ name:"five" },
-    stretching:"uniform",
-    androidhls:true
-  });
+    // Basic safe URL decode (user might pass encoded)
+    function normalizeUrl(url){
+      if(!url) return '';
+      try { return decodeURIComponent(url); } catch(e){ return url; }
+    }
 
-})();
-</script>
+    // initial source from ?ios=
+    const iosParamRaw = getQueryParam('ios');
+    const iosUrl = normalizeUrl(iosParamRaw);
+    if(!iosUrl){
+      // If none provided, show example but still create player with a sample fallback
+      toast('No ?ios= parameter found — using sample fallback. Add ?ios=<encoded-url> to URL.', 6000);
+    }
 
+    // The qualities array stores {name, url}
+    const qualities = [];
+
+    // Add default 360p using ios param (or a small fallback sample mp4/hls)
+    const fallbackSample = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'; // small public test HLS
+    const defaultUrl = iosUrl || fallbackSample;
+    qualities.push({ name: '360p', url: defaultUrl });
+
+    // Populate select
+    const qualitySelect = $('#quality-select');
+
+    function refreshQualitySelect(){
+      // clear
+      qualitySelect.innerHTML = '';
+      qualities.forEach((q, idx)=>{
+        const opt = document.createElement('option');
+        opt.value = String(idx);
+        opt.textContent = q.name;
+        qualitySelect.appendChild(opt);
+      });
+      // select default (0 -> 360p)
+      qualitySelect.selectedIndex = 0;
+    }
+
+    // Create DPlayer
+    let dp;
+    function createPlayer(initialUrl){
+      // Basic config: autoplay false, screenshot false
+      dp = new DPlayer({
+        container: document.getElementById('dplayer'),
+        live: false,
+        autoplay: false,
+        preload: 'auto',
+        screenshot: true,
+        video: {
+          url: initialUrl,
+          type: (initialUrl && initialUrl.indexOf('.m3u8') !== -1) ? 'hls' : 'auto'
+        }
+      });
+
+      // Provide switching wrapper
+      dp.on('pause', () => { /* nothing for now */ });
+
+      // When player changes size/enters fullscreen, attempt orientation lock if we triggered it
+      // We use our custom fullscreen button instead of relying entirely on DPlayer's internal FS control.
+    }
+
+    // Switch video function using dplayer.switchVideo
+    function switchToQuality(idx){
+      const q = qualities[idx];
+      if(!q) return;
+      const url = q.url;
+      const type = (url.indexOf('.m3u8') !== -1) ? 'hls' : 'auto';
+      try {
+        dp.switchVideo({ url: url, type: type });
+        toast('Switched to ' + q.name);
+      } catch (e){
+        // fallback: destroy and recreate
+        try {
+          dp.destroy();
+        } catch(e2){}
+        createPlayer(url);
+        toast('Recreated player for ' + q.name);
+      }
+    }
+
+    // Try to guess other resolutions by replacing common tokens in filename
+    function guessOtherResolutions(baseUrl) {
+      // look for common digits patterns like -360, _360, /360p, 360p, 360
+      // We'll try to replace 360 with 480,720,1080, but only if 360 is present; otherwise, try to append suffixes.
+      const guesses = [];
+      const targets = ['480p','720p','1080p'];
+      let base = baseUrl;
+      // If url contains '360' near letters, replace first occurrence
+      const regex360 = /360p|360(?=[^\d]|$)/i;
+      if(regex360.test(base)){
+        targets.forEach(t=>{
+          const candidate = base.replace(regex360, t);
+          guesses.push({name: t, url: candidate});
+        });
+      } else {
+        // try replace 480/720 etc if 720 exists etc - otherwise try simple filename insertion
+        const insertionTry = base.replace(/(\.[a-z0-9]+)(\?.*)?$/i, function(m, ext, query){
+          // insert before extension: -480
+          return '-' + '%s' + ext + (query || '');
+        });
+        if(insertionTry && insertionTry.indexOf('%s') !== -1){
+          targets.forEach(t=>{
+            const candidate = insertionTry.replace('%s', t.replace('p',''));
+            // But keep label with p
+            guesses.push({name: t, url: candidate});
+          });
+        }
+      }
+      return guesses;
+    }
+
+    // UI: Add quality modal behavior
+    const modal = $('#modal');
+    $('#add-quality-btn').addEventListener('click', () => {
+      $('#new-quality-label').value = '';
+      $('#new-quality-url').value = '';
+      modal.style.display = 'block';
+    });
+    $('#modal-cancel').addEventListener('click', ()=> modal.style.display='none');
+
+    $('#modal-add').addEventListener('click', ()=>{
+      const label = $('#new-quality-label').value.trim();
+      const url = $('#new-quality-url').value.trim();
+      if(!label || !url){ toast('Please provide both label and URL'); return; }
+      qualities.push({name: label, url: url});
+      refreshQualitySelect();
+      modal.style.display = 'none';
+      toast('Added ' + label);
+    });
+
+    // Guess button: attempts to create candidate URLs and add if user accepts
+    $('#guess-btn').addEventListener('click', ()=>{
+      const base = qualities[0] && qualities[0].url;
+      if(!base){ toast('No base URL to guess from'); return; }
+      const guesses = guessOtherResolutions(base);
+      if(!guesses.length){ toast('Could not guess variants from URL'); return; }
+      // Add guesses automatically but keep names, user can select to switch
+      let added = 0;
+      guesses.forEach(g=>{
+        // Avoid duplicates
+        if(!qualities.some(q=>q.url===g.url)){
+          qualities.push(g);
+          added++;
+        }
+      });
+      if(added) {
+        refreshQualitySelect();
+        toast('Added ' + added + ' guessed qualities (verify URLs if necessary)');
+      } else {
+        toast('Guessed qualities already present or no unique guess');
+      }
+    });
+
+    // Fullscreen (Landscape) button behavior
+    let requestedOrientation = false;
+    $('#enter-fullscreen-btn').addEventListener('click', async ()=>{
+      const container = document.getElementById('player-wrap');
+      try {
+        // request native fullscreen on the wrapper
+        if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else {
+          toast('Fullscreen not supported in this browser');
+        }
+
+        // Attempt to lock orientation to landscape
+        if (screen.orientation && screen.orientation.lock) {
+          try {
+            await screen.orientation.lock('landscape');
+            requestedOrientation = true;
+          } catch (err) {
+            // on some browsers locking requires fullscreen and user gesture; we already requested fullscreen,
+            // but some browsers still deny — ignore silently but inform user
+            console.warn('orientation lock failed', err);
+            toast('Orientation lock not allowed by browser');
+          }
+        } else if (screen.lockOrientationUniversal) {
+          // legacy
+          try { screen.lockOrientationUniversal('landscape'); requestedOrientation = true; } catch(e){}
+        } else {
+          // Fallback: rotate transform not recommended; just inform user
+          toast('Orientation lock not supported by this browser');
+        }
+
+        // attempt to play (mobile often requires user gesture; but fullscreen was an explicit user gesture)
+        try { await dp.play(); } catch(e) { /* ignore */ }
+      } catch (e) {
+        console.error(e);
+        toast('Could not enter fullscreen: ' + (e.message || e));
+      }
+    });
+
+    // When leaving fullscreen, unlock orientation if we locked it
+    document.addEventListener('fullscreenchange', async ()=>{
+      if (!document.fullscreenElement && requestedOrientation) {
+        try {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        } catch(e){}
+        requestedOrientation = false;
+      }
+    });
+
+    // When user selects quality from the select
+    qualitySelect.addEventListener('change', (ev)=>{
+      const idx = Number(ev.target.value);
+      if (!isNaN(idx)) switchToQuality(idx);
+    });
+
+    // Initialize page
+    refreshQualitySelect();
+    createPlayer(defaultUrl);
+
+    // Expose for console debugging (optional)
+    window._dp_page = {
+      player: dp,
+      qualities: qualities,
+      addQuality: function(name, url){ qualities.push({name: name, url: url}); refreshQualitySelect(); }
+    };
+
+    // Auto-select default option 0 and ensure label shows correct
+    setTimeout(()=> {
+      refreshQualitySelect();
+      qualitySelect.selectedIndex = 0;
+    }, 200);
+
+    // Accessibility / cleanup: hide modal when clicking outside
+    window.addEventListener('click', (e)=>{
+      if(e.target === modal) modal.style.display = 'none';
+    });
+
+  })();
+  </script>
 </body>
 </html>
