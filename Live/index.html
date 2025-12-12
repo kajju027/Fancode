@@ -36,11 +36,11 @@
         /* ------------------------------------------- */
         :root {
             --plyr-color-main: #4393c4; /* Accent color for progress, volume, etc. */
-            --plyr-control-spacing: 12px; /* Adjust spacing between controls */
-            --plyr-font-size-time: 14px; /* Time font size */
+            --plyr-control-spacing: 12px;
+            --plyr-font-size-time: 14px;
         }
         
-        /* Custom Loading Spinner for professional touch */
+        /* Custom Loading Spinner */
         .plyr--loading .plyr__spinner {
             border-top-color: var(--plyr-color-main);
             border-left-color: var(--plyr-color-main);
@@ -74,7 +74,7 @@
 
     <div class="video-container">
         <video id="player" playsinline muted controls></video>
-    </div>
+        </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
@@ -87,21 +87,15 @@
 
         // --- Utility Functions ---
 
-        /**
-         * Extracts and decodes the video URL from the ?ios= query parameter.
-         */
         function getVideoUrlFromQuery() {
             const urlParams = new URLSearchParams(window.location.search);
             const videoUrl = urlParams.get(URL_PARAM_KEY);
             return videoUrl ? decodeURIComponent(videoUrl) : null;
         }
 
-        /**
-         * Displays a highly visible, custom error or information message.
-         */
         function displayOverlay(title, message) {
             const container = document.querySelector('.video-container');
-            if (document.querySelector('.info-overlay')) return; // Avoid stacking overlays
+            if (document.querySelector('.info-overlay')) return; 
             
             container.innerHTML = `<div class="info-overlay"><h2>${title}</h2><p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">${message}</p></div>`;
         }
@@ -117,31 +111,30 @@
                 return;
             }
 
-            // --- 1. Plyr Initialization ---
+            // --- 1. Plyr Initialization (Full Customization) ---
             const player = new Plyr(videoElement, {
                 playsinline: true, 
-                muted: true, // Required: Default to muted
-                autoplay: true, // Required: Attempt to autoplay
+                muted: true, // Default: Muted
+                autoplay: true, // Default: Autoplay
                 loop: { active: false },
                 clickToPlay: true,
-                disableContextMenu: true, // Disables right-click menu for a cleaner look
-                tooltips: { controls: true, seek: true }, // Show tooltips on hover
-                keyboard: { focused: true, global: true }, // Enable global keyboard shortcuts
+                disableContextMenu: true, 
+                tooltips: { controls: true, seek: true }, 
+                keyboard: { focused: true, global: true }, 
                 
-                // Include ALL controls for full customization
+                // ALL CONTROLS ENABLED
                 controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
-                settings: ['captions', 'quality', 'speed'], // Ensure all settings are available
+                // ALL SETTINGS ENABLED (Quality, Speed, Captions)
+                settings: ['captions', 'quality', 'speed'], 
             });
 
-            // --- 2. HLS Integration for Streaming (Quality Changer & Stability) ---
+            // --- 2. HLS Integration (Quality Switching & Default 480p Logic) ---
             if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
                 const hls = new Hls({
-                    // Set crossOrigin to anonymous and ensure no credentials are sent (Helps with blocking issues)
                     crossOrigin: 'anonymous', 
                     withCredentials: false, 
-                    // Optimized settings for live streams
                     liveDurationInfinity: true,
-                    lowLatencyMode: true, // Enable low latency if supported by the stream
+                    lowLatencyMode: true,
                 });
 
                 hls.loadSource(videoUrl);
@@ -156,9 +149,13 @@
                         label: `${height}p`,
                     }));
 
-                    // Always add the 'Auto' option
                     plyrQualities.unshift({ size: 0, label: 'Auto' });
                     player.quality = plyrQualities;
+                    
+                    // --- IMPORTANT: Set Default Quality to 480p ---
+                    const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
+                    // Set the player's quality setting to 480p if available, otherwise 'Auto' (0)
+                    player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
                     
                     // Wire up the Plyr quality change event to HLS
                     player.on('qualitychange', (e) => {
@@ -166,7 +163,7 @@
                         if (newQuality === 0) {
                             hls.currentLevel = -1; // Auto selection
                         } else {
-                            // Find the level index based on the height (quality value)
+                            // Find the level index based on the height
                             const levelIndex = data.levels.findIndex(level => level.height === newQuality);
                             if (levelIndex !== -1) {
                                 hls.currentLevel = levelIndex;
@@ -174,13 +171,8 @@
                         }
                     });
 
-                    // Set default quality (480p) if available, otherwise 'Auto'
-                    const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
-                    player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
-                    
-                    // Start playback and hide the initial loading state
                     player.media.play().catch(error => {
-                        console.log("Autoplay failed, user interaction needed.", error);
+                        console.log("Autoplay failed. User interaction required.");
                     });
                 });
                 
@@ -201,15 +193,12 @@
             }
 
 
-            // --- 3. Custom Events & UX Enhancements ---
+            // --- 3. Custom Events (Fullscreen/Landscape & UX) ---
 
             // Required: Fullscreen/Landscape Mobile Logic
             player.on('enterfullscreen', () => {
-                // Attempt to lock screen to landscape (device/browser dependent)
                 if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(() => {
-                        // console.warn('Could not lock screen orientation');
-                    });
+                    screen.orientation.lock('landscape').catch(() => {});
                 }
             });
 
@@ -219,15 +208,8 @@
                 }
             });
             
-            // Notification when user unmutes the video
             player.on('unmute', () => {
                 console.log('Player unmuted by user.');
-            });
-
-            // Notification when the video successfully plays
-            player.on('playing', () => {
-                console.log('Video is now playing.');
-                // Optional: Remove any temporary loading/info messages here if you added one manually.
             });
         }
 
