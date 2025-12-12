@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>888 Fixed Professional Live Player</title>
+    <title>Fixed Professional Live Player - Final</title>
 
     <meta name="referrer" content="no-referrer" />
 
@@ -26,27 +26,36 @@
             position: absolute;
             top: 0;
             left: 0;
-            /* Use Flexbox to ensure centering and full size */
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* FIX 3: Ensure Plyr takes up full space inside its container on all screens */
+        /* Plyr Full-Size Fix */
         .plyr {
             width: 100%;
             max-width: 100%;
             height: 100%;
             max-height: 100%;
-            /* Optional: Set a max aspect ratio for video content inside the container */
-            /* aspect-ratio: 16 / 9; */
         }
 
-        /* CUSTOM COLOR THEME: #4393c4 */
+        /* ------------------------------------------- */
+        /* CUSTOM COLOR THEME: #e8e8e8 (New Color) */
+        /* ------------------------------------------- */
         :root {
-            --plyr-color-main: #4393c4; 
+            --plyr-color-main: #e8e8e8; /* New accent color: Light Gray */
+            /* Ensure controls are visible against dark background */
+            --plyr-control-spacing: 12px;
+            --plyr-font-size-time: 14px;
         }
         
+        /* Custom Loading Spinner Color */
+        .plyr--loading .plyr__spinner {
+            border-top-color: var(--plyr-color-main);
+            border-left-color: var(--plyr-color-main);
+            border-right-color: var(--plyr-color-main);
+        }
+
         /* Error/Info Message Styling */
         .info-overlay {
             color: #fff;
@@ -60,7 +69,7 @@
             border-radius: 8px;
             z-index: 100;
             border: 1px solid var(--plyr-color-main);
-            box-shadow: 0 0 20px rgba(67, 147, 196, 0.4);
+            box-shadow: 0 0 20px rgba(232, 232, 232, 0.4);
         }
     </style>
 </head>
@@ -106,7 +115,7 @@
 
             // --- 1. Plyr Initialization (Full Customization) ---
             const player = new Plyr(videoElement, {
-                type: 'video', // FIX 2: Explicitly set type to 'video'
+                type: 'video', 
                 playsinline: true, 
                 muted: true, 
                 autoplay: true, 
@@ -116,9 +125,9 @@
                 tooltips: { controls: true, seek: true }, 
                 keyboard: { focused: true, global: true }, 
                 
-                // ALL CONTROLS ENABLED (INCLUDING PROGRESS BAR, which is often duration-related)
+                // ALL CONTROLS ENABLED
                 controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
-                // ALL SETTINGS ENABLED (Captions, Quality, Speed)
+                // ALL SETTINGS ENABLED (Crucial for Quality Button)
                 settings: ['captions', 'quality', 'speed'], 
             });
 
@@ -127,15 +136,14 @@
                 const hls = new Hls({
                     crossOrigin: 'anonymous', 
                     withCredentials: false, 
-                    // FIX 2: Live Stream Stability improvements
-                    liveSyncDurationCount: 3, // How many segments to keep buffer for seeking
-                    liveMaxLatencyDurationCount: 5, // Maximum allowed latency (in segments)
+                    liveSyncDurationCount: 3, 
+                    liveMaxLatencyDurationCount: 5, 
                 });
 
                 hls.loadSource(videoUrl);
                 hls.attachMedia(videoElement);
 
-                // --- Plyr Quality Integration Logic ---
+                // --- FIX: Plyr Quality Integration Logic ---
                 hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                     try {
                         const availableQualities = data.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i);
@@ -147,14 +155,20 @@
 
                         plyrQualities.unshift({ size: 0, label: 'Auto' });
                         
-                        // FIX 1: Set player.quality property
+                        // Set player.quality property
                         player.quality = plyrQualities;
+
+                        // Force Plyr to refresh its settings menu after qualities are set
+                        if (player.elements && player.elements.buttons && player.elements.buttons.settings) {
+                            player.elements.buttons.settings.click(); // Open
+                            setTimeout(() => player.elements.buttons.settings.click(), 50); // Close immediately
+                        }
                         
                         // --- Set Default Quality to 480p ---
                         const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
                         player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
 
-                        // FIX 1: Wire up the Plyr quality change event to HLS
+                        // Wire up the Plyr quality change event to HLS
                         player.on('qualitychange', (e) => {
                             const newQuality = e.detail.quality;
                             if (newQuality === 0) {
@@ -172,7 +186,6 @@
                         });
                     } catch (e) {
                         console.error("Error setting Plyr quality:", e);
-                        displayOverlay("Configuration Error", "Could not configure quality settings (HLS Parse Error).");
                     }
                 });
                 
@@ -195,7 +208,6 @@
             // --- 3. Custom Events (Fullscreen/Landscape) ---
 
             player.on('enterfullscreen', () => {
-                // Required: Attempt to lock screen to landscape 
                 if (screen.orientation && screen.orientation.lock) {
                     screen.orientation.lock('landscape').catch(() => {});
                 }
@@ -207,11 +219,8 @@
                 }
             });
             
-            player.on('timeupdate', () => {
-                // This event confirms that time/duration updates are being received by Plyr
-                // For live streams, the 'duration' will typically show the buffer length, 
-                // but the progress bar should move.
-                // console.log('Time updated. Current time:', player.currentTime);
+            player.on('unmute', () => {
+                console.log('Player unmuted by user.');
             });
         }
 
