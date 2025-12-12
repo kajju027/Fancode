@@ -2,125 +2,432 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate Full Customized Live Player</title>
-
+    <title>FanCode Player | Live Streaming</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="referrer" content="no-referrer" />
+    
+    <link rel="icon" href="https://fancode.com/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            background: #000;
+        /* NEW COLOR FIX: Accent color changed to #e8e8e8 */
+        :root {
+            --plyr-color-main: #e8e8e8; /* Light Gray Accent Color */
+            --background-dark: #02040a;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-purple: #a855f7;
+        }
+
+        /* EXISTING STYLES RETAINED AND ADAPTED FOR NEW COLOR */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            height: 100svh; 
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #02040a 0%, #0f172a 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
             overflow: hidden;
+            position: relative;
         }
 
-        .video-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+        body > * {
+            position: relative;
+            z-index: 1;
         }
 
+        .player-header, .player-footer {
+            flex-shrink: 0;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .player-footer {
+            border-bottom: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-main {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #0a0a0a, #000);
+            min-height: 0;
+            padding: 0; /* Remove padding to maximize player space */
+        }
+
+        /* FIX: Ensure Plyr takes full available space in all views */
         .plyr {
             width: 100%;
             height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        /* Other styles are retained... */
+
+        .error-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 2rem;
+            text-align: center;
+            font-size: 1.1rem;
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10;
         }
 
-        :root {
-            --plyr-color-main: #00adee;
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            /* Spinner color uses the new plyr-color-main */
+            border: 4px solid rgba(232, 232, 232, 0.2); 
+            border-top-color: var(--plyr-color-main);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Theater Mode */
+        body.theater-mode .player-header,
+        body.theater-mode .player-footer {
+            display: none;
+        }
+
+        body.theater-mode .player-main {
+            height: 100vh;
+        }
+
     </style>
 </head>
-<body>
+<body class="text-slate-200">
 
-    <div class="video-container">
+    <header class="player-header text-center">
+        <div class="flex items-center justify-between mb-3">
+            <a href="#" class="control-btn text-sm">
+                <i class="fas fa-arrow-left mr-2"></i>Back
+            </a>
+            <div class="flex gap-2">
+                <button id="theater-mode-btn" class="control-btn text-sm" title="Theater Mode (T)">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button id="pip-btn" class="control-btn text-sm" title="Picture-in-Picture (P)">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button id="shortcuts-btn" class="control-btn text-sm" title="Keyboard Shortcuts">
+                    <i class="fas fa-keyboard"></i>
+                </button>
+            </div>
+        </div>
+        <h1 id="match-title" class="text-xl md:text-2xl font-black text-white truncate mb-1">Loading Match...</h1>
+        <div id="language-container" class="hidden">
+            <span class="language-badge">
+                <i class="fas fa-globe"></i>
+                <span id="match-language">Loading...</span>
+            </span>
+        </div>
+        <button id="share-links-btn" class="share-button w-full max-w-sm mx-auto mt-3 py-3 px-6 rounded-lg text-md font-bold">
+            <i class="fas fa-share-alt mr-2"></i> Share With Friends
+        </button>
+    </header>
+
+    <main class="player-main">
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="text-center">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-slate-300">Loading stream...</p>
+            </div>
+        </div>
         <video id="player" playsinline controls></video>
+    </main>
+
+    <footer class="player-footer text-center">
+        <a href="https://t.me/+xdQNNePetGxjYjI1" target="_blank" class="telegram-btn inline-flex items-center justify-center w-full max-w-sm mx-auto px-6 py-3.5 rounded-lg font-bold text-black hover:text-white">
+            <i class="fab fa-telegram-plane mr-3 text-lg"></i> Join Telegram Channel
+        </a>
+    </footer>
+    
+    <div id="telegram-popup" class="popup-overlay">
+        <div class="popup-card">
+            <div class="text-6xl mb-4 text-sky-400"><i class="fab fa-telegram"></i></div>
+            <h3 class="text-2xl font-bold text-white mb-2">Never Miss a Match!</h3>
+            <p class="text-slate-400 mb-6">
+                Join our Telegram channel for live updates and instant stream links.
+            </p>
+            <div class="flex flex-col gap-3">
+                <a href="https://t.me/+xdQNNePetGxjYjI1" target="_blank" id="popup-join-btn" class="popup-join-btn w-full text-center px-6 py-3 rounded-lg font-semibold text-white transition-transform transform hover:scale-105">
+                    <i class="fas fa-rocket mr-2"></i>Join Now
+                </a>
+                <button id="popup-close-btn" class="w-full text-center px-6 py-3 rounded-lg font-semibold text-slate-300 bg-slate-700 hover:bg-slate-600 transition-colors">
+                    Maybe Later
+                </button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-
     <script>
+        // --- CONFIGURATION & CONSTANTS ---
+        // NOTE: The DATA_URL is for fetching match details (which is not directly related to HLS quality fix)
+        // Since you are using a query parameter for the video link, we will prioritize that.
+        const URL_PARAM_KEY = 'ios'; 
+        const DEFAULT_QUALITY_HEIGHT = 480; 
 
-        function getVideo() {
-            const p = new URLSearchParams(window.location.search);
-            return p.get("ios") ? decodeURIComponent(p.get("ios")) : null;
+        // --- Utility Functions ---
+        function getVideoUrlFromQuery() {
+            const urlParams = new URLSearchParams(window.location.search);
+            // This function is the KEY to getting the video link from the URL
+            const videoUrl = urlParams.get(URL_PARAM_KEY);
+            return videoUrl ? decodeURIComponent(videoUrl) : null;
         }
 
-        function initPlayer() {
+        function displayError(message) {
+             const main = document.querySelector('.player-main');
+             if (main) {
+                main.innerHTML = `
+                    <div class="error-message">
+                        <h2 class="text-2xl font-bold text-red-500 mb-4">Stream Error</h2>
+                        <p class="text-slate-400">${message}</p>
+                    </div>`;
+             }
+             document.getElementById('loading-overlay')?.classList.add('hidden');
+        }
+        
+        // --- Core Player Initialization ---
 
-            const videoURL = getVideo();
-            const video = document.getElementById("player");
+        function initializePlyrAndHLS(streamUrl) {
+            const videoElement = document.getElementById('player');
+            const loadingOverlay = document.getElementById('loading-overlay');
 
-            if (!videoURL) {
-                alert("Missing video URL. Use ?ios=YOUR_LINK");
-                return;
-            }
-
-            const player = new Plyr(video, {
-                controls: [
-                    'play-large',
-                    'restart',
-                    'rewind',
-                    'play',
-                    'fast-forward',
-                    'progress',
-                    'current-time',
-                    'duration',
-                    'mute',
-                    'volume',
-                    'captions',
-                    'settings',
-                    'pip',
-                    'airplay',
-                    'download',
-                    'fullscreen'
-                ],
-
-                settings: [
-                    'captions',
-                    'quality',
-                    'speed',
-                    'loop'
-                ],
-
-                speed: { selected: 1, options: [0.25,0.5,0.75,1,1.25,1.5,2] },
-                tooltips: { controls: true, seek: true },
-                clickToPlay: true
+            // --- 1. Plyr Initialization (Full Customization) ---
+            const player = new Plyr(videoElement, {
+                type: 'video', 
+                playsinline: true, 
+                muted: true, 
+                autoplay: true, 
+                loop: { active: false },
+                clickToPlay: true,
+                disableContextMenu: true, 
+                tooltips: { controls: true, seek: true }, 
+                keyboard: { focused: true, global: true }, 
+                
+                // ALL CONTROLS ENABLED
+                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
+                // ALL SETTINGS ENABLED (Crucial for Quality Button)
+                settings: ['captions', 'quality', 'speed'], 
             });
 
-            if (Hls.isSupported() && videoURL.includes(".m3u8")) {
+            // --- 2. HLS Integration (Quality Switching & Default 480p Logic) ---
+            if (Hls.isSupported() && streamUrl.toLowerCase().endsWith('.m3u8')) {
+                const hls = new Hls({
+                    crossOrigin: 'anonymous', 
+                    withCredentials: false, 
+                    liveSyncDurationCount: 3, 
+                    liveMaxLatencyDurationCount: 5, 
+                });
 
-                const hls = new Hls({ maxMaxBufferLength: 60 });
-                hls.loadSource(videoURL);
-                hls.attachMedia(video);
+                hls.loadSource(streamUrl);
+                hls.attachMedia(videoElement);
+                
+                // Hide loading overlay when HLS successfully loads first segment
+                hls.on(Hls.Events.LEVEL_LOADED, () => {
+                    loadingOverlay?.classList.add('hidden');
+                });
 
-                hls.on(Hls.Events.MANIFEST_PARSED, (e, data) => {
 
-                    const qualities = data.levels.map(l => l.height)
-                        .filter((v, i, a) => a.indexOf(v) === i)
-                        .sort((a, b) => b - a);
+                // --- FIX: Plyr Quality Integration Logic ---
+                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                    try {
+                        const availableQualities = data.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i);
 
-                    player.options.quality = {
-                        default: qualities[0],
-                        options: qualities,
-                        forced: true,
-                        onChange: q => {
-                            const idx = data.levels.findIndex(x => x.height === q);
-                            hls.currentLevel = idx;
-                        }
-                    };
+                        const plyrQualities = availableQualities.map((height) => ({
+                            size: height,
+                            label: `${height}p`,
+                        }));
 
-                    player.quality = qualities[0];
+                        plyrQualities.unshift({ size: 0, label: 'Auto' });
+                        
+                        // Set player.quality property
+                        player.quality = plyrQualities;
+                        
+                        // --- Set Default Quality to 480p ---
+                        const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
+                        player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
+
+                        // Wire up the Plyr quality change event to HLS
+                        player.on('qualitychange', (e) => {
+                            const newQuality = e.detail.quality;
+                            if (newQuality === 0) {
+                                hls.currentLevel = -1; // Auto selection
+                            } else {
+                                const levelIndex = data.levels.findIndex(level => level.height === newQuality);
+                                if (levelIndex !== -1) {
+                                    hls.currentLevel = levelIndex;
+                                }
+                            }
+                        });
+
+                        player.media.play().catch(error => {
+                            // Autoplay blocked
+                        });
+                    } catch (e) {
+                        console.error("Error setting Plyr quality:", e);
+                    }
+                });
+                
+                // --- Critical HLS Error Handling ---
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                         displayError("Playback failed due to a critical HLS stream error. The link may be expired, geo-restricted, or offline.");
+                         console.error("HLS Fatal Error:", data);
+                    }
                 });
 
             } else {
-                video.src = videoURL;
+                // Fallback for standard MP4 or non-HLS links
+                videoElement.src = streamUrl;
+                loadingOverlay?.classList.add('hidden');
+                videoElement.addEventListener('error', (e) => {
+                     displayError("The video link failed to load. Ensure it is a valid MP4/MOV or HLS link.");
+                });
             }
+
+            // --- 3. Custom Events (Fullscreen/Landscape) ---
+            player.on('enterfullscreen', () => {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {});
+                }
+            });
+
+            player.on('exitfullscreen', () => {
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            });
         }
 
-        document.addEventListener("DOMContentLoaded", initPlayer);
+        // --- DOCUMENT READY LOGIC ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const videoUrl = getVideoUrlFromQuery();
+            
+            if (!videoUrl) {
+                // Check if the old JSON data fetch logic is needed for match details
+                // If you are relying only on `?ios=LINK`, the ID/CDN logic below is redundant.
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get("id");
+                const cdn = urlParams.get("cdn");
+
+                if (!id || !cdn) {
+                    displayError("Missing video URL or match details in the URL. Please use the format <code>?ios=YOUR_VIDEO_LINK</code>.");
+                    return;
+                }
+                
+                // If ID/CDN are present (from your friend's original code logic):
+                const { streamUrl, match } = await getStreamAndMatchDetails(id, cdn);
+
+                if (!streamUrl) {
+                    displayError(`Sorry, this stream could not be loaded. It might be offline or unavailable.`);
+                    return;
+                }
+                
+                if (match) {
+                    // Update header details based on fetched JSON data
+                    document.getElementById('match-title').textContent = match.title || 'Live Match';
+                    document.title = `${match.title || 'Live Match'} | FanCode Player`;
+                    const languageContainer = document.getElementById('language-container');
+                    const languageElem = document.getElementById('match-language');
+                    if (match.language) {
+                        languageElem.textContent = formatLanguage(match.language);
+                        languageContainer.classList.remove('hidden');
+                    }
+                }
+                
+                initializePlyrAndHLS(streamUrl); // Initialize with fetched URL
+                
+            } else {
+                // If only the ?ios=LINK is used (simpler method)
+                 document.getElementById('match-title').textContent = 'Live Stream';
+                 document.title = 'Live Stream | Player';
+                 document.getElementById('loading-overlay')?.classList.remove('hidden'); // Show loader
+                 initializePlyrAndHLS(videoUrl); // Initialize with query parameter URL
+            }
+            
+            // Re-define helper functions used in the friend's template logic (needed if you use ?id= and ?cdn=)
+            function formatLanguage(lang) { /* ... implementation retained ... */
+                if (!lang) return '';
+                const languageMap = {
+                    'BLOODY_SWEET': '🎯 Multi-Audio', 'ENGLISH': '🇬🇧 English', 'HINDI': '🇮🇳 Hindi', 'TAMIL': '🇮🇳 Tamil', 'TELUGU': '🇮🇳 Telugu', 'KANNADA': '🇮🇳 Kannada', 'BENGALI': '🇮🇳 Bengali', 'MALAYALAM': '🇮🇳 Malayalam', 'MARATHI': '🇮🇳 Marathi'
+                };
+                return languageMap[lang.toUpperCase()] || `🌐 ${lang.charAt(0) + lang.slice(1).toLowerCase()}`;
+            }
+
+            async function getStreamAndMatchDetails(id, cdnKey) { /* ... implementation retained ... */
+                const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
+                try {
+                    const res = await fetch(DATA_URL);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const data = await res.json();
+                    const match = data.matches.find(m => String(m.match_id) === String(id));
+                    if (!match) throw new Error("Match not found for ID: " + id);
+                    const streamingCdn = { ...match.STREAMING_CDN };
+                    delete streamingCdn.Primary_Playback_URL;
+                    const sources = {
+                        adfree_stream: match.adfree_stream, dai_stream: match.dai_stream, ...streamingCdn
+                    };
+                    const streamUrl = sources[cdnKey];
+                    if (streamUrl && streamUrl !== "Unavailable") {
+                        return { streamUrl, match };
+                    } else {
+                        throw new Error(`Stream for '${cdnKey}' is unavailable.`);
+                    }
+                } catch (err) {
+                    console.error("Error fetching stream data:", err);
+                    return { streamUrl: null, match: null };
+                }
+            }
+            
+            // You can remove all handlePopup, getStreamAndMatchDetails, and formatLanguage if you only use ?ios=LINK
+            handlePopup();
+        });
     </script>
 
 </body>
