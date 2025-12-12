@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fixed Professional Live Player - Final</title>
+    <title>Professional Live Player with Popup</title>
 
     <meta name="referrer" content="no-referrer" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
     <style>
-        /* Base Styling for Full-Screen, Professional Look */
+        /* --- CORE PLAYER STYLES --- */
         html, body {
             height: 100%;
             margin: 0;
@@ -31,7 +33,6 @@
             justify-content: center;
         }
 
-        /* Plyr Full-Size Fix */
         .plyr {
             width: 100%;
             max-width: 100%;
@@ -39,24 +40,27 @@
             max-height: 100%;
         }
 
-        /* ------------------------------------------- */
-        /* CUSTOM COLOR THEME: #e8e8e8 (New Color) */
-        /* ------------------------------------------- */
         :root {
-            --plyr-color-main: #e8e8e8; /* New accent color: Light Gray */
-            /* Ensure controls are visible against dark background */
+            /* Player Theme Color */
+            --plyr-color-main: #e8e8e8; 
             --plyr-control-spacing: 12px;
             --plyr-font-size-time: 14px;
+
+            /* Popup Theme Variables */
+            --popup-bg: #000000;
+            --primary-color: #e30000;
+            --primary-color-dark: #b30000;
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #2d2d2d;
         }
         
-        /* Custom Loading Spinner Color */
         .plyr--loading .plyr__spinner {
             border-top-color: var(--plyr-color-main);
             border-left-color: var(--plyr-color-main);
             border-right-color: var(--plyr-color-main);
         }
 
-        /* Error/Info Message Styling */
         .info-overlay {
             color: #fff;
             text-align: center;
@@ -71,11 +75,131 @@
             border: 1px solid var(--plyr-color-main);
             box-shadow: 0 0 20px rgba(232, 232, 232, 0.4);
         }
+
+        /* --- POPUP STYLES (Copied & Adapted) --- */
+        .popup-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 1); /* Full black background initially */
+            z-index: 11000;
+            display: block; /* Active by default */
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .popup-backdrop.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none;
+        }
+
+        .telegram-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            background: var(--popup-bg);
+            color: var(--text-light);
+            padding: 40px 25px;
+            border-radius: 16px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 50px 10px rgba(227, 0, 0, 0.5), 0 0 20px rgba(227, 0, 0, 0.3) inset;
+            z-index: 12000;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            display: block; /* Active by default */
+            opacity: 1;
+            transition: all 0.5s cubic-bezier(.2,.9,.2,1);
+        }
+
+        .telegram-popup.hidden {
+            display: none;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        .telegram-popup h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(227, 0, 0, 0.5);
+            margin-bottom: 0.75rem;
+        }
+
+        .telegram-popup p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+            line-height: 1.5;
+        }
+
+        .telegram-popup button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 12px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .telegram-popup button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+
+        .telegram-popup .join-btn {
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-color-dark));
+            color: white;
+            box-shadow: 0 0 12px rgba(227, 0, 0, 0.4);
+        }
+
+        .telegram-popup .join-btn:hover {
+            box-shadow: 0 0 25px rgba(227, 0, 0, 0.7);
+        }
+
+        .telegram-popup .joined-btn {
+            background-color: var(--border-color);
+            color: var(--text-light);
+            border: 1px solid var(--primary-color-dark);
+        }
+
+        /* Helper class to hide content while popup is active */
+        .content-blurred {
+            filter: blur(5px);
+        }
+
+        @media (max-width: 480px) {
+            .telegram-popup {
+                padding: 30px 20px;
+                max-width: 90%;
+            }
+            .telegram-popup h2 { font-size: 1.5rem; }
+            .telegram-popup p { font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="video-container">
+    <div class="popup-backdrop" id="popupBackdrop"></div>
+
+    <div class="telegram-popup" id="telegramPopup">
+        <h2><i class="fa-brands fa-whatsapp"></i> Support Us!</h2>
+        <p>Join our Whatsapp channel <strong>𝗖𝗥𝗜𝗖𝗞𝗘𝗧 𝗡𝗘𝗪𝗦 𝗣𝗢𝗜𝗡𝗧</strong> For Instant Updates And Exclusive Links.</p>
+        <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" rel="noopener" id="joinLink" style="text-decoration: none;">
+            <button class="join-btn">Join Now</button>
+        </a>
+        <button class="joined-btn" id="alreadyJoinedBtn">Already Joined</button>
+    </div>
+
+    <div class="video-container" id="mainContent">
         <video id="player" playsinline muted controls></video>
     </div>
 
@@ -83,7 +207,37 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
     <script>
-        // --- CONFIGURATION & CONSTANTS ---
+        // --- POPUP LOGIC ---
+        const popupBackdrop = document.getElementById('popupBackdrop');
+        const telegramPopup = document.getElementById('telegramPopup');
+        const joinLink = document.getElementById('joinLink');
+        const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
+        let playerInitialized = false;
+
+        // Function to hide popup and START the player
+        function closePopupAndPlay() {
+            popupBackdrop.classList.add('hidden');
+            telegramPopup.classList.add('hidden');
+            
+            // Only initialize player if not done yet
+            if (!playerInitialized) {
+                initializePlayer();
+                playerInitialized = true;
+            }
+        }
+
+        // Event Listeners for Popup Actions
+        // If user clicks "Join Now", we assume they joined, close popup and load video
+        joinLink.addEventListener('click', () => {
+            // Slight delay to allow the new tab to open
+            setTimeout(closePopupAndPlay, 500); 
+        });
+
+        // If user clicks "Already Joined", close popup and load video
+        alreadyJoinedBtn.addEventListener('click', closePopupAndPlay);
+
+
+        // --- PLAYER CONFIGURATION & CONSTANTS ---
         const PLAYER_ID = 'player';
         const URL_PARAM_KEY = 'ios';
         const DEFAULT_QUALITY_HEIGHT = 480; 
@@ -102,7 +256,7 @@
             container.innerHTML = `<div class="info-overlay"><h2>${title}</h2><p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">${message}</p></div>`;
         }
 
-        // --- Core Player Initialization ---
+        // --- Core Player Initialization (Called only after Popup closes) ---
 
         function initializePlayer() {
             const videoUrl = getVideoUrlFromQuery();
@@ -113,7 +267,7 @@
                 return;
             }
 
-            // --- 1. Plyr Initialization (Full Customization) ---
+            // --- 1. Plyr Initialization ---
             const player = new Plyr(videoElement, {
                 type: 'video', 
                 playsinline: true, 
@@ -124,14 +278,11 @@
                 disableContextMenu: true, 
                 tooltips: { controls: true, seek: true }, 
                 keyboard: { focused: true, global: true }, 
-                
-                // ALL CONTROLS ENABLED
                 controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
-                // ALL SETTINGS ENABLED (Crucial for Quality Button)
                 settings: ['captions', 'quality', 'speed'], 
             });
 
-            // --- 2. HLS Integration (Quality Switching & Default 480p Logic) ---
+            // --- 2. HLS Integration ---
             if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
                 const hls = new Hls({
                     crossOrigin: 'anonymous', 
@@ -155,24 +306,22 @@
 
                         plyrQualities.unshift({ size: 0, label: 'Auto' });
                         
-                        // Set player.quality property
                         player.quality = plyrQualities;
 
-                        // Force Plyr to refresh its settings menu after qualities are set
+                        // Force refresh settings
                         if (player.elements && player.elements.buttons && player.elements.buttons.settings) {
-                            player.elements.buttons.settings.click(); // Open
-                            setTimeout(() => player.elements.buttons.settings.click(), 50); // Close immediately
+                            player.elements.buttons.settings.click(); 
+                            setTimeout(() => player.elements.buttons.settings.click(), 50); 
                         }
                         
-                        // --- Set Default Quality to 480p ---
+                        // Set Default Quality to 480p
                         const default480p = plyrQualities.find(q => q.size === DEFAULT_QUALITY_HEIGHT);
                         player.quality = default480p ? DEFAULT_QUALITY_HEIGHT : 0; 
 
-                        // Wire up the Plyr quality change event to HLS
                         player.on('qualitychange', (e) => {
                             const newQuality = e.detail.quality;
                             if (newQuality === 0) {
-                                hls.currentLevel = -1; // Auto selection
+                                hls.currentLevel = -1; 
                             } else {
                                 const levelIndex = data.levels.findIndex(level => level.height === newQuality);
                                 if (levelIndex !== -1) {
@@ -189,24 +338,23 @@
                     }
                 });
                 
-                // --- Critical HLS Error Handling ---
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
                          displayOverlay("Stream Loading Error", "Playback failed due to a critical HLS stream error. The link may be expired, geo-restricted, or offline.");
-                         console.error("HLS Fatal Error:", data);
                     }
                 });
 
             } else {
-                // Fallback for standard MP4 or non-HLS links
+                // Fallback for non-HLS
                 videoElement.src = videoUrl;
                 videoElement.addEventListener('error', (e) => {
                      displayOverlay("Media Error", "The video link failed to load. Ensure it is a valid MP4/MOV or HLS link.");
                 });
+                // Autoplay for non-HLS
+                player.play();
             }
 
-            // --- 3. Custom Events (Fullscreen/Landscape) ---
-
+            // --- 3. Custom Events ---
             player.on('enterfullscreen', () => {
                 if (screen.orientation && screen.orientation.lock) {
                     screen.orientation.lock('landscape').catch(() => {});
@@ -218,13 +366,11 @@
                     screen.orientation.unlock();
                 }
             });
-            
-            player.on('unmute', () => {
-                console.log('Player unmuted by user.');
-            });
         }
+        
+        // NOTE: Unlike previous versions, we DO NOT call initializePlayer() here automatically.
+        // It is called inside closePopupAndPlay().
 
-        document.addEventListener('DOMContentLoaded', initializePlayer);
     </script>
 
 </body>
