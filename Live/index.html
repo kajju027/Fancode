@@ -1,132 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>FAMCODE OFFICIAL PLAYER</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FAMCODE OFFICIAL VIDEO PLAYER</title>
+    <meta name="referrer" content="no-referrer" />
 
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
 <style>
-html,body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    background:#000;
-    overflow:hidden;
-    font-family:sans-serif
-}
-:root{
-    --plyr-color-main:#0078e8;
-}
-.video-container{
-    width:100%;
-    height:100%;
-}
-video{
-    width:100%;
-    height:100%;
-}
-#loading{
-    position:fixed;
-    inset:0;
-    background:#000;
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-}
-.spinner{
-    width:40px;
-    height:40px;
-    border:4px solid #333;
-    border-top:4px solid #0078e8;
-    border-radius:50%;
-    animation:spin 1s linear infinite
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.plyr__menu__container{
-    backdrop-filter:blur(12px)
-}
+    /* --- CORE PLAYER STYLES --- */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    }
+
+    .video-container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .plyr {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+    }
+
+    /* --- THEME CUSTOMIZATION: #0078e8 (Blue) --- */
+    :root {
+        --plyr-color-main: #0078e8;
+        --plyr-control-spacing: 12px;
+        --plyr-font-size-time: 14px;
+    }
+
+    /* Custom Spinner Color */
+    .plyr--loading .plyr__spinner {
+        border-top-color: var(--plyr-color-main);
+        border-left-color: var(--plyr-color-main);
+        border-right-color: var(--plyr-color-main);
+    }
+
+    /* --- LOADING OVERLAY (New Feature) --- */
+    #loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+    }
+    #loading-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .loading-spinner-custom {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid var(--plyr-color-main);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* --- ERROR/INFO OVERLAY --- */
+    .info-overlay {
+        color: #fff;
+        text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px 30px;
+        background-color: rgba(0, 0, 0, 0.9);
+        border-radius: 8px;
+        z-index: 999;
+        border: 1px solid #e30000; /* Red border for errors */
+        box-shadow: 0 0 20px rgba(227, 0, 0, 0.5);
+    }
+
+    /* --- POPUP STYLES --- */
+    :root {
+        --popup-bg: #000000;
+        --primary-color: #e30000;
+        --primary-color-dark: #b30000;
+        --text-light: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border-color: #2d2d2d;
+    }
+
+    .popup-backdrop {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 1); z-index: 11000;
+    }
+    .popup-backdrop.hidden { opacity: 0; pointer-events: none; display: none; }
+
+    .telegram-popup {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: var(--popup-bg); color: var(--text-light); padding: 40px 25px;
+        border-radius: 16px; border: 2px solid var(--primary-color);
+        box-shadow: 0 0 50px 10px rgba(227, 0, 0, 0.5); z-index: 12000;
+        text-align: center; width: 90%; max-width: 400px;
+    }
+    .telegram-popup.hidden { display: none; opacity: 0; }
+    .telegram-popup h2 { margin-top: 0; color: var(--primary-color); font-size: 1.75rem; }
+    .telegram-popup button {
+        width: 100%; padding: 14px; margin-top: 12px; font-size: 1rem;
+        border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
+    }
+    .telegram-popup .join-btn { background: #e30000; color: white; }
+    .telegram-popup .joined-btn { background: #2d2d2d; color: #f1f5f9; border: 1px solid #b30000; }
+
 </style>
+
 </head>
-
 <body>
+    <div class="popup-backdrop" id="popupBackdrop"></div>
+    <div class="telegram-popup" id="telegramPopup">
+        <h2><i class="fa-brands fa-whatsapp"></i> Support Us!</h2>
+        <p>Join our Whatsapp channel <strong>𝗖𝗥𝗜𝗖𝗞𝗘𝗧 𝗡𝗘𝗪𝗦 𝗣𝗢𝗜𝗡𝗧</strong> For Instant Updates And Exclusive Links.</p>
+        <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" rel="noopener" id="joinLink" style="text-decoration: none;">
+            <button class="join-btn">Join Now</button>
+        </a>
+        <button class="joined-btn" id="alreadyJoinedBtn">Already Joined</button>
+    </div>
 
-<div id="loading"><div class="spinner"></div></div>
+    <div class="video-container" id="mainContent">
+        <div id="loading-overlay">
+            <div class="loading-spinner-custom"></div>
+            <span>Loading stream... Please wait.</span>
+        </div>
 
-<div class="video-container">
-    <video id="player" playsinline controls></video>
-</div>
+        <video id="player" playsinline muted controls></video>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
-<script>
-const video = document.getElementById('player');
-const loader = document.getElementById('loading');
+    <script>
+        // --- CONSTANTS ---
+        const PLAYER_ID = 'player';
+        const URL_PARAM_KEY = 'ios';
+        const AUTO_QUALITY_OPTION = 0; // HLS Auto quality option for Plyr
 
-function getVideo(){
-    const p=new URLSearchParams(location.search);
-    return p.get('ios');
-}
+        // --- DOM ELEMENTS ---
+        const popupBackdrop = document.getElementById('popupBackdrop');
+        const telegramPopup = document.getElementById('telegramPopup');
+        const joinLink = document.getElementById('joinLink');
+        const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
-const source = getVideo();
-if(!source){
-    loader.innerHTML="<h3>Missing ?ios= link</h3>";
-    throw new Error("No video");
-}
+        let playerInitialized = false;
+        let plyrInstance = null;
+        let hlsInstance = null;
 
-const player = new Plyr(video,{
-    autoplay:true,
-    muted:true,
-    controls:[
-        'play-large','play','current-time','duration',
-        'mute','volume','settings','pip','fullscreen'
-    ],
-    settings:['quality','speed']
-});
+        // --- POPUP & LOADER CONTROL ---
 
-if(Hls.isSupported() && source.includes('.m3u8')){
-    const hls = new Hls({capLevelToPlayerSize:true});
-    hls.loadSource(source);
-    hls.attachMedia(video);
+        function hideLoading() {
+             loadingOverlay.classList.add('hidden');
+        }
 
-    hls.on(Hls.Events.MANIFEST_PARSED,(_,data)=>{
-        const qualities = data.levels
-            .map(l=>l.height)
-            .filter((v,i,a)=>a.indexOf(v)===i)
-            .sort((a,b)=>b-a);
+        function closePopupAndPlay() {
+            popupBackdrop.classList.add('hidden');
+            telegramPopup.classList.add('hidden');
+            loadingOverlay.classList.remove('hidden');
 
-        player.options.quality={
-            default:qualities.includes(360)?360:qualities[qualities.length-1],
-            options:qualities,
-            forced:true,
-            onChange:q=>{
-                const i=data.levels.findIndex(l=>l.height===q);
-                hls.currentLevel=i;
+            if (!playerInitialized) {
+                initializePlayer();
+                playerInitialized = true;
             }
-        };
+        }
 
-        player.options.speed={
-            selected:1,
-            options:[0.5,0.75,1,1.25,1.5,1.75,2]
-        };
+        joinLink.addEventListener('click', () => { setTimeout(closePopupAndPlay, 500); });
+        alreadyJoinedBtn.addEventListener('click', closePopupAndPlay);
 
-        player.play();
-        loader.style.display="none";
-    });
 
-}else{
-    video.src=source;
-    player.play();
-    loader.style.display="none";
-}
+        // --- UTILITY & ERROR DISPLAY ---
+        function getVideoUrlFromQuery() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoUrl = urlParams.get(URL_PARAM_KEY);
+            return videoUrl ? decodeURIComponent(videoUrl) : null;
+        }
 
-player.on('playing',()=>loader.style.display="none");
-</script>
+        function displayOverlay(title, message) {
+            hideLoading();
+            const container = document.querySelector('.video-container');
+            if (document.querySelector('.info-overlay')) return;
+            container.innerHTML += `<div class="info-overlay"><h2>${title}</h2><p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">${message}</p></div>`;
+            if (plyrInstance) plyrInstance.destroy();
+        }
+
+        // --- Core Player Initialization ---
+
+        function initializePlayer() {
+            const videoUrl = getVideoUrlFromQuery();
+            const videoElement = document.getElementById(PLAYER_ID);
+
+            if (!videoUrl) {
+                displayOverlay("Configuration Error", "Missing video URL. Please provide a link in the query parameter: <code>?ios=YOUR_VIDEO_LINK</code>");
+                return;
+            }
+
+            // --- 1. Plyr Initialization ---
+            plyrInstance = new Plyr(videoElement, {
+                type: 'video',
+                playsinline: true,
+                muted: true,
+                autoplay: true,
+                loop: { active: false },
+                clickToPlay: true,
+                disableContextMenu: true,
+                tooltips: { controls: true, seek: true },
+                keyboard: { focused: true, global: true },
+                // Control Bar: play/pause, time, volume, settings, fullscreen. (Live feel)
+                controls: ['play-large', 'play', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
+
+                // CRITICAL: Set 'quality' and 'speed' in settings
+                settings: ['quality', 'speed', 'captions'],
+            });
+
+            // --- 2. HLS Integration & Quality Switching ---
+            if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
+                hlsInstance = new Hls({
+                    crossOrigin: 'anonymous',
+                    withCredentials: false,
+                    liveSyncDurationCount: 3,
+                    liveMaxLatencyDurationCount: 5,
+                });
+
+                hlsInstance.loadSource(videoUrl);
+                hlsInstance.attachMedia(videoElement);
+
+                // --- Quality Integration Logic (New/Updated) ---
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                    try {
+                        // HLS levels are the different qualities/bitrates available.
+                        // We map them to their heights (resolution) for Plyr.
+                        const qualities = data.levels.map(l => l.height).filter(Boolean);
+                        // Add 0 for 'Auto' quality (handled by HLS, which is level -1)
+                        let availableQualities = [AUTO_QUALITY_OPTION, ...new Set(qualities)].sort((a,b)=>a-b);
+                        const defaultQuality = 480; // 480p as default resolution
+
+                        // Set up Plyr's quality configuration
+                        plyrInstance.config.quality = {
+                            default: defaultQuality,
+                            options: availableQualities,
+                            forced: true,
+                            onChange: (q) => {
+                                // Find the index of the HLS level corresponding to the selected height (q)
+                                if (q === AUTO_QUALITY_OPTION) {
+                                    hlsInstance.currentLevel = -1; // -1 means HLS auto selection
+                                } else {
+                                    // Find the index of the highest level that matches the selected quality
+                                    // Note: HLS levels are often sorted by bitrate, not height, so a simple findIndex is needed
+                                    const levelIndex = data.levels.findIndex(level => level.height === q);
+                                    if (levelIndex !== -1) {
+                                        hlsInstance.currentLevel = levelIndex;
+                                    }
+                                }
+                                // Optionally, show loading when quality changes
+                                loadingOverlay.classList.remove('hidden');
+                            }
+                        };
+
+                        // Add Speed options
+                        plyrInstance.config.speed = {
+                            selected: 1,
+                            options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+                        };
+
+                        // Re-initialize Plyr to apply new settings, or manually update
+                        if (plyrInstance.settings) {
+                            // This line is often necessary for Plyr to correctly display new settings
+                            plyrInstance.destroy();
+                            plyrInstance = new Plyr(videoElement, plyrInstance.config);
+                            // Re-attach event listeners after re-initialization
+                            attachPlyrEvents();
+                        }
+
+                        // Set the initial quality to the default one for HLS
+                        if (hlsInstance.currentLevel === -1) {
+                            hlsInstance.currentLevel = -1; // Auto
+                        } else {
+                           const initialLevelIndex = data.levels.findIndex(level => level.height === defaultQuality);
+                           if (initialLevelIndex !== -1) {
+                                hlsInstance.currentLevel = initialLevelIndex;
+                           }
+                        }
+
+                        // Start playing and hide loader
+                        videoElement.play().catch(error => {
+                            console.log("Autoplay blocked/failed. User interaction required.");
+                        });
+
+                    } catch (e) {
+                        console.error("Error setting Plyr quality/config:", e);
+                    }
+                });
+
+                // --- HLS ERROR HANDLING ---
+                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        hlsInstance.destroy();
+                        // Display user-friendly error message
+                        displayOverlay("Stream Error", `Playback failed: ${data.reason}. Please check the video link.`);
+                    }
+                });
+
+            } else {
+                // Non-HLS (MP4/Other) Fallback
+                videoElement.src = videoUrl;
+
+                videoElement.addEventListener('error', (e) => {
+                     displayOverlay("Media Error", "The video link failed to load or the format is unsupported.");
+                });
+
+                plyrInstance.play();
+            }
+
+            // --- 3. Plyr General Events & Customizations ---
+            attachPlyrEvents();
+        }
+
+        function attachPlyrEvents() {
+            if (!plyrInstance) return;
+
+            // Hide custom loading overlay once playback starts
+            plyrInstance.on('playing', hideLoading);
+
+            // Handle loading state
+            plyrInstance.on('waiting', () => {
+                loadingOverlay.classList.remove('hidden');
+            });
+            plyrInstance.on('canplay', hideLoading);
+
+            // --- Fullscreen Landscape Lock (Kept from original code) ---
+            plyrInstance.on('enterfullscreen', () => {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {});
+                }
+            });
+
+            plyrInstance.on('exitfullscreen', () => {
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            });
+        }
+
+
+    </script>
 
 </body>
 </html>
