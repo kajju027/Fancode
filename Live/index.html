@@ -1,321 +1,323 @@
-<!DOCTYPE HTML>
-<HTML LANG="EN">
-<HEAD>
-    <META CHARSET="UTF-8">
-    <TITLE>LIVE STREAM PLAYER</TITLE>
-    <META NAME="VIEWPORT" CONTENT="WIDTH=DEVICE-WIDTH, INITIAL-SCALE=1.0, MAXIMUM-SCALE=1.0, USER-SCALABLE=NO" />
-    <META NAME="REFERRER" CONTENT="NO-REFERRER" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LIVE STREAM PLAYER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="referrer" content="no-referrer" />
 
-    <LINK REL="STYLESHEET" HREF="https://cdn.plyr.io/3.7.8/plyr.css" />
-    <LINK REL="STYLESHEET" HREF="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <STYLE>
-        :ROOT {
-            --PLYR-COLOR-MAIN: #0ea5e9; 
-            --POPUP-BG: #0A0A0A;
-            --PRIMARY-COLOR: #0ea5e9;
-            --TEXT-LIGHT: #F1F5F9;
+    <style>
+        :root {
+            --plyr-color-main: #0ea5e9; 
+            --popup-bg: #0A0A0A;
+            --primary-color: #0ea5e9;
+            --text-light: #F1F5F9;
         }
         
-        HTML, BODY {
-            HEIGHT: 100%;
-            MARGIN: 0;
-            PADDING: 0;
-            OVERFLOW: HIDDEN;
-            BACKGROUND-COLOR: #000;
-            FONT-FAMILY: -APPLE-SYSTEM, BLINKSYSTEMFONT, "SEGOE UI", ROBOTO, OXYGEN, UBUNTU, CANTARELL, "FIRA SANS", "DROID SANS", "HELVETICA NEUE", SANS-SERIF;
-            COLOR: WHITE;
-            DISPLAY: FLEX;
-            ALIGN-ITEMS: CENTER;
-            JUSTIFY-CONTENT: CENTER;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .VIDEO-CONTAINER {
-            WIDTH: 100%;
-            HEIGHT: 100%;
-            POSITION: RELATIVE;
-            MAX-WIDTH: 100%; 
-            MAX-HEIGHT: 100%;
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            max-width: 100%; 
+            max-height: 100%;
         }
 
-        .PLYR {
-            WIDTH: 100%;
-            HEIGHT: 100%;
-        }
-        
-        .LOADING-OVERLAY {
-            POSITION: ABSOLUTE;
-            INSET: 0;
-            BACKGROUND: RGBA(0, 0, 0, 0.95);
-            DISPLAY: FLEX;
-            FLEX-DIRECTION: COLUMN;
-            ALIGN-ITEMS: CENTER;
-            JUSTIFY-CONTENT: CENTER;
-            Z-INDEX: 10;
-            OPACITY: 1;
-            TRANSITION: OPACITY 0.3S EASE;
-            COLOR: #FFF;
-            FONT-SIZE: 1.1REM;
-        }
-
-        .LOADING-OVERLAY.HIDDEN {
-            OPACITY: 0;
-            POINTER-EVENTS: NONE;
-        }
-
-        .SPINNER {
-            WIDTH: 60PX;
-            HEIGHT: 60PX;
-            BORDER: 5PX SOLID RGBA(255, 255, 255, 0.2);
-            BORDER-TOP-COLOR: VAR(--PLYR-COLOR-MAIN);
-            BORDER-RADIUS: 50%;
-            ANIMATION: SPIN 0.8S LINEAR INFINITE;
-            MARGIN-BOTTOM: 15PX;
-        }
-
-        @KEYFRAMES SPIN {
-            TO { TRANSFORM: ROTATE(360DEG); }
+        .plyr {
+            width: 100%;
+            height: 100%;
         }
         
-        .ERROR-MESSAGE {
-            POSITION: ABSOLUTE;
-            TOP: 50%;
-            LEFT: 50%;
-            TRANSFORM: TRANSLATE(-50%, -50%);
-            PADDING: 25PX;
-            BACKGROUND-COLOR: RGBA(180, 0, 0, 0.95);
-            BORDER-RADIUS: 10PX;
-            TEXT-ALIGN: CENTER;
-            Z-INDEX: 999;
-            COLOR: WHITE;
-            FONT-SIZE: 1.2REM;
-            BORDER: 2PX SOLID #FFD700;
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            color: #fff;
+            font-size: 1.1rem;
         }
 
-        .POPUP-BACKDROP {
-            POSITION: FIXED; TOP: 0; LEFT: 0; WIDTH: 100%; HEIGHT: 100%;
-            BACKGROUND: RGBA(0, 0, 0, 1); Z-INDEX: 11000;
-            DISPLAY: FLEX; ALIGN-ITEMS: CENTER; JUSTIFY-CONTENT: CENTER;
-            OPACITY: 1;
-            TRANSITION: OPACITY 0.5S EASE;
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
-        .POPUP-BACKDROP.HIDDEN { OPACITY: 0; POINTER-EVENTS: NONE; DISPLAY: NONE; }
 
-        .TELEGRAM-POPUP {
-            BACKGROUND: VAR(--POPUP-BG); COLOR: VAR(--TEXT-LIGHT); PADDING: 40PX 30PX;
-            BORDER-RADIUS: 16PX; BORDER: 2PX SOLID VAR(--PRIMARY-COLOR);
-            BOX-SHADOW: 0 0 60PX 15PX RGBA(14, 165, 233, 0.5); 
-            Z-INDEX: 12000;
-            TEXT-ALIGN: CENTER; WIDTH: 90%; MAX-WIDTH: 420PX;
-            POSITION: RELATIVE;
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--plyr-color-main);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 15px;
         }
-        .TELEGRAM-POPUP H2 { MARGIN-TOP: 0; COLOR: VAR(--PRIMARY-COLOR); FONT-SIZE: 1.8REM; }
-        .TELEGRAM-POPUP P { MARGIN-BOTTOM: 20PX; FONT-SIZE: 1.05REM; }
-        .TELEGRAM-POPUP BUTTON {
-            WIDTH: 100%; PADDING: 15PX; MARGIN-TOP: 15PX; FONT-SIZE: 1.1REM;
-            BORDER: NONE; BORDER-RADIUS: 10PX; CURSOR: POINTER; FONT-WEIGHT: 700;
-            TRANSITION: ALL 0.3S;
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .TELEGRAM-POPUP .JOIN-BTN { BACKGROUND: VAR(--PRIMARY-COLOR); COLOR: WHITE; }
-        .TELEGRAM-POPUP .JOIN-BTN:HOVER { BACKGROUND: #0c8cdb; TRANSFORM: SCALE(1.02); }
-        .TELEGRAM-POPUP .JOINED-BTN { BACKGROUND: #2D2D2D; COLOR: #F1F5F9; BORDER: 1PX SOLID #3A3A3A; }
-        .TELEGRAM-POPUP .JOINED-BTN:HOVER { BACKGROUND: #3A3A3A; TRANSFORM: SCALE(1.02); }
-    </STYLE>
-</HEAD>
-<BODY>
+        
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 25px;
+            background-color: rgba(180, 0, 0, 0.95);
+            border-radius: 10px;
+            text-align: center;
+            z-index: 999;
+            color: white;
+            font-size: 1.2rem;
+            border: 2px solid #FFD700;
+        }
 
-<DIV CLASS="POPUP-BACKDROP" ID="POPUPBACKDROP">
-    <DIV CLASS="TELEGRAM-POPUP" ID="TELEGRAMPOPUP">
-        <H2><I CLASS="FA-BRANDS FA-WHATSAPP"></I> SUPPORT US!</H2>
-        <P>JOIN OUR WHATSAPP CHANNEL <STRONG>𝗖𝗥𝗜𝗖𝗞𝗘𝗧 𝗡𝗘𝗪𝗦 𝗣𝗢𝗜𝗡𝗧</STRONG> FOR INSTANT UPDATES AND EXCLUSIVE LINKS.</P>
-        <A HREF="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" TARGET="_BLANK" REL="NOOPENER" ID="JOINLINK" STYLE="TEXT-DECORATION: NONE;">
-            <BUTTON CLASS="JOIN-BTN">JOIN NOW</BUTTON>
-        </A>
-        <BUTTON CLASS="JOINED-BTN" ID="ALREADYJOINEDBTN">ALREADY JOINED</BUTTON>
-    </DIV>
-</DIV>
+        .popup-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 1); z-index: 11000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .popup-backdrop.hidden { opacity: 0; pointer-events: none; display: none; }
 
-<DIV CLASS="VIDEO-CONTAINER">
+        .telegram-popup {
+            background: var(--popup-bg); color: var(--text-light); padding: 40px 30px;
+            border-radius: 16px; border: 2px solid var(--primary-color);
+            box-shadow: 0 0 60px 15px rgba(14, 165, 233, 0.5); 
+            z-index: 12000;
+            text-align: center; width: 90%; max-width: 420px;
+            position: relative;
+        }
+        .telegram-popup h2 { margin-top: 0; color: var(--primary-color); font-size: 1.8rem; }
+        .telegram-popup p { margin-bottom: 20px; font-size: 1.05rem; }
+        .telegram-popup button {
+            width: 100%; padding: 15px; margin-top: 15px; font-size: 1.1rem;
+            border: none; border-radius: 10px; cursor: pointer; font-weight: 700;
+            transition: all 0.3s;
+        }
+        .telegram-popup .join-btn { background: var(--primary-color); color: white; }
+        .telegram-popup .join-btn:hover { background: #0c8cdb; transform: scale(1.02); } 
+        .telegram-popup .joined-btn { background: #2D2D2D; color: #F1F5F9; border: 1px solid #3A3A3A; }
+        .telegram-popup .joined-btn:hover { background: #3A3A3A; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+
+<div class="popup-backdrop" id="popupBackdrop">
+    <div class="telegram-popup" id="telegramPopup">
+        <h2><i class="fa-brands fa-whatsapp"></i> Support Us!</h2>
+        <p>JOIN OUR WHATSAPP CHANNEL <STRONG>𝗖𝗥𝗜𝗖𝗞𝗘𝗧 𝗡𝗘𝗪𝗦 𝗣𝗢𝗜𝗡𝗧</STRONG> FOR INSTANT UPDATES AND EXCLUSIVE LINKS.</p>
+        <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" rel="noopener" id="joinLink" style="text-decoration: none;">
+            <button class="join-btn">JOIN NOW</button>
+        </a>
+        <button class="joined-btn" id="alreadyJoinedBtn">ALREADY JOINED</button>
+    </div>
+</div>
+
+<div class="video-container">
     
-    <DIV CLASS="LOADING-OVERLAY" ID="LOADING-OVERLAY">
-        <DIV CLASS="SPINNER"></DIV>
-        <P>LOADING STREAM... PLEASE WAIT.</P>
-    </DIV>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p>LOADING STREAM... PLEASE WAIT.</p>
+    </div>
 
-    <VIDEO ID="PLAYER" PLAYSINLINE CONTROLS></VIDEO>
-</DIV>
+    <video id="player" playsinline controls></video>
+</div>
 
-<SCRIPT SRC="https://cdn.jsdelivr.net/npm/hls.js@latest"></SCRIPT>
-<SCRIPT SRC="https://cdn.plyr.io/3.7.8/plyr.js"></SCRIPT>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
-<SCRIPT>
-    CONST PLAYER_ID = 'PLAYER';
-    CONST URL_PARAM_KEY = 'IOS';
-    CONST AUTO_QUALITY = 0;
+<script>
+    // STANDARD JAVASCRIPT VARS AND FUNCS (using camelCase for stability)
+    const playerId = 'player';
+    const urlParamKey = 'ios';
+    const autoQuality = 0;
 
-    CONST PLAYER_ELEMENT = DOCUMENT.GETELEMENTBYID(PLAYER_ID);
-    CONST LOADING_OVERLAY = DOCUMENT.GETELEMENTBYID('LOADING-OVERLAY');
-    CONST POPUP_BACKDROP = DOCUMENT.GETELEMENTBYID('POPUPBACKDROP');
-    CONST TELEGRAM_POPUP = DOCUMENT.GETELEMENTBYID('TELEGRAMPOPUP');
-    CONST JOIN_LINK = DOCUMENT.GETELEMENTBYID('JOINLINK');
-    CONST ALREADY_JOINED_BTN = DOCUMENT.GETELEMENTBYID('ALREADYJOINEDBTN');
+    const playerElement = document.getElementById(playerId);
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const popupBackdrop = document.getElementById('popupBackdrop');
+    const telegramPopup = document.getElementById('telegramPopup');
+    const joinLink = document.getElementById('joinLink');
+    const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
     
-    LET HLS_INSTANCE = NULL;
-    LET PLYR_INSTANCE = NULL;
-    LET PLAYER_CONFIG = NULL;
+    let hlsInstance = null;
+    let plyrInstance = null;
+    let playerConfig = null;
 
-    LET PLAYER_INITIALIZED = FALSE;
+    let playerInitialized = false;
 
-    FUNCTION DISPLAY_ERROR(MESSAGE) {
-        LOADING_OVERLAY.CLASSLIST.ADD('HIDDEN');
-        POPUP_BACKDROP.CLASSLIST.ADD('HIDDEN');
-        CONST CONTAINER = DOCUMENT.QUERYSELECTOR('.VIDEO-CONTAINER');
-        IF (DOCUMENT.QUERYSELECTOR('.ERROR-MESSAGE')) RETURN;
-        CONTAINER.INNERHTML += `<DIV CLASS="ERROR-MESSAGE"><H2 STYLE="FONT-WEIGHT: BOLD; MARGIN-BOTTOM: 10PX;">STREAM ERROR</H2><P>${MESSAGE}</P></DIV>`;
-        IF (PLYR_INSTANCE) PLYR_INSTANCE.DESTROY();
+    function displayError(message) {
+        loadingOverlay.classList.add('hidden');
+        popupBackdrop.classList.add('hidden');
+        const container = document.querySelector('.video-container');
+        if (document.querySelector('.error-message')) return;
+        container.innerHTML += `<div class="error-message"><h2>STREAM ERROR</h2><p>${message}</p></div>`;
+        if (plyrInstance) plyrInstance.destroy();
     }
 
-    FUNCTION GET_VIDEO_URL_FROM_QUERY() {
-        CONST URL_PARAMS = NEW URLSEARCHPARAMS(WINDOW.LOCATION.SEARCH);
-        CONST VIDEO_URL = URL_PARAMS.GET(URL_PARAM_KEY);
-        RETURN VIDEO_URL ? DECODEURICOMPONENT(VIDEO_URL) : NULL;
+    function getVideoUrlFromQuery() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoUrl = urlParams.get(urlParamKey);
+        return videoUrl ? decodeURIComponent(videoUrl) : null;
     }
 
-    FUNCTION ATTACH_PLYR_EVENTS() {
-        IF (!PLYR_INSTANCE) RETURN;
+    function attachPlyrEvents() {
+        if (!plyrInstance) return;
 
-        PLYR_INSTANCE.ON('PLAYING', () => LOADING_OVERLAY.CLASSLIST.ADD('HIDDEN'));
-        PLYR_INSTANCE.ON('WAITING', () => LOADING_OVERLAY.CLASSLIST.REMOVE('HIDDEN'));
-        PLYR_INSTANCE.ON('CANPLAY', () => LOADING_OVERLAY.CLASSLIST.ADD('HIDDEN'));
+        plyrInstance.on('playing', () => loadingOverlay.classList.add('hidden'));
+        plyrInstance.on('waiting', () => loadingOverlay.classList.remove('hidden'));
+        plyrInstance.on('canplay', () => loadingOverlay.classList.add('hidden'));
 
-        PLYR_INSTANCE.ON('ENTERFULLSCREEN', () => {
-            IF (SCREEN.ORIENTATION && SCREEN.ORIENTATION.LOCK) {
-                SCREEN.ORIENTATION.LOCK('LANDSCAPE').CATCH(() => {}); 
+        plyrInstance.on('enterfullscreen', () => {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {}); 
             }
         });
 
-        PLYR_INSTANCE.ON('EXITFULLSCREEN', () => {
-            IF (SCREEN.ORIENTATION && SCREEN.ORIENTATION.UNLOCK) {
-                SCREEN.ORIENTATION.UNLOCK();
+        plyrInstance.on('exitfullscreen', () => {
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
             }
         });
     }
 
-    FUNCTION INITIALIZE_PLAYER() {
-        CONST STREAM_URL = GET_VIDEO_URL_FROM_QUERY();
+    function initializePlayer() {
+        const streamUrl = getVideoUrlFromQuery();
 
-        IF (!STREAM_URL) {
-            DISPLAY_ERROR("MISSING VIDEO URL. USE: <CODE>?IOS=YOUR_M3U8_LINK</CODE>");
-            RETURN;
+        if (!streamUrl) {
+            displayError("MISSING VIDEO URL. USE: <code>?ios=YOUR_M3U8_LINK</code>");
+            return;
         }
 
-        PLAYER_CONFIG = {
-            AUTOPLAY: TRUE,
-            PLAYSINLINE: TRUE,
-            MUTED: TRUE,
-            CONTROLS: ['PLAY-LARGE', 'PLAY', 'PROGRESS', 'CURRENT-TIME', 'MUTE', 'VOLUME', 'SETTINGS', 'PIP', 'FULLSCREEN'],
-            SETTINGS: ['QUALITY', 'SPEED', 'CAPTIONS'],
-            SPEED: {
-                SELECTED: 1,
-                OPTIONS: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+        playerConfig = {
+            autoplay: true,
+            playsinline: true,
+            muted: true,
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
+            settings: ['quality', 'speed', 'captions'],
+            speed: {
+                selected: 1,
+                options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
             },
         };
         
-        IF (STREAM_URL.TOLOWERCASE().INCLUDES('.M3U8') && HLS.ISSUPPORTED()) {
+        if (streamUrl.toLowerCase().includes('.m3u8') && Hls.isSupported()) {
             
-            HLS_INSTANCE = NEW HLS({
-                CROSSORIGIN: 'ANONYMOUS',
-                WITHCREDENTIALS: FALSE,
+            hlsInstance = new Hls({
+                crossOrigin: 'anonymous',
+                withCredentials: false,
             });
 
-            HLS_INSTANCE.LOADSOURCE(STREAM_URL);
-            HLS_INSTANCE.ATTACHMEDIA(PLAYER_ELEMENT);
+            hlsInstance.loadSource(streamUrl);
+            hlsInstance.attachMedia(playerElement);
             
-            HLS_INSTANCE.ON(HLS.EVENTS.MANIFEST_PARSED, FUNCTION (EVENT, DATA) {
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                 
-                CONST QUALITIES = DATA.LEVELS.MAP(L => L.HEIGHT).FILTER(BOOLEAN);
-                LET AVAILABLE_QUALITIES = [AUTO_QUALITY, ...NEW SET(QUALITIES)].SORT((A, B) => B - A);
-                CONST DEFAULT_QUALITY = AVAILABLE_QUALITIES.FIND(Q => Q === 720) || AUTO_QUALITY; 
+                const qualities = data.levels.map(l => l.height).filter(Boolean);
+                let availableQualities = [autoQuality, ...new Set(qualities)].sort((a, b) => b - a);
+                const defaultQuality = availableQualities.find(q => q === 720) || autoQuality; 
                 
-                PLAYER_CONFIG.QUALITY = {
-                    DEFAULT: DEFAULT_QUALITY,
-                    OPTIONS: AVAILABLE_QUALITIES,
-                    FORCED: TRUE,
-                    ONCHANGE: (NEW_QUALITY) => {
-                        LOADING_OVERLAY.CLASSLIST.REMOVE('HIDDEN');
-                        IF (NEW_QUALITY === AUTO_QUALITY) {
-                            HLS_INSTANCE.CURRENTLEVEL = -1;
-                        } ELSE {
-                            CONST LEVEL_INDEX = HLS_INSTANCE.LEVELS.FINDINDEX(LEVEL => LEVEL.HEIGHT === NEW_QUALITY);
-                            IF (LEVEL_INDEX !== -1) {
-                                HLS_INSTANCE.CURRENTLEVEL = LEVEL_INDEX;
+                playerConfig.quality = {
+                    default: defaultQuality,
+                    options: availableQualities,
+                    forced: true,
+                    onChange: (newQuality) => {
+                        loadingOverlay.classList.remove('hidden');
+                        if (newQuality === autoQuality) {
+                            hlsInstance.currentLevel = -1;
+                        } else {
+                            const levelIndex = hlsInstance.levels.findIndex(level => level.height === newQuality);
+                            if (levelIndex !== -1) {
+                                hlsInstance.currentLevel = levelIndex;
                             }
                         }
                     },
                 };
 
-                IF (PLYR_INSTANCE) {
-                    PLYR_INSTANCE.DESTROY();
+                if (plyrInstance) {
+                    plyrInstance.destroy();
                 }
-                PLYR_INSTANCE = NEW PLYR(PLAYER_ELEMENT, PLAYER_CONFIG);
-                ATTACH_PLYR_EVENTS();
+                plyrInstance = new Plyr(playerElement, playerConfig);
+                attachPlyrEvents();
 
-                HLS_INSTANCE.ON(HLS.EVENTS.LEVEL_SWITCHED, () => LOADING_OVERLAY.CLASSLIST.ADD('HIDDEN'));
+                hlsInstance.on(Hls.Events.LEVEL_SWITCHED, () => loadingOverlay.classList.add('hidden'));
                 
-                PLAYER_ELEMENT.PLAY().CATCH(E => CONSOLE.WARN("AUTOPLAY BLOCKED/FAILED.", E));
+                playerElement.play().catch(e => console.warn("AUTOPLAY BLOCKED/FAILED.", e));
             });
             
-            HLS_INSTANCE.ON(HLS.EVENTS.ERROR, FUNCTION (EVENT, DATA) {
-                IF (DATA.FATAL) {
-                    HLS_INSTANCE.DESTROY();
-                    DISPLAY_ERROR(`PLAYBACK FAILED: ${DATA.REASON}. PLEASE CHECK THE HLS LINK.`);
+            hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                if (data.fatal) {
+                    if (hlsInstance) hlsInstance.destroy();
+                    displayError(`PLAYBACK FAILED: ${data.reason}. PLEASE CHECK THE HLS LINK.`);
                 }
             });
 
-        } ELSE {
-            PLAYER_ELEMENT.SRC = STREAM_URL;
-            PLYR_INSTANCE = NEW PLYR(PLAYER_ELEMENT, PLAYER_CONFIG);
-            ATTACH_PLYR_EVENTS();
+        } else {
+            playerElement.src = streamUrl;
+            plyrInstance = new Plyr(playerElement, playerConfig);
+            attachPlyrEvents();
             
-            PLAYER_ELEMENT.ADDEVENTLISTENER('ERROR', (E) => {
-                 DISPLAY_ERROR("THE VIDEO LINK FAILED TO LOAD OR THE FORMAT IS UNSUPPORTED.");
+            playerElement.addEventListener('error', (e) => {
+                 displayError("THE VIDEO LINK FAILED TO LOAD OR THE FORMAT IS UNSUPPORTED.");
             });
             
-            PLYR_INSTANCE.PLAY().CATCH(E => CONSOLE.WARN("AUTOPLAY BLOCKED/FAILED.", E));
-            LOADING_OVERLAY.CLASSLIST.ADD('HIDDEN');
+            plyrInstance.play().catch(e => console.warn("AUTOPLAY BLOCKED/FAILED.", e));
+            loadingOverlay.classList.add('hidden');
         }
     }
 
-    FUNCTION CLOSE_POPUP_AND_INITIALIZE_PLAYER() {
-        POPUP_BACKDROP.CLASSLIST.ADD('HIDDEN');
-        TELEGRAM_POPUP.CLASSLIST.ADD('HIDDEN');
+    function closePopupAndInitializePlayer() {
+        popupBackdrop.classList.add('hidden');
+        telegramPopup.classList.add('hidden');
         
-        IF (!PLAYER_INITIALIZED) {
-            LOADING_OVERLAY.CLASSLIST.REMOVE('HIDDEN');
-            INITIALIZE_PLAYER();
-            PLAYER_INITIALIZED = TRUE;
+        if (!playerInitialized) {
+            loadingOverlay.classList.remove('hidden');
+            initializePlayer();
+            playerInitialized = true;
         }
     }
     
-    // --- POPUP BUTTON EVENT LISTENERS FIX ---
-    // Join Link (A tag): We only need to ensure the player initializes after the click.
-    // The link itself handles opening the WhatsApp URL.
-    JOIN_LINK.ADDEVENTLISTENER('CLICK', () => { 
-        // Allow time for the WhatsApp link to open, then close popup and initialize player.
-        SETTIMEOUT(CLOSE_POPUP_AND_INITIALIZE_PLAYER, 500); 
+    // --- POPUP BUTTON EVENT LISTENERS (FIXED) ---
+    
+    // 1. Join Link (A tag): Ensures the player initializes after the user clicks to open the WhatsApp link.
+    joinLink.addEventListener('click', () => { 
+        // Use a short timeout to let the browser handle the navigation/new tab first
+        setTimeout(closePopupAndInitializePlayer, 500); 
     });
     
-    // Already Joined Button: This button has no external action, so it directly closes the popup and initializes the player.
-    ALREADY_JOINED_BTN.ADDEVENTLISTENER('CLICK', CLOSE_POPUP_AND_INITIALIZE_PLAYER);
-    // --- END POPUP BUTTON EVENT LISTENERS FIX ---
-
-    DOCUMENT.ADDEVENTLISTENER('DOMLOADEDCONTENT', () => {
-        POPUP_BACKDROP.CLASSLIST.REMOVE('HIDDEN');
-        LOADING_OVERLAY.CLASSLIST.ADD('HIDDEN');
+    // 2. Already Joined Button: Directly closes popup and starts player initialization.
+    alreadyJoinedBtn.addEventListener('click', closePopupAndInitializePlayer);
+    
+    // --- INITIAL START ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show the popup immediately on load
+        popupBackdrop.classList.remove('hidden');
+        loadingOverlay.classList.add('hidden');
     });
 
-</SCRIPT>
+</script>
 
-</BODY>
-            </HTML>
-                
+</body>
+</html>
+
