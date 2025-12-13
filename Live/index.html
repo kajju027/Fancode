@@ -11,9 +11,9 @@
     
     <STYLE>
         :ROOT {
-            --PLYR-COLOR-MAIN: #FF0055; 
+            --PLYR-COLOR-MAIN: #0ea5e9; 
             --POPUP-BG: #0A0A0A;
-            --PRIMARY-COLOR: #FF0055;
+            --PRIMARY-COLOR: #0ea5e9;
             --TEXT-LIGHT: #F1F5F9;
         }
         
@@ -104,7 +104,8 @@
         .TELEGRAM-POPUP {
             BACKGROUND: VAR(--POPUP-BG); COLOR: VAR(--TEXT-LIGHT); PADDING: 40PX 30PX;
             BORDER-RADIUS: 16PX; BORDER: 2PX SOLID VAR(--PRIMARY-COLOR);
-            BOX-SHADOW: 0 0 60PX 15PX RGBA(255, 0, 85, 0.5); Z-INDEX: 12000;
+            BOX-SHADOW: 0 0 60PX 15PX RGBA(14, 165, 233, 0.5); 
+            Z-INDEX: 12000;
             TEXT-ALIGN: CENTER; WIDTH: 90%; MAX-WIDTH: 420PX;
             POSITION: RELATIVE;
         }
@@ -116,7 +117,7 @@
             TRANSITION: ALL 0.3S;
         }
         .TELEGRAM-POPUP .JOIN-BTN { BACKGROUND: VAR(--PRIMARY-COLOR); COLOR: WHITE; }
-        .TELEGRAM-POPUP .JOIN-BTN:HOVER { BACKGROUND: #CC0044; TRANSFORM: SCALE(1.02); }
+        .TELEGRAM-POPUP .JOIN-BTN:HOVER { BACKGROUND: #0c8cdb; TRANSFORM: SCALE(1.02); }
         .TELEGRAM-POPUP .JOINED-BTN { BACKGROUND: #2D2D2D; COLOR: #F1F5F9; BORDER: 1PX SOLID #3A3A3A; }
         .TELEGRAM-POPUP .JOINED-BTN:HOVER { BACKGROUND: #3A3A3A; TRANSFORM: SCALE(1.02); }
     </STYLE>
@@ -295,9 +296,18 @@
             PLAYER_INITIALIZED = TRUE;
         }
     }
-
-    JOIN_LINK.ADDEVENTLISTENER('CLICK', () => { SETTIMEOUT(CLOSE_POPUP_AND_INITIALIZE_PLAYER, 500); });
+    
+    // --- POPUP BUTTON EVENT LISTENERS FIX ---
+    // Join Link (A tag): We only need to ensure the player initializes after the click.
+    // The link itself handles opening the WhatsApp URL.
+    JOIN_LINK.ADDEVENTLISTENER('CLICK', () => { 
+        // Allow time for the WhatsApp link to open, then close popup and initialize player.
+        SETTIMEOUT(CLOSE_POPUP_AND_INITIALIZE_PLAYER, 500); 
+    });
+    
+    // Already Joined Button: This button has no external action, so it directly closes the popup and initializes the player.
     ALREADY_JOINED_BTN.ADDEVENTLISTENER('CLICK', CLOSE_POPUP_AND_INITIALIZE_PLAYER);
+    // --- END POPUP BUTTON EVENT LISTENERS FIX ---
 
     DOCUMENT.ADDEVENTLISTENER('DOMLOADEDCONTENT', () => {
         POPUP_BACKDROP.CLASSLIST.REMOVE('HIDDEN');
@@ -307,5 +317,5 @@
 </SCRIPT>
 
 </BODY>
-                </HTML>
-                        
+            </HTML>
+                
