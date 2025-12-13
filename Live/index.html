@@ -180,6 +180,7 @@
         let playerInitialized = false;
         let plyrInstance = null;
         let hlsInstance = null;
+        let playerConfig = null; // Store initial Plyr configuration
 
         // --- POPUP & LOADER CONTROL ---
 
@@ -217,8 +218,35 @@
             if (plyrInstance) plyrInstance.destroy();
         }
 
-        // --- Core Player Initialization ---
+        // --- Plyr Events Attachment ---
+        function attachPlyrEvents() {
+            if (!plyrInstance) return;
 
+            // Hide custom loading overlay once playback starts
+            plyrInstance.on('playing', hideLoading);
+
+            // Handle loading state
+            plyrInstance.on('waiting', () => {
+                loadingOverlay.classList.remove('hidden');
+            });
+            plyrInstance.on('canplay', hideLoading);
+
+            // Fullscreen Landscape Lock
+            plyrInstance.on('enterfullscreen', () => {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {});
+                }
+            });
+
+            plyrInstance.on('exitfullscreen', () => {
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            });
+        }
+
+
+        // --- Core Player Initialization ---
         function initializePlayer() {
             const videoUrl = getVideoUrlFromQuery();
             const videoElement = document.getElementById(PLAYER_ID);
@@ -228,8 +256,9 @@
                 return;
             }
 
-            // --- 1. Plyr Initialization ---
-            plyrInstance = new Plyr(videoElement, {
+            // --- 1. Initial Plyr Configuration ---
+            // The configuration object is now stored in a global variable
+            playerConfig = {
                 type: 'video',
                 playsinline: true,
                 muted: true,
@@ -239,12 +268,24 @@
                 disableContextMenu: true,
                 tooltips: { controls: true, seek: true },
                 keyboard: { focused: true, global: true },
-                // Control Bar: play/pause, time, volume, settings, fullscreen. (Live feel)
                 controls: ['play-large', 'play', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
-
-                // CRITICAL: Set 'quality' and 'speed' in settings
                 settings: ['quality', 'speed', 'captions'],
-            });
+                // Default Speed options
+                speed: {
+                    selected: 1,
+                    options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+                },
+                // Default Quality options (Will be overwritten by HLS)
+                quality: {
+                    default: AUTO_QUALITY_OPTION,
+                    options: [AUTO_QUALITY_OPTION]
+                }
+            };
+
+            // Initialize Plyr instance
+            plyrInstance = new Plyr(videoElement, playerConfig);
+            attachPlyrEvents();
+
 
             // --- 2. HLS Integration & Quality Switching ---
             if (Hls.isSupported() && videoUrl.toLowerCase().endsWith('.m3u8')) {
@@ -258,18 +299,16 @@
                 hlsInstance.loadSource(videoUrl);
                 hlsInstance.attachMedia(videoElement);
 
-                // --- Quality Integration Logic (New/Updated) ---
+                // --- Quality Integration Logic (Critical Fix) ---
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                     try {
-                        // HLS levels are the different qualities/bitrates available.
-                        // We map them to their heights (resolution) for Plyr.
                         const qualities = data.levels.map(l => l.height).filter(Boolean);
-                        // Add 0 for 'Auto' quality (handled by HLS, which is level -1)
+                        // Add 0 for 'Auto' and ensure unique, sorted list
                         let availableQualities = [AUTO_QUALITY_OPTION, ...new Set(qualities)].sort((a,b)=>a-b);
-                        const defaultQuality = 480; // 480p as default resolution
+                        const defaultQuality = availableQualities.find(q => q === 480) || AUTO_QUALITY_OPTION; // Fallback to Auto
 
-                        // Set up Plyr's quality configuration
-                        plyrInstance.config.quality = {
+                        // 1. Update the configuration object with new quality options
+                        playerConfig.quality = {
                             default: defaultQuality,
                             options: availableQualities,
                             forced: true,
@@ -278,42 +317,34 @@
                                 if (q === AUTO_QUALITY_OPTION) {
                                     hlsInstance.currentLevel = -1; // -1 means HLS auto selection
                                 } else {
-                                    // Find the index of the highest level that matches the selected quality
-                                    // Note: HLS levels are often sorted by bitrate, not height, so a simple findIndex is needed
+                                    // Find the index of the best level that matches the selected quality
                                     const levelIndex = data.levels.findIndex(level => level.height === q);
                                     if (levelIndex !== -1) {
                                         hlsInstance.currentLevel = levelIndex;
                                     }
                                 }
-                                // Optionally, show loading when quality changes
                                 loadingOverlay.classList.remove('hidden');
                             }
                         };
 
-                        // Add Speed options
-                        plyrInstance.config.speed = {
-                            selected: 1,
-                            options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
-                        };
-
-                        // Re-initialize Plyr to apply new settings, or manually update
-                        if (plyrInstance.settings) {
-                            // This line is often necessary for Plyr to correctly display new settings
+                        // 2. Destroy and re-initialize Plyr with the UPDATED config
+                        // **THIS IS THE CRITICAL STEP TO REFRESH THE SETTINGS MENU**
+                        if (plyrInstance) {
                             plyrInstance.destroy();
-                            plyrInstance = new Plyr(videoElement, plyrInstance.config);
-                            // Re-attach event listeners after re-initialization
-                            attachPlyrEvents();
                         }
+                        plyrInstance = new Plyr(videoElement, playerConfig);
+                        attachPlyrEvents(); // Re-attach events
 
                         // Set the initial quality to the default one for HLS
-                        if (hlsInstance.currentLevel === -1) {
-                            hlsInstance.currentLevel = -1; // Auto
-                        } else {
+                        if (defaultQuality !== AUTO_QUALITY_OPTION) {
                            const initialLevelIndex = data.levels.findIndex(level => level.height === defaultQuality);
                            if (initialLevelIndex !== -1) {
                                 hlsInstance.currentLevel = initialLevelIndex;
                            }
+                        } else {
+                            hlsInstance.currentLevel = -1; // Auto
                         }
+
 
                         // Start playing and hide loader
                         videoElement.play().catch(error => {
@@ -345,38 +376,10 @@
                 plyrInstance.play();
             }
 
-            // --- 3. Plyr General Events & Customizations ---
-            attachPlyrEvents();
         }
-
-        function attachPlyrEvents() {
-            if (!plyrInstance) return;
-
-            // Hide custom loading overlay once playback starts
-            plyrInstance.on('playing', hideLoading);
-
-            // Handle loading state
-            plyrInstance.on('waiting', () => {
-                loadingOverlay.classList.remove('hidden');
-            });
-            plyrInstance.on('canplay', hideLoading);
-
-            // --- Fullscreen Landscape Lock (Kept from original code) ---
-            plyrInstance.on('enterfullscreen', () => {
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(() => {});
-                }
-            });
-
-            plyrInstance.on('exitfullscreen', () => {
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
-            });
-        }
-
 
     </script>
 
 </body>
 </html>
+
