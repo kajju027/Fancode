@@ -10,9 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
-        /* --- Video Player & Customization Styles (Simplified from your code) --- */
+        /* --- Video Player & Customization Styles --- */
         :root {
             --plyr-color-main: #0078e8; /* Blue accent color */
+            --popup-bg: #000000;
+            --primary-color: #e30000;
+            --text-light: #f1f5f9;
         }
         
         html, body {
@@ -89,9 +92,46 @@
             color: white;
             font-size: 1.1rem;
         }
+
+        /* --- POPUP STYLES --- */
+        .popup-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 1); z-index: 11000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .popup-backdrop.hidden { opacity: 0; pointer-events: none; display: none; }
+
+        .telegram-popup {
+            background: var(--popup-bg); color: var(--text-light); padding: 40px 25px;
+            border-radius: 16px; border: 2px solid var(--primary-color);
+            box-shadow: 0 0 50px 10px rgba(227, 0, 0, 0.5); z-index: 12000;
+            text-align: center; width: 90%; max-width: 400px;
+            position: relative; /* Make it visible inside the backdrop */
+        }
+        .telegram-popup.hidden { display: none; opacity: 0; }
+        .telegram-popup h2 { margin-top: 0; color: var(--primary-color); font-size: 1.75rem; }
+        .telegram-popup button {
+            width: 100%; padding: 14px; margin-top: 12px; font-size: 1rem;
+            border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
+        }
+        .telegram-popup .join-btn { background: #e30000; color: white; }
+        .telegram-popup .joined-btn { background: #2d2d2d; color: #f1f5f9; border: 1px solid #b30000; }
     </style>
 </head>
 <body>
+
+<div class="popup-backdrop" id="popupBackdrop">
+    <div class="telegram-popup" id="telegramPopup">
+        <h2><i class="fa-brands fa-whatsapp"></i> Support Us!</h2>
+        <p>Join our Whatsapp channel <strong>𝗖𝗥𝗜𝗖𝗞𝗘𝗧 𝗡𝗘𝗪𝗦 𝗣𝗢𝗜𝗡𝗧</strong> For Instant Updates And Exclusive Links.</p>
+        <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" target="_blank" rel="noopener" id="joinLink" style="text-decoration: none;">
+            <button class="join-btn">Join Now</button>
+        </a>
+        <button class="joined-btn" id="alreadyJoinedBtn">Already Joined</button>
+    </div>
+</div>
 
 <div class="video-container">
     
@@ -115,13 +155,22 @@
     // --- DOM Elements ---
     const playerElement = document.getElementById(PLAYER_ID);
     const loadingOverlay = document.getElementById('loading-overlay');
+    const popupBackdrop = document.getElementById('popupBackdrop');
+    const telegramPopup = document.getElementById('telegramPopup');
+    const joinLink = document.getElementById('joinLink');
+    const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
     
     let hlsInstance = null;
     let plyrInstance = null;
     let playerConfig = null; // To hold the base Plyr config
 
+    let playerInitialized = false;
+
+    // --- UTILITY FUNCTIONS ---
+
     function displayError(message) {
         loadingOverlay.classList.add('hidden');
+        popupBackdrop.classList.add('hidden');
         const container = document.querySelector('.video-container');
         if (document.querySelector('.error-message')) return;
         container.innerHTML += `
@@ -138,8 +187,34 @@
         return videoUrl ? decodeURIComponent(videoUrl) : null;
     }
 
+    function attachPlyrEvents() {
+        if (!plyrInstance) return;
+
+        // Hide custom loading overlay once playback starts
+        plyrInstance.on('playing', () => loadingOverlay.classList.add('hidden'));
+
+        // Handle loading state
+        plyrInstance.on('waiting', () => loadingOverlay.classList.remove('hidden'));
+        plyrInstance.on('canplay', () => loadingOverlay.classList.add('hidden'));
+
+        // --- CRITICAL: Fullscreen Landscape Lock ---
+        plyrInstance.on('enterfullscreen', () => {
+            if (screen.orientation && screen.orientation.lock) {
+                // Lock screen to landscape orientation on mobile
+                screen.orientation.lock('landscape').catch(() => {}); 
+            }
+        });
+
+        plyrInstance.on('exitfullscreen', () => {
+            if (screen.orientation && screen.orientation.unlock) {
+                // Unlock screen orientation when exiting fullscreen
+                screen.orientation.unlock();
+            }
+        });
+    }
+
     // --- Core Player Initialization ---
-    document.addEventListener('DOMContentLoaded', () => {
+    function initializePlayer() {
         const streamUrl = getVideoUrlFromQuery();
 
         if (!streamUrl) {
@@ -148,10 +223,10 @@
         }
 
         // --- 1. Base Plyr Configuration ---
-        // We define the base configuration here, which HLS will later augment
         playerConfig = {
             autoplay: true,
             playsinline: true,
+            muted: true, // Auto-play requires muted on most browsers
             controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
             settings: ['quality', 'speed', 'captions'],
             // Default Speed options
@@ -172,14 +247,10 @@
             hlsInstance.loadSource(streamUrl);
             hlsInstance.attachMedia(playerElement);
             
-            // --- CRITICAL: Quality Integration ---
             hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
                 
-                // Get available qualities from HLS levels
                 const qualities = data.levels.map(l => l.height).filter(Boolean);
-                let availableQualities = [AUTO_QUALITY, ...new Set(qualities)].sort((a, b) => b - a); // Sort Descending
-                
-                // Choose a default quality, or fall back to Auto
+                let availableQualities = [AUTO_QUALITY, ...new Set(qualities)].sort((a, b) => b - a);
                 const defaultQuality = availableQualities.find(q => q === 720) || AUTO_QUALITY; 
                 
                 // Update Plyr configuration for quality settings
@@ -188,11 +259,10 @@
                     options: availableQualities,
                     forced: true,
                     onChange: (newQuality) => {
-                        loadingOverlay.classList.remove('hidden'); // Show loader during change
+                        loadingOverlay.classList.remove('hidden');
                         if (newQuality === AUTO_QUALITY) {
                             hlsInstance.currentLevel = -1; // HLS Auto
                         } else {
-                            // Find the HLS level index that matches the selected quality
                             const levelIndex = hlsInstance.levels.findIndex(level => level.height === newQuality);
                             if (levelIndex !== -1) {
                                 hlsInstance.currentLevel = levelIndex;
@@ -201,22 +271,18 @@
                     },
                 };
 
-                // Initialize Plyr with the complete configuration
-                // If already initialized (shouldn't happen here), destroy and re-create.
+                // Destroy and Re-initialize Plyr with the UPDATED config to show Quality options
                 if (plyrInstance) {
                     plyrInstance.destroy();
                 }
                 plyrInstance = new Plyr(playerElement, playerConfig);
-                
-                // Set HLS event handlers
+                attachPlyrEvents(); // Re-attach events
+
+                // Set HLS event handler for load complete
                 hlsInstance.on(Hls.Events.LEVEL_SWITCHED, () => loadingOverlay.classList.add('hidden'));
                 
-                // Set Plyr event handlers
-                plyrInstance.on('playing', () => loadingOverlay.classList.add('hidden'));
-                plyrInstance.on('waiting', () => loadingOverlay.classList.remove('hidden'));
-                
-                // Attempt to play
-                playerElement.play().catch(e => console.warn("Autoplay blocked/failed.", e));
+                // Attempt to play (muted auto-play should work)
+                playerElement.play().catch(e => console.warn("Autoplay blocked/failed. User interaction required.", e));
             });
             
             // HLS Error Handling
@@ -231,6 +297,7 @@
             // --- 3. MP4/Other Non-HLS Handling ---
             playerElement.src = streamUrl;
             plyrInstance = new Plyr(playerElement, playerConfig);
+            attachPlyrEvents();
             
             playerElement.addEventListener('error', (e) => {
                  displayError("The video link failed to load or the format is unsupported.");
@@ -239,15 +306,33 @@
             plyrInstance.play().catch(e => console.warn("Autoplay blocked/failed.", e));
             loadingOverlay.classList.add('hidden');
         }
+    }
 
-        // Hide loader after a short delay if Plyr/HLS takes time to report playing
-        setTimeout(() => {
-            if (plyrInstance && plyrInstance.playing) {
-                loadingOverlay.classList.add('hidden');
-            }
-        }, 3000);
 
+    // --- POPUP CONTROL ---
+    
+    function closePopupAndInitializePlayer() {
+        popupBackdrop.classList.add('hidden');
+        telegramPopup.classList.add('hidden');
+        
+        if (!playerInitialized) {
+            loadingOverlay.classList.remove('hidden');
+            initializePlayer();
+            playerInitialized = true;
+        }
+    }
+
+    joinLink.addEventListener('click', () => { setTimeout(closePopupAndInitializePlayer, 500); });
+    alreadyJoinedBtn.addEventListener('click', closePopupAndInitializePlayer);
+
+
+    // --- Start Execution: Show Popup first ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show the popup immediately
+        popupBackdrop.classList.remove('hidden');
+        loadingOverlay.classList.add('hidden');
     });
+
 </script>
 
 </body>
