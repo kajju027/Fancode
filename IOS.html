@@ -73,7 +73,7 @@
 
         .stream-header h1 { 
             font-size: 1.25rem; 
-            font-weight: 900; 
+            font-weight: 800; /* Bold Text preserved */
             margin: 0;
             color: var(--text-light);
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
@@ -86,7 +86,7 @@
             font-size: 11px;
             line-height: 1.3;
             color: #fff;
-            font-weight: 700; 
+            font-weight: 700; /* Bold Text preserved */
             text-align: right;
             z-index: 9999;
             pointer-events: none;
@@ -122,7 +122,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 200;
+            z-index: 10;
             opacity: 1;
             transition: opacity 0.3s ease;
             color: #fff;
@@ -134,9 +134,9 @@
         }
 
         .spinner {
-            width: 70px;
-            height: 70px;
-            border: 6px solid rgba(255, 255, 255, 0.2);
+            width: 65px; /* Large Spinner preserved */
+            height: 65px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
             border-top-color: var(--plyr-color-main);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -147,42 +147,44 @@
             to { transform: rotate(360deg); }
         }
 
-        .loading-overlay p {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        /* --- PREMIUM ERROR UI STYLE --- */
+        /* --- NEW PREMIUM ERROR CARD UI --- */
         .premium-error-card {
-            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            background: linear-gradient(145deg, #1a1a1a, #050505);
             border: 2px solid var(--primary-color);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px 30px;
             text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 15px 35px rgba(227, 0, 0, 0.3);
-            animation: slideUp 0.6s ease-out;
-            z-index: 300;
+            max-width: 380px;
+            width: 85%;
+            box-shadow: 0 20px 50px rgba(227, 0, 0, 0.3);
+            animation: cardFadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
         }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
         .error-icon {
-            font-size: 60px;
+            font-size: 65px;
             color: var(--primary-color);
             margin-bottom: 20px;
-            filter: drop-shadow(0 0 10px rgba(227, 0, 0, 0.5));
+            filter: drop-shadow(0 0 10px rgba(227, 0, 0, 0.4));
         }
-        .error-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; color: #fff; text-transform: uppercase; }
-        .error-desc { font-size: 1rem; color: #bbb; line-height: 1.6; margin-bottom: 25px; }
-        .home-btn {
+        .error-title { font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .error-desc { font-size: 1rem; color: #ccc; line-height: 1.5; margin-bottom: 25px; }
+        .join-btn-error {
             background: var(--primary-color); color: white; border: none;
-            padding: 12px 30px; border-radius: 50px; font-weight: 700;
+            padding: 14px 28px; border-radius: 50px; font-weight: 700;
             cursor: pointer; text-decoration: none; display: inline-block;
-            transition: 0.3s; box-shadow: 0 5px 15px rgba(227, 0, 0, 0.4);
+            transition: 0.3s ease; box-shadow: 0 5px 15px rgba(227, 0, 0, 0.4);
         }
-        .home-btn:hover { transform: scale(1.05); background: #ff1a1a; }
+        .join-btn-error:hover { transform: scale(1.05); background: #ff1a1a; box-shadow: 0 8px 20px rgba(227, 0, 0, 0.6); }
 
+        /* --- POPUP STYLES --- */
         .popup-backdrop {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 1); z-index: 11000;
@@ -225,7 +227,7 @@
 <div class="video-wrapper">
     <div class="header-container" id="headerContainer">
         <div class="stream-header">
-            <h1>FANCODE CNP</h1>
+            <h1>Fancode CNP</h1>
             <div style="display: flex; align-items: center;">
                 <div class="view-counter">
                     <div class="name">Fancode CNP</div>
@@ -235,7 +237,7 @@
         </div>
     </div>
     
-    <div class="video-container" id="videoContainer">
+    <div class="video-container" id="main-container">
         <div class="loading-overlay" id="loading-overlay">
             <div class="spinner"></div>
             <p>Loading stream... Please wait.</p>
@@ -250,8 +252,6 @@
 <script>
     const PLAYER_ID = 'player';
     const URL_PARAM_KEY = 'ios';
-    const AUTO_QUALITY = 0;
-    
     const STREAM_ID = 'Fancode';
     const HIT_BASE = 'https://hit-counter-red.onrender.com/api/hit?key=';
     const GET_BASE = 'https://hit-counter-red.onrender.com/api/get?key=';
@@ -259,30 +259,24 @@
     const playerElement = document.getElementById(PLAYER_ID);
     const loadingOverlay = document.getElementById('loading-overlay');
     const popupBackdrop = document.getElementById('popupBackdrop');
-    const telegramPopup = document.getElementById('telegramPopup');
-    const joinLink = document.getElementById('joinLink');
-    const alreadyJoinedBtn = document.getElementById('alreadyJoinedBtn');
-    const viewCountElement = document.getElementById('viewCount');
     const headerContainer = document.getElementById('headerContainer');
-    const videoContainer = document.getElementById('videoContainer');
+    const mainContainer = document.getElementById('main-container');
 
     let hlsInstance = null;
     let plyrInstance = null;
     let playerInitialized = false;
 
-    // --- NEW PREMIUM ERROR FUNCTION ---
-    function displayPremiumError(title, message) {
+    // --- UPDATED PREMIUM ERROR FUNCTION ---
+    function displayError(title, message) {
         loadingOverlay.classList.add('hidden');
         headerContainer.style.display = 'none';
         
-        videoContainer.innerHTML = `
-            <div style="display:flex; justify-content:center; align-items:center; height:100%;">
-                <div class="premium-error-card">
-                    <div class="error-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
-                    <div class="error-title">${title}</div>
-                    <div class="error-desc">${message}</div>
-                    <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" class="home-btn">JOIN FOR NEW LINKS</a>
-                </div>
+        mainContainer.innerHTML = `
+            <div class="premium-error-card">
+                <div class="error-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                <div class="error-title">${title}</div>
+                <div class="error-desc">${message}</div>
+                <a href="https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T" class="join-btn-error">GET NEW LINK</a>
             </div>`;
         if (plyrInstance) plyrInstance.destroy();
     }
@@ -295,20 +289,25 @@
     }
 
     async function startViewCounter() {
-        const HIT_URL = HIT_BASE + STREAM_ID;
-        const GET_URL = GET_BASE + STREAM_ID;
-        try { await fetch(HIT_URL + "&_=" + Date.now()); } catch(e) {}
-
+        try { await fetch(HIT_BASE + STREAM_ID + "&_=" + Date.now()); } catch(e) {}
         async function updateViews() {
             try {
-                const res = await fetch(GET_URL + "&_=" + Date.now());
+                const res = await fetch(GET_BASE + STREAM_ID + "&_=" + Date.now());
                 const json = await res.json();
-                if (viewCountElement) viewCountElement.innerText = formatViews(Number(json.total || 0)) + " Views";
+                document.getElementById('viewCount').innerText = formatViews(Number(json.total || 0)) + " Views";
             } catch(err) {}
         }
         updateViews();
         setInterval(updateViews, 2000);
+        // 3-Second delay for header
         setTimeout(() => { headerContainer.classList.add('show'); }, 3000);
+    }
+
+    function attachPlyrEvents() {
+        if (!plyrInstance) return;
+        plyrInstance.on('playing', () => loadingOverlay.classList.add('hidden'));
+        plyrInstance.on('waiting', () => loadingOverlay.classList.remove('hidden'));
+        plyrInstance.on('canplay', () => loadingOverlay.classList.add('hidden'));
     }
 
     function initializePlayer() {
@@ -316,7 +315,7 @@
         const streamUrl = urlParams.get(URL_PARAM_KEY);
 
         if (!streamUrl || streamUrl.trim() === "") {
-            displayPremiumError("INVALID ID", "The Stream ID you provided is incorrect or has expired. Please get a fresh link.");
+            displayError("Invalid ID", "The video ID or Link is missing or has expired. Please check the source again.");
             return;
         }
         
@@ -335,17 +334,21 @@
             hlsInstance.attachMedia(playerElement);
             hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
                 plyrInstance = new Plyr(playerElement, playerConfig);
-                loadingOverlay.classList.add('hidden');
+                attachPlyrEvents();
                 playerElement.play().catch(() => {});
             });
             hlsInstance.on(Hls.Events.ERROR, function (event, data) {
-                if (data.fatal) displayPremiumError("MATCH ENDED", "This match has finished or the stream is currently offline. Stay tuned for the next match.");
+                if (data.fatal) {
+                    hlsInstance.destroy();
+                    displayError("Match Ended", "This live event has ended or the link is no longer active. Join WhatsApp for new links.");
+                }
             });
         } else {
             playerElement.src = streamUrl;
             plyrInstance = new Plyr(playerElement, playerConfig);
-            playerElement.onplay = () => loadingOverlay.classList.add('hidden');
-            playerElement.onerror = () => displayPremiumError("STREAM OFFLINE", "The link failed to load. Please join our channel for a working link.");
+            attachPlyrEvents();
+            playerElement.onerror = () => displayError("Offline", "Stream is currently unavailable. Please try again later.");
+            loadingOverlay.classList.add('hidden');
         }
     }
 
@@ -357,8 +360,8 @@
         }
     }
 
-    joinLink.addEventListener('click', () => { setTimeout(closePopup, 500); });
-    alreadyJoinedBtn.addEventListener('click', closePopup);
+    document.getElementById('joinLink').onclick = () => setTimeout(closePopup, 500);
+    document.getElementById('alreadyJoinedBtn').onclick = closePopup;
 
     document.addEventListener('DOMContentLoaded', () => {
         popupBackdrop.classList.remove('hidden');
