@@ -102,9 +102,9 @@ SIMPLY UPLOAD AND RUN.
 
 ## 📊 REPOSITORY INSIGHTS
 
-![LAST COMMIT](https://img.shields.io/github/last-commit/kajju027/FANCODE-MAIN)
-![ACTIVITY](https://img.shields.io/github/commit-activity/m/kajju027/FANCODE-MAIN)
-![SIZE](https://img.shields.io/github/repo-size/kajju027/FANCODE-MAIN)
+![LAST COMMIT](https://img.shields.io/github/last-commit/kajju027/FANCODE)
+![ACTIVITY](https://img.shields.io/github/commit-activity/m/kajju027/FANCODE)
+![SIZE](https://img.shields.io/github/repo-size/kajju027/FANCODE)
 
 ---
 
