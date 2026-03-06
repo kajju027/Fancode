@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Custom Plyr Player</title>
+    
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    
+    <style>
+        :root {
+            /* এখানে আপনি প্লেয়ারের রঙ পরিবর্তন করতে পারেন */
+            --plyr-color-main: #00b3ff; 
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* কাস্টমাইজড প্লেয়ার স্টাইল */
+        .plyr--video {
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <video id="player" playsinline controls crossorigin>
+        </video>
+</div>
+
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const video = document.getElementById('player');
+        
+        // ১. URL থেকে প্যারামিটার ধরা (?url=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoSource = urlParams.get('url');
+
+        if (!videoSource) {
+            alert("দয়া করে URL এ ভিডিও লিঙ্ক দিন। উদাহরণ: ?url=YOUR_LINK");
+            return;
+        }
+
+        // ২. Plyr সেটিংস কাস্টমাইজেশন
+        const controls = [
+            'play-large', 'restart', 'rewind', 'play', 'fast-forward', 
+            'progress', 'current-time', 'duration', 'mute', 'volume', 
+            'captions', 'settings', 'pip', 'airplay', 'download', 'fullscreen'
+        ];
+
+        const player = new Plyr(video, {
+            controls,
+            settings: ['captions', 'quality', 'speed', 'loop'],
+            tooltips: { controls: true, seek: true },
+            displayDuration: true
+        });
+
+        // ৩. লাইভ স্ট্রিমিং (HLS) চেক এবং লোড করা
+        if (videoSource.includes('.m3u8')) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSource);
+                hls.attachMedia(video);
+                window.hls = hls;
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // সাফারি ব্রাউজারের জন্য
+                video.src = videoSource;
+            }
+        } else {
+            // সাধারণ ভিডিওর জন্য (MP4, WebM)
+            video.src = videoSource;
+        }
+
+        // ৪. কাস্টম টাইটেল বা কনসোলে মেসেজ (অপশনাল)
+        console.log("Playing source:", videoSource);
+    });
+</script>
+
+</body>
+</html>
+
