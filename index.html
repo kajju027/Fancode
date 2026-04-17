@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FANCODE FANCODE WEB BY CNPTV - SAYAN | WATCH FREE HD SPORTS ONLINE</title>
+  <title>CRICKET STREAMING POINT | WATCH FREE HD SPORTS ONLINE</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -29,64 +29,47 @@
     #matchesGrid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 16px;
-    }
-
-    .bg-mesh {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 600px 400px at 10% 5%, rgba(16,185,129,0.035) 0%, transparent 100%),
-        radial-gradient(ellipse 500px 500px at 90% 85%, rgba(239,68,68,0.025) 0%, transparent 100%);
+      gap: 14px;
     }
 
     @keyframes cardIn {
-      from { opacity: 0; transform: translateY(14px) scale(0.985); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .card-enter { animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .card-enter { animation: cardIn 0.35s ease-out both; }
 
     @keyframes livePulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
-      50%      { opacity: 0.5; box-shadow: 0 0 0 3px rgba(16,185,129,0); }
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.3; }
     }
     .live-dot { animation: livePulse 1.5s ease-in-out infinite; }
-
-    .card-live:hover  { box-shadow: 0 12px 40px -12px rgba(16,185,129,0.12), 0 4px 16px -4px rgba(0,0,0,0.35); border-color: rgba(16,185,129,0.08); }
-    .card-upcoming:hover { box-shadow: 0 12px 40px -12px rgba(239,68,68,0.08), 0 4px 16px -4px rgba(0,0,0,0.35); }
-    .card-done:hover { box-shadow: 0 12px 40px -12px rgba(113,113,122,0.06), 0 4px 16px -4px rgba(0,0,0,0.35); }
 
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
   </style>
 </head>
 
-<body class="font-body text-zinc-300 min-h-screen flex flex-col relative">
+<body class="font-body text-zinc-300 min-h-screen flex flex-col">
 
-  <div class="bg-mesh"></div>
-
-  <!-- ════════ HEADER ════════ -->
-  <header class="sticky top-0 z-50 border-b border-zinc-800/35 bg-zinc-950/90 backdrop-blur-xl">
-    <div class="max-w-[1440px] mx-auto px-5 py-3">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 border-b border-zinc-800/25 bg-zinc-950/90 backdrop-blur-xl">
+    <div class="max-w-[1400px] mx-auto px-5 py-3">
       <div class="flex items-start justify-between gap-4">
 
-        <!-- Brand -->
         <div class="min-w-0 pt-0.5">
           <div class="font-heading font-bold text-[15px] text-zinc-100 tracking-tight leading-none">
-            CRICKET NETWORK <span class="text-red-500">POINT</span>
+            CRICKET STREAMING <span class="text-red-500">POINT</span>
           </div>
           <div id="lastUpdate" class="text-[9px] text-zinc-600 font-semibold tracking-[0.13em] mt-1.5 uppercase">Loading...</div>
-          <!-- Author line -->
           <div id="authorWrap" class="hidden relative items-center gap-2.5 mt-1.5">
-            <div class="flex-1 h-px bg-zinc-800/35"></div>
+            <div class="flex-1 h-px bg-zinc-800/25"></div>
             <span id="authorName" class="text-[8px] text-zinc-600 font-medium tracking-[0.08em] whitespace-nowrap"></span>
-            <div class="flex-1 h-px bg-zinc-800/35"></div>
+            <div class="flex-1 h-px bg-zinc-800/25"></div>
           </div>
         </div>
 
-        <!-- WhatsApp -->
-        <button id="joinWhatsApp" class="flex items-center gap-2 pl-3.5 pr-3 py-[8px] rounded-lg bg-[#25D366]/8 hover:bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/12 hover:border-[#25D366]/22 text-[10px] font-bold uppercase tracking-[0.08em] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer flex-shrink-0 mt-0.5">
+        <button id="joinWhatsApp" class="flex items-center gap-2 pl-3.5 pr-3 py-[8px] rounded-lg bg-zinc-800/50 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-300 border border-zinc-800/40 hover:border-zinc-700/50 text-[10px] font-bold uppercase tracking-[0.08em] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex-shrink-0 mt-0.5">
           <svg class="w-[14px] h-[14px] fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           <span class="hidden sm:inline">JOIN WHATSAPP</span>
         </button>
@@ -95,66 +78,53 @@
     </div>
   </header>
 
-  <!-- ════════ MAIN ════════ -->
-  <main class="relative z-10 flex-1 max-w-[1440px] w-full mx-auto px-5 pt-5 pb-8">
+  <!-- Main -->
+  <main class="flex-1 max-w-[1400px] w-full mx-auto px-5 pt-5 pb-8">
 
-    <!-- Search bar -->
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-2.5">
         <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         <span class="font-heading text-[11px] font-semibold text-zinc-600 tracking-[0.12em] uppercase">Matches</span>
-        <div class="hidden sm:block h-px w-12 bg-zinc-800/50"></div>
+        <div class="hidden sm:block h-px w-10 bg-zinc-800/40"></div>
       </div>
 
-      <div class="relative w-full sm:w-auto sm:min-w-[300px] sm:max-w-[360px]">
+      <div class="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-[340px]">
         <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="text" placeholder="Search team or event..." aria-label="Search matches" class="w-full pl-10 pr-10 py-[10px] rounded-xl bg-zinc-900/70 border border-zinc-800/40 text-[12.5px] text-zinc-200 placeholder-zinc-600 font-medium outline-none transition-all duration-300 focus:border-zinc-600/50 focus:bg-zinc-900/90 focus:shadow-[0_0_0_3px_rgba(39,39,42,0.18)]">
-        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-zinc-700 font-mono border border-zinc-800/40 rounded px-1.5 py-px hidden sm:inline-block pointer-events-none select-none">/</span>
+        <input id="q" type="text" placeholder="Search team or event..." aria-label="Search matches" class="w-full pl-10 pr-10 py-[9px] rounded-xl bg-zinc-900/60 border border-zinc-800/30 text-[12px] text-zinc-200 placeholder-zinc-600 font-medium outline-none transition-all duration-200 focus:border-zinc-700/40 focus:bg-zinc-900/80">
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-zinc-700 font-mono border border-zinc-800/30 rounded px-1.5 py-px hidden sm:inline-block pointer-events-none select-none">/</span>
       </div>
     </div>
 
-    <!-- Grid -->
     <div id="matchesGrid"></div>
 
-    <!-- Loading -->
     <div id="loadingIndicator" class="text-center py-20">
       <div class="inline-flex flex-col items-center gap-3">
         <div class="w-5 h-5 rounded-full border-[1.5px] border-zinc-800 border-t-zinc-500 animate-spin"></div>
-        <span class="text-[10px] text-zinc-600 font-semibold tracking-[0.15em] uppercase">Loading Matches</span>
+        <span class="text-[10px] text-zinc-600 font-semibold tracking-[0.15em] uppercase">Loading</span>
       </div>
     </div>
 
   </main>
 
-  <!-- ════════ FOOTER ════════ -->
-  <footer class="relative z-10 border-t border-zinc-800/25 mt-auto">
-    <div class="max-w-[1440px] mx-auto px-5 pt-7 pb-6">
-
-      <!-- Brand -->
-    <div class="flex flex-col items-center text-center gap-1.5 mb-5">        <div class="font-heading font-bold text-[13px] text-zinc-400 tracking-tight">CRICKET NETWORK <span class="text-red-500/80">POINT</span></div>
-        <p class="text-[10.5px] text-zinc-700 font-medium">Free HD Sports Streaming Platform</p>
+  <!-- Footer -->
+  <footer class="border-t border-zinc-800/20 mt-auto">
+    <div class="max-w-[1400px] mx-auto px-5 pt-6 pb-5">
+      <div class="flex flex-col items-center text-center gap-1.5 mb-4">
+        <div class="font-heading font-bold text-[12px] text-zinc-500 tracking-tight">CRICKET STREAMING <span class="text-red-500/70">POINT</span></div>
+        <p class="text-[10px] text-zinc-700">Free HD Sports Streaming</p>
       </div>
-
-      <!-- Divider with credit -->
-      <div class="flex items-center gap-3 mb-5">
-        <div class="flex-1 h-px bg-zinc-800/25"></div>
-        <span class="text-[8.5px] text-zinc-700 font-semibold tracking-[0.12em] uppercase whitespace-nowrap">Sayan OAI &nbsp;·&nbsp; All Rights Reserved</span>
-        <div class="flex-1 h-px bg-zinc-800/25"></div>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex-1 h-px bg-zinc-800/20"></div>
+        <span class="text-[8px] text-zinc-700 font-semibold tracking-[0.12em] uppercase whitespace-nowrap">Sayan OAI · All Rights Reserved</span>
+        <div class="flex-1 h-px bg-zinc-800/20"></div>
       </div>
-
-      <!-- Supercounters -->
       <div class="flex justify-center">
-        <!-- BEGIN: Powered by Supercounters.com -->
         <script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script>
         <script type="text/javascript">sc_online_i(1732944,"00FFCC","474747");</script>
-        <!-- END: Powered by Supercounters.com -->
       </div>
-
     </div>
   </footer>
 
-  <!-- ════════ SCRIPT ════════ -->
   <script src="script.js"></script>
-
 </body>
 </html>
