@@ -1,193 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <meta name="referrer" content="no-referrer">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="referrer" content="no-referrer">
+  <title>CRICKET STREAMING POINT | Live</title>
+  <meta name="robots" content="noindex, nofollow">
 
-    <title>CRICKET STREAMING POINT | Live Stream</title>
-    <meta name="description" content="Stream live sports in HD.">
-    <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { heading: ['"Space Grotesk"','sans-serif'], body: ['"Inter"','system-ui','sans-serif'] } } }
+    }
+  </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        heading: ['"Space Grotesk"', 'sans-serif'],
-                        body: ['"Inter"', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css"/>
+  <style>
+    body { background: #09090b; }
 
-    <style>
-        body { background: #09090b; }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .live-dot { animation: livePulse 1.5s ease-in-out infinite; }
 
-        .bg-mesh {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 500px 400px at 20% 10%, rgba(16,185,129,0.03) 0%, transparent 100%),
-                radial-gradient(ellipse 400px 400px at 80% 90%, rgba(239,68,68,0.02) 0%, transparent 100%);
-        }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.35s ease-out both; }
+    .fd1 { animation-delay: 0.05s; }
+    .fd2 { animation-delay: 0.1s; }
+    .fd3 { animation-delay: 0.15s; }
 
-        @keyframes livePulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
-            50%      { opacity: 0.5; box-shadow: 0 0 0 3px rgba(16,185,129,0); }
-        }
-        .live-dot { animation: livePulse 1.5s ease-in-out infinite; }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.93) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .pop-in { animation: popIn 0.35s cubic-bezier(0.16,1,0.3,1); }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.4s ease-out both; }
-        .fade-up-d1 { animation-delay: 0.06s; }
-        .fade-up-d2 { animation-delay: 0.12s; }
-        .fade-up-d3 { animation-delay: 0.18s; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.92) translateY(8px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .pop-in { animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    /* ── Custom Player (JW-style) ── */
+    .sp-wrap {
+      position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; user-select: none;
+    }
+    .sp-wrap video { display: block; width: 100%; height: 100%; }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+    .sp-loader {
+      position: absolute; inset: 0; background: #000; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px; z-index: 30;
+    }
+    .sp-loader.hidden { display: none; }
+    .sp-loader .ring {
+      width: 36px; height: 36px; border: 2px solid #27272a; border-top-color: #52525b;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .sp-loader span { font-size: 10px; color: #52525b; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 
-        .plyr { width: 100%; height: 100%; }
-        .plyr__video-wrapper { background: #000; }
-        .plyr--fullscreen-active {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999;
-        }
+    .sp-overlay {
+      position: absolute; inset: 0; z-index: 10; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; transition: background 0.25s;
+    }
+    .sp-wrap.sp-show .sp-overlay { background: rgba(0,0,0,0.15); }
+    .sp-overlay.hidden { display: none; }
 
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-    </style>
+    .sp-big-play {
+      width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px); border: 2px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(0.85); transition: all 0.3s;
+    }
+    .sp-wrap.sp-show .sp-big-play,
+    .sp-wrap.sp-paused .sp-big-play { opacity: 1; transform: scale(1); }
+    .sp-big-play:hover { background: rgba(255,255,255,0.2); }
+    .sp-big-play svg { width: 22px; height: 22px; fill: #fff; margin-left: 2px; }
+
+    .sp-controls {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
+      display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 38px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .sp-wrap.sp-show .sp-controls,
+    .sp-wrap.sp-paused .sp-controls { opacity: 1; }
+
+    .sp-btn {
+      background: none; border: none; cursor: pointer; padding: 4px;
+      display: flex; align-items: center; justify-content: center; color: #d4d4d8;
+      transition: color 0.2s; flex-shrink: 0;
+    }
+    .sp-btn:hover { color: #fff; }
+    .sp-btn svg { width: 16px; height: 16px; }
+
+    .sp-progress {
+      flex: 1; height: 20px; display: flex; align-items: center; cursor: pointer; padding: 7px 0;
+    }
+    .sp-progress-track {
+      width: 100%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px;
+      position: relative; transition: height 0.15s;
+    }
+    .sp-progress:hover .sp-progress-track { height: 5px; }
+    .sp-progress-buffered {
+      position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.2); border-radius: 2px;
+    }
+    .sp-progress-filled {
+      position: absolute; top: 0; left: 0; height: 100%; background: #fff; border-radius: 2px;
+    }
+
+    .sp-time { font-size: 11px; color: #a1a1aa; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
+
+    .sp-vol { display: none; }
+    @media (min-width: 640px) { .sp-vol { display: flex; align-items: center; gap: 4px; } }
+    .sp-vol-range {
+      width: 60px; height: 3px; -webkit-appearance: none; appearance: none;
+      background: rgba(255,255,255,0.15); border-radius: 2px; outline: none; cursor: pointer;
+    }
+    .sp-vol-range::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%;
+      background: #fff; cursor: pointer;
+    }
+
+    .sp-quality { position: relative; flex-shrink: 0; }
+    .sp-quality-btn { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #a1a1aa; }
+    .sp-quality-menu {
+      position: absolute; bottom: calc(100% + 8px); right: 0;
+      background: rgba(18,18,20,0.95); border: 1px solid #27272a; border-radius: 8px;
+      padding: 4px; min-width: 72px; backdrop-filter: blur(12px); z-index: 40;
+    }
+    .sp-quality-menu.hidden { display: none; }
+    .sp-qopt {
+      padding: 5px 10px; font-size: 11px; color: #71717a; border-radius: 5px;
+      cursor: pointer; transition: all 0.15s; font-weight: 500;
+    }
+    .sp-qopt:hover { background: rgba(255,255,255,0.06); color: #d4d4d8; }
+    .sp-qopt.sp-active { color: #fff; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+  </style>
 </head>
 
-<body class="font-body text-zinc-300 min-h-screen flex flex-col relative">
+<body class="font-body text-zinc-300 min-h-screen flex flex-col">
 
-    <div class="bg-mesh"></div>
+  <!-- Player Screen -->
+  <div class="hidden" id="videoScreen">
 
-    <!-- ══════════ PLAYER SCREEN ══════════ -->
-    <div class="hidden" id="videoScreen">
-
-        <!-- Top Bar -->
-        <div class="sticky top-0 z-50 border-b border-zinc-800/30 bg-zinc-950/90 backdrop-blur-xl">
-            <div class="max-w-[900px] mx-auto px-4 py-3 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0">
-                    <a href="../" class="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-800/40 flex items-center justify-center transition-colors duration-200">
-                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-                    </a>
-                    <div class="min-w-0">
-                        <div id="headerTitle" class="font-heading font-semibold text-[13px] text-zinc-200 truncate leading-none">Loading...</div>
-                    </div>
-                </div>
-                <div id="headerBadge" class="flex items-center gap-[6px] px-2.5 py-[5px] rounded-lg bg-emerald-500/10 border border-emerald-500/15 text-[9px] font-bold uppercase tracking-[0.1em] text-emerald-400 flex-shrink-0">
-                    <span class="w-[6px] h-[6px] rounded-full bg-emerald-400 live-dot"></span>
-                    LIVE
-                </div>
-            </div>
+    <!-- Top Bar -->
+    <div class="sticky top-0 z-50 border-b border-zinc-800/25 bg-zinc-950/90 backdrop-blur-xl">
+      <div class="max-w-[900px] mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <a href="../" class="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-800/30 flex items-center justify-center transition-colors">
+            <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          </a>
+          <div class="min-w-0">
+            <div id="headerTitle" class="font-heading font-semibold text-[13px] text-zinc-200 truncate leading-none">Loading...</div>
+          </div>
         </div>
-
-        <!-- Content -->
-        <div class="relative z-10 flex-1 max-w-[900px] w-full mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
-
-            <!-- Video -->
-            <div class="fade-up relative w-full bg-black rounded-2xl overflow-hidden border border-zinc-800/30">
-                <div class="absolute top-3 right-3 z-50 text-right pointer-events-none">
-                    <div id="viewChannelName" class="text-[9px] font-semibold text-white/60">Fancode Official ™</div>
-                    <div id="viewCount" class="text-[10px] font-bold text-white/80">0 Views</div>
-                </div>
-                <div class="relative w-full aspect-video bg-black" id="videoContainer">
-                    <video id="player" controls playsinline crossorigin></video>
-                    <div class="absolute inset-0 bg-black/92 flex flex-col items-center justify-center gap-3 z-[60]" id="loader">
-                        <div class="w-10 h-10 border-2 border-zinc-800 border-t-zinc-500 rounded-full" style="animation:spin 0.7s linear infinite;"></div>
-                        <span class="text-[10px] text-zinc-600 font-semibold tracking-widest uppercase">Loading Stream</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info Bar -->
-            <div class="fade-up fade-up-d1 flex items-center gap-3 px-4 py-3 bg-zinc-900/50 rounded-xl border border-zinc-800/25 flex-wrap">
-                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-                    <span id="compactTournament" class="text-zinc-300 font-medium">-</span>
-                </div>
-                <div class="w-px h-3 bg-zinc-800/50 hidden sm:block"></div>
-                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span id="compactTime" class="text-zinc-300 font-medium">-</span>
-                </div>
-                <div class="w-px h-3 bg-zinc-800/50 hidden sm:block"></div>
-                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/></svg>
-                    <span class="text-amber-400/80 font-semibold">English</span>
-                </div>
-                <div class="w-px h-3 bg-zinc-800/50 hidden sm:block"></div>
-                <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-                    <span id="compactStreamType" class="text-zinc-300 font-medium">-</span>
-                </div>
-            </div>
-
-            <!-- Action: WhatsApp -->
-            <div class="fade-up fade-up-d2 bg-zinc-900/40 rounded-xl border border-zinc-800/25 p-4 flex flex-col gap-3">
-                <div class="flex items-center gap-2 text-[12px] text-zinc-500 font-medium">
-                    <svg class="w-4 h-4 text-amber-500/60" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                    Follow us for instant updates
-                </div>
-                <button id="btnWhatsApp" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/18 text-[#25D366] border border-[#25D366]/12 hover:border-[#25D366]/22 text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer">
-                    <svg class="w-[14px] h-[14px] fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    Join WhatsApp Channel
-                </button>
-            </div>
-
-            <!-- Action: Share -->
-            <div class="fade-up fade-up-d3 bg-zinc-900/40 rounded-xl border border-zinc-800/25 p-4 flex flex-col gap-3">
-                <div class="flex items-center gap-2 text-[12px] text-zinc-500 font-medium">
-                    <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    Copy Link & Share
-                </div>
-                <button id="btnShare" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-zinc-800/40 hover:bg-zinc-800/70 text-zinc-400 hover:text-zinc-300 border border-zinc-800/35 hover:border-zinc-700/40 text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                    Copy Page Link
-                </button>
-            </div>
-
+        <div id="headerBadge" class="flex items-center gap-[6px] px-2.5 py-[5px] rounded-lg bg-emerald-500/8 border border-emerald-500/12 text-[9px] font-bold uppercase tracking-[0.1em] text-emerald-400 flex-shrink-0">
+          <span class="w-[6px] h-[6px] rounded-full bg-emerald-400 live-dot"></span>LIVE
         </div>
+      </div>
     </div>
 
-    <!-- ══════════ POPUP ══════════ -->
-    <div class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-5" id="popup" style="background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);">
-        <div class="pop-in w-full max-w-[340px] bg-zinc-900/95 border border-zinc-700/25 rounded-2xl p-7 text-center shadow-2xl shadow-black/50">
-            <div class="w-14 h-14 rounded-full bg-emerald-500/8 border border-emerald-500/12 flex items-center justify-center mx-auto mb-5">
-                <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            </div>
-            <h3 class="font-heading font-bold text-[17px] text-zinc-100 mb-2 tracking-tight">Support Us</h3>
-            <p class="text-[12px] text-zinc-500 leading-relaxed mb-6">Join our WhatsApp channel<br><span class="text-zinc-300 font-semibold">CRICKET NEWS POINT</span><br>for instant updates & exclusive links.</p>
-            <button id="popupJoin" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11.5px] font-bold uppercase tracking-[0.06em] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/12 cursor-pointer border-0 mb-2.5">
-                <svg class="w-[14px] h-[14px] fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Join Now
-            </button>
-            <button id="popupClose" class="w-full py-2.5 rounded-xl bg-zinc-800/30 hover:bg-zinc-800/60 text-zinc-600 hover:text-zinc-400 text-[11px] font-semibold tracking-[0.03em] transition-all duration-200 cursor-pointer border border-zinc-800/25">
-                Already Joined
-            </button>
-        </div>
-    </div>
+    <!-- Content -->
+    <div class="relative z-10 flex-1 max-w-[900px] w-full mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
 
-    <!-- ══════════ SCRIPTS ══════════ -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
-    <script src="player.js"></script>
+      <!-- Video Player -->
+      <div class="fade-up sp-wrap" id="playerWrap">
+        <div class="sp-loader" id="spLoader"><div class="ring"></div><span>Loading</span></div>
+        <video id="video" playsinline></video>
+        <div class="sp-overlay" id="spOverlay">
+          <div class="sp-big-play"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+        </div>
+        <div class="sp-controls" id="spControls">
+          <button class="sp-btn" id="spPlayBtn">
+            <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+            <svg id="icoPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+          <div class="sp-progress" id="spProgress">
+            <div class="sp-progress-track">
+              <div class="sp-progress-buffered" id="spBuffered" style="width:0"></div>
+              <div class="sp-progress-filled" id="spFilled" style="width:0"></div>
+            </div>
+          </div>
+          <span class="sp-time" id="spTime">0:00 / 0:00</span>
+          <div class="sp-vol">
+            <button class="sp-btn" id="spVolBtn">
+              <svg id="icoVolOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor"/><path d="M15.54,8.46a5,5,0,0,1,0,7.07"/></svg>
+              <svg id="icoVolOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            </button>
+            <input type="range" class="sp-vol-range" id="spVolRange" min="0" max="100" value="80">
+          </div>
+          <div class="sp-quality">
+            <button class="sp-btn sp-quality-btn" id="spQualityBtn">HD</button>
+            <div class="sp-quality-menu hidden" id="spQualityMenu"></div>
+          </div>
+          <button class="sp-btn" id="spFsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- View counter -->
+      <div class="fade-up fd1 flex items-center justify-between px-1">
+        <span id="viewChannelName" class="text-[9px] text-zinc-600 font-semibold">Fancode Official ™</span>
+        <span id="viewCount" class="text-[10px] text-zinc-500 font-medium">0 Views</span>
+      </div>
+
+      <!-- Info Bar -->
+      <div class="fade-up fd1 flex items-center gap-3 px-4 py-3 bg-zinc-900/40 rounded-xl border border-zinc-800/20 flex-wrap">
+        <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+          <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <span id="compactTournament" class="text-zinc-300 font-medium">-</span>
+        </div>
+        <div class="w-px h-3 bg-zinc-800/40 hidden sm:block"></div>
+        <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+          <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="compactTime" class="text-zinc-300 font-medium">-</span>
+        </div>
+        <div class="w-px h-3 bg-zinc-800/40 hidden sm:block"></div>
+        <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+          <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/></svg>
+          <span class="text-zinc-300 font-medium">English</span>
+        </div>
+        <div class="w-px h-3 bg-zinc-800/40 hidden sm:block"></div>
+        <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+          <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          <span id="compactStreamType" class="text-zinc-300 font-medium">-</span>
+        </div>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="fade-up fd2 bg-zinc-900/30 rounded-xl border border-zinc-800/20 p-4 flex flex-col gap-3">
+        <div class="flex items-center gap-2 text-[11px] text-zinc-500 font-medium">
+          <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Follow for instant updates
+        </div>
+        <button id="btnWhatsApp" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-zinc-800/40 hover:bg-zinc-800/70 text-zinc-400 hover:text-zinc-300 border border-zinc-800/25 text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-200 hover:-translate-y-px cursor-pointer">
+          <svg class="w-[13px] h-[13px] fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Join WhatsApp
+        </button>
+      </div>
+
+      <!-- Share -->
+      <div class="fade-up fd3 bg-zinc-900/30 rounded-xl border border-zinc-800/20 p-4 flex flex-col gap-3">
+        <div class="flex items-center gap-2 text-[11px] text-zinc-500 font-medium">
+          <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Copy Link & Share
+        </div>
+        <button id="btnShare" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-zinc-800/40 hover:bg-zinc-800/70 text-zinc-400 hover:text-zinc-300 border border-zinc-800/25 text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-200 hover:-translate-y-px cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Link
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Popup -->
+  <div class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-5" id="popup" style="background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);">
+    <div class="pop-in w-full max-w-[320px] bg-zinc-900/95 border border-zinc-800/30 rounded-2xl p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-zinc-800/60 border border-zinc-700/30 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6 text-zinc-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <h3 class="font-heading font-bold text-[16px] text-zinc-100 mb-1.5 tracking-tight">Support Us</h3>
+      <p class="text-[11.5px] text-zinc-500 leading-relaxed mb-5">Join our WhatsApp channel<br><span class="text-zinc-300 font-semibold">CRICKET NEWS POINT</span><br>for instant updates & links.</p>
+      <button id="popupJoin" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-zinc-100 text-zinc-900 text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-200 hover:-translate-y-px cursor-pointer border-0 mb-2">Join Now</button>
+      <button id="popupClose" class="w-full py-2 rounded-xl bg-transparent hover:bg-zinc-800/50 text-zinc-600 hover:text-zinc-400 text-[10px] font-semibold tracking-[0.03em] transition-all duration-200 cursor-pointer border-0">Already Joined</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="player.js"></script>
 
 </body>
 </html>
