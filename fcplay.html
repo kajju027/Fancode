@@ -22,6 +22,7 @@
             background: #000; font-family: 'Inter', sans-serif;
             color: #fff; display: flex; flex-direction: column;
         }
+
         .hdr {
             flex-shrink: 0; padding: 10px 14px;
             background: rgba(3,3,8,0.97); backdrop-filter: blur(28px);
@@ -38,10 +39,7 @@
             font-size: 0.78rem; font-weight: 600; text-decoration: none;
             transition: background 0.2s, border-color 0.2s;
         }
-        .back-a:hover {
-            background: rgba(229,9,20,0.14);
-            border-color: rgba(229,9,20,0.35); color: #fff;
-        }
+        .back-a:hover { background: rgba(229,9,20,0.14); border-color: rgba(229,9,20,0.35); color: #fff; }
         .hdr-right { display: flex; align-items: center; gap: 8px; }
         .share-b {
             display: inline-flex; align-items: center; gap: 6px;
@@ -72,26 +70,97 @@
         }
         @keyframes dp { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
         .m-title {
-            font-size: 1rem; font-weight: 900; color: #fff;
-            line-height: 1.3; overflow: hidden; text-overflow: ellipsis;
-            white-space: nowrap; max-width: calc(100vw - 28px);
+            font-size: 1rem; font-weight: 900; color: #fff; line-height: 1.3;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            max-width: calc(100vw - 28px);
         }
         .meta-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-        .tourn-t {
-            font-size: 0.68rem; font-weight: 700; color: #f59e0b;
-            text-transform: uppercase; letter-spacing: 0.04em;
-        }
+        .tourn-t { font-size: 0.68rem; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.04em; }
         .lang-pill {
             display: inline-flex; align-items: center; gap: 5px;
             background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.2));
             border: 1px solid rgba(168,85,247,0.3); color: #e9d5ff;
             font-size: 0.68rem; font-weight: 600; padding: 2px 9px; border-radius: 20px;
         }
+
         .pw {
             flex-grow: 1; min-height: 0; position: relative;
             background: #000; overflow: hidden;
         }
-        #vid { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        #player { width: 100%; height: 100%; }
+        .jwplayer { width: 100% !important; height: 100% !important; }
+        .jw-wrapper, .jw-media { width: 100% !important; height: 100% !important; }
+
+        .jw-skin-netflix .jw-controlbar {
+            background: linear-gradient(transparent, rgba(0,0,0,0.72) 35%, rgba(0,0,0,0.94) 100%) !important;
+            height: 80px !important; padding: 0 12px 10px !important;
+            align-items: flex-end !important;
+            transition: opacity 0.35s ease !important;
+        }
+        .jw-skin-netflix.jw-flag-user-inactive .jw-controlbar { opacity: 0 !important; pointer-events: none !important; }
+        .jw-skin-netflix.jw-state-paused .jw-controlbar { opacity: 1 !important; pointer-events: auto !important; }
+
+        .jw-skin-netflix .jw-slider-time .jw-progress { background-color: #E50914 !important; }
+        .jw-skin-netflix .jw-slider-time .jw-buffer { background-color: rgba(255,255,255,0.38) !important; }
+        .jw-skin-netflix .jw-slider-time .jw-rail { background-color: rgba(255,255,255,0.22) !important; height: 4px !important; border-radius: 2px !important; }
+        .jw-skin-netflix .jw-slider-time:hover .jw-rail { height: 6px !important; }
+        .jw-skin-netflix .jw-slider-time .jw-knob {
+            background-color: #E50914 !important; border-color: #E50914 !important;
+            width: 14px !important; height: 14px !important; border-radius: 50% !important;
+            margin-top: -5px !important;
+        }
+        .jw-skin-netflix .jw-slider-time .jw-cue { background-color: rgba(255,255,255,0.6) !important; }
+
+        .jw-skin-netflix .jw-icon { color: rgba(255,255,255,0.92) !important; }
+        .jw-skin-netflix .jw-icon:hover { color: #fff !important; transform: scale(1.12) !important; }
+        .jw-skin-netflix .jw-icon:active { transform: scale(0.95) !important; }
+        .jw-skin-netflix .jw-icon-rewind { display: none !important; }
+        .jw-skin-netflix .jw-icon-next { display: none !important; }
+        .jw-skin-netflix .jw-icon-cast { display: none !important; }
+
+        .jw-skin-netflix .jw-text-elapsed,
+        .jw-skin-netflix .jw-text-duration,
+        .jw-skin-netflix .jw-text-countdown {
+            color: rgba(255,255,255,0.86) !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important; font-size: 0.78rem !important;
+        }
+        .jw-skin-netflix .jw-time-tip {
+            background: rgba(0,0,0,0.88) !important; color: #fff !important;
+            border-radius: 3px !important; padding: 2px 7px !important;
+            font-size: 0.75rem !important; font-weight: 600 !important;
+        }
+
+        .jw-skin-netflix .jw-display-icon-display {
+            border: 2px solid rgba(255,255,255,0.75) !important;
+            background-color: rgba(0,0,0,0.62) !important;
+            border-radius: 50% !important; width: 62px !important; height: 62px !important;
+        }
+        .jw-skin-netflix .jw-display-icon-display svg { fill: white !important; width: 28px !important; height: 28px !important; }
+
+        .jw-skin-netflix .jw-slider-volume .jw-progress { background-color: #fff !important; }
+        .jw-skin-netflix .jw-slider-volume .jw-knob { background-color: #fff !important; }
+
+        .jw-skin-netflix .jw-settings-menu {
+            background: rgba(6,6,6,0.97) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            border-radius: 5px !important; font-family: 'Inter', sans-serif !important;
+        }
+        .jw-skin-netflix .jw-settings-content-item { color: rgba(255,255,255,0.76) !important; font-size: 0.8rem !important; }
+        .jw-skin-netflix .jw-settings-content-item:hover { background: rgba(229,9,20,0.18) !important; color: #fff !important; }
+        .jw-skin-netflix .jw-settings-content-item-active { color: #E50914 !important; font-weight: 700 !important; }
+
+        .jw-skin-netflix.jw-flag-live .jw-slider-time { display: none !important; }
+        .jw-skin-netflix.jw-flag-live .jw-text-countdown { display: none !important; }
+        .jw-skin-netflix .jw-flag-live-badge {
+            background: #E50914 !important; border-radius: 3px !important;
+            color: white !important; font-weight: 800 !important;
+            font-size: 0.65rem !important; padding: 2px 7px !important;
+            text-transform: uppercase !important; letter-spacing: 0.05em !important;
+        }
+        .jw-skin-netflix .jw-logo { display: none !important; }
+
         .ls {
             position: absolute; inset: 0; background: rgba(0,0,0,0.9);
             display: flex; flex-direction: column;
@@ -107,94 +176,11 @@
         }
         @keyframes nfr { to { transform: rotate(360deg); } }
         .ls-txt { margin-top: 13px; font-size: 0.76rem; color: rgba(255,255,255,0.38); }
-        .top-grad {
-            position: absolute; top: 0; left: 0; right: 0; height: 65px;
-            background: linear-gradient(rgba(0,0,0,0.5), transparent);
-            z-index: 5; pointer-events: none; transition: opacity 0.3s;
-        }
-        .top-grad.gone { opacity: 0; }
-        .rw {
-            position: absolute; inset: 0; display: flex;
-            align-items: center; justify-content: center;
-            z-index: 8; pointer-events: none; opacity: 0; transition: opacity 0.12s;
-        }
-        .rw.show { opacity: 1; }
-        .rc {
-            width: 62px; height: 62px; border-radius: 50%;
-            background: rgba(0,0,0,0.62); border: 2px solid rgba(255,255,255,0.72);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 25px; color: #fff; animation: rsc 0.38s ease-out both;
-        }
-        @keyframes rsc { from { transform: scale(0.65); } to { transform: scale(1.05); } }
-        .ctrl {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.68) 28%, rgba(0,0,0,0.9) 100%);
-            padding: 38px 14px 12px; z-index: 10;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .ctrl.gone { opacity: 0; transform: translateY(8px); pointer-events: none; }
-        .prog {
-            position: relative; height: 4px;
-            background: rgba(255,255,255,0.22); border-radius: 2px;
-            margin-bottom: 10px; cursor: pointer; transition: height 0.2s;
-        }
-        .prog:hover { height: 6px; }
-        .buf-f {
-            position: absolute; top: 0; left: 0; height: 100%;
-            background: rgba(255,255,255,0.35); border-radius: 2px;
-        }
-        .play-f {
-            position: absolute; top: 0; left: 0; height: 100%;
-            background: var(--nf); border-radius: 2px; max-width: 100%;
-        }
-        .prog-dot {
-            position: absolute; right: -6px; top: 50%;
-            transform: translateY(-50%) scale(0); width: 13px; height: 13px;
-            background: var(--nf); border-radius: 50%; transition: transform 0.15s;
-        }
-        .prog:hover .prog-dot { transform: translateY(-50%) scale(1); }
-        .cr { display: flex; align-items: center; gap: 6px; }
-        .cb {
-            background: transparent; border: none; color: #fff; cursor: pointer;
-            padding: 7px; border-radius: 4px; font-size: 15px;
-            display: flex; align-items: center; justify-content: center;
-            transition: color 0.15s, transform 0.12s; flex-shrink: 0;
-        }
-        .cb:hover { color: var(--nf); transform: scale(1.1); }
-        .cb:active { transform: scale(0.93); }
-        .cb.lg { font-size: 20px; }
-        .vol-g { display: flex; align-items: center; gap: 4px; }
-        .vol-slide { width: 0; overflow: hidden; transition: width 0.3s; }
-        .vol-g:hover .vol-slide { width: 55px; }
-        input.vr {
-            -webkit-appearance: none; width: 55px; height: 3px;
-            background: rgba(255,255,255,0.26); border-radius: 2px;
-            outline: none; cursor: pointer;
-        }
-        input.vr::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 11px; height: 11px;
-            border-radius: 50%; background: #fff; cursor: pointer;
-        }
-        .t-lbl { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.86); white-space: nowrap; }
-        .sp { flex: 1; }
-        .qual-p {
-            position: absolute; bottom: 52px; right: 44px;
-            background: rgba(6,6,6,0.97); border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 5px; min-width: 88px; padding: 5px 0; z-index: 20;
-            opacity: 0; pointer-events: none; transform: translateY(5px);
-            transition: opacity 0.18s, transform 0.18s;
-        }
-        .qual-p.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        .q-o {
-            padding: 7px 14px; font-size: 12px; color: rgba(255,255,255,0.73);
-            cursor: pointer; transition: background 0.12s;
-        }
-        .q-o:hover { background: rgba(229,9,20,0.18); color: #fff; }
-        .q-o.on { color: var(--nf); font-weight: 700; }
+
         .ps-ov {
             position: absolute; inset: 0; background: rgba(0,0,0,0.87);
             backdrop-filter: blur(5px); display: flex;
-            align-items: center; justify-content: center; z-index: 16;
+            align-items: center; justify-content: center; z-index: 30;
         }
         .ps-card {
             background: linear-gradient(145deg, #111, #1a0808);
@@ -216,17 +202,13 @@
             width: 100%; padding: 11px 14px; border-radius: 8px; font-size: 0.85rem;
             font-weight: 700; cursor: pointer; border: none;
             transition: transform 0.2s, box-shadow 0.2s; margin-top: 9px;
+            font-family: 'Inter', sans-serif;
         }
-        .src-fc {
-            background: linear-gradient(135deg, var(--nf), var(--nfdk));
-            color: #fff; box-shadow: 0 4px 14px rgba(229,9,20,0.36);
-        }
+        .src-fc { background: linear-gradient(135deg, var(--nf), var(--nfdk)); color: #fff; box-shadow: 0 4px 14px rgba(229,9,20,0.36); }
         .src-fc:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(229,9,20,0.52); }
-        .src-dai {
-            background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.86);
-            border: 1px solid rgba(255,255,255,0.15) !important;
-        }
-        .src-dai:hover { background: rgba(255,255,255,0.11); transform: translateY(-2px); }
+        .src-dai { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.88); border: 1px solid rgba(255,255,255,0.16) !important; }
+        .src-dai:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+
         .ftr {
             flex-shrink: 0; background: rgba(3,3,8,0.97); backdrop-filter: blur(28px);
             border-top: 1px solid rgba(255,255,255,0.06); padding: 9px 14px; text-align: center;
@@ -239,12 +221,12 @@
             box-shadow: 0 3px 12px rgba(14,165,233,0.3); transition: transform 0.2s, box-shadow 0.2s;
         }
         .tg-b:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(14,165,233,0.5); }
+
         .pop-bg {
             position: fixed; inset: 0; background: rgba(0,0,0,0.78);
             backdrop-filter: blur(7px); z-index: 50; display: flex;
             align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.32s, visibility 0s 0.32s;
+            opacity: 0; visibility: hidden; transition: opacity 0.32s, visibility 0s 0.32s;
         }
         .pop-bg.on { opacity: 1; visibility: visible; transition: opacity 0.32s; }
         .pop-box {
@@ -258,15 +240,15 @@
         .pop-join {
             display: block; background: linear-gradient(135deg, #22d3ee, #0ea5e9);
             color: #fff; font-weight: 700; padding: 12px; border-radius: 8px;
-            text-decoration: none; font-size: 0.88rem; margin-bottom: 9px;
-            transition: transform 0.2s;
+            text-decoration: none; font-size: 0.88rem; margin-bottom: 9px; transition: transform 0.2s;
         }
         .pop-join:hover { transform: scale(1.04); }
         .pop-cl {
             width: 100%; background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.58);
-            font-weight: 600; padding: 12px; border-radius: 8px; cursor: pointer;
-            font-size: 0.88rem; transition: background 0.2s;
+            font-weight: 600; padding: 12px; border-radius: 8px;
+            cursor: pointer; font-size: 0.88rem; transition: background 0.2s;
+            font-family: 'Inter', sans-serif;
         }
         .pop-cl:hover { background: rgba(255,255,255,0.1); }
         .err-p {
@@ -301,41 +283,7 @@
             <div class="nf-ring"></div>
             <p class="ls-txt">Loading stream...</p>
         </div>
-
-        <video id="vid" playsinline></video>
-
-        <div class="top-grad" id="tg-grad"></div>
-
-        <div class="rw" id="rw">
-            <div class="rc" id="rc"><i class="fas fa-play" style="margin-left:3px;"></i></div>
-        </div>
-
-        <div class="qual-p" id="qp"></div>
-
-        <div class="ctrl" id="ctrl">
-            <div class="prog" id="prog">
-                <div class="buf-f" id="bf" style="width:0%"></div>
-                <div class="play-f" id="pf" style="width:0%">
-                    <div class="prog-dot"></div>
-                </div>
-            </div>
-            <div class="cr">
-                <button class="cb lg" id="ppb"><i class="fas fa-play"></i></button>
-                <div class="vol-g">
-                    <button class="cb" id="mb"><i class="fas fa-volume-up"></i></button>
-                    <div class="vol-slide">
-                        <input class="vr" type="range" id="vr" min="0" max="100" value="100">
-                    </div>
-                </div>
-                <div class="t-lbl" id="tl">
-                    <span class="live-pill"><span class="dot-a"></span>LIVE</span>
-                </div>
-                <div class="sp"></div>
-                <button class="cb" id="qb" title="Quality"><i class="fas fa-cog"></i></button>
-                <button class="cb" id="thb" title="Theater Mode"><i class="fas fa-expand"></i></button>
-                <button class="cb lg" id="fsb" title="Fullscreen"><i class="fas fa-expand-arrows-alt"></i></button>
-            </div>
-        </div>
+        <div id="player"></div>
     </div>
 
     <footer class="ftr">
@@ -356,32 +304,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwplayer@8.27.3/jwplayer.js"></script>
     <script>
         const DATA_URL = 'https://raw.githubusercontent.com/doctor-8trange/zyphx8/refs/heads/main/data/fancode.json';
 
-        const vid = document.getElementById('vid');
-        const ls = document.getElementById('ls');
-        const ctrl = document.getElementById('ctrl');
-        const tgGrad = document.getElementById('tg-grad');
-        const prog = document.getElementById('prog');
-        const pf = document.getElementById('pf');
-        const bf = document.getElementById('bf');
-        const ppb = document.getElementById('ppb');
-        const mb = document.getElementById('mb');
-        const vr = document.getElementById('vr');
-        const tl = document.getElementById('tl');
-        const qb = document.getElementById('qb');
-        const qp = document.getElementById('qp');
-        const thb = document.getElementById('thb');
-        const fsb = document.getElementById('fsb');
-        const rw = document.getElementById('rw');
-        const rc = document.getElementById('rc');
-        const pw = document.getElementById('pw');
-
-        let hideT = null;
-        let hlsInst = null;
-        let isLive = true;
         let matchData = null;
 
         const LANGS = {
@@ -398,11 +324,6 @@
 
         function fmtLang(l) {
             return LANGS[(l || '').toUpperCase()] || '🌐 ' + (l ? l.charAt(0) + l.slice(1).toLowerCase() : '');
-        }
-
-        function fmtTime(s) {
-            if (!isFinite(s) || s < 0) return '00:00';
-            return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(Math.floor(s % 60)).padStart(2, '0');
         }
 
         function resolveUrl(match, key) {
@@ -434,9 +355,53 @@
             }
         }
 
+        function initJWPlayer(streamUrl) {
+            const ls = document.getElementById('ls');
+            const pw = document.getElementById('pw');
+
+            const playerInstance = jwplayer('player').setup({
+                file: streamUrl,
+                type: 'hls',
+                width: '100%',
+                height: '100%',
+                stretching: 'bestfit',
+                autostart: true,
+                mute: false,
+                controls: true,
+                displaytitle: false,
+                displaydescription: false,
+                sharing: false,
+                abouttext: 'FanCode Live',
+                aboutlink: 'https://fancode.com/',
+                skin: { name: 'netflix' },
+                primary: 'html5',
+                hlshtml: true,
+                preload: 'auto'
+            });
+
+            playerInstance.on('ready', () => {
+                ls.classList.add('gone');
+            });
+
+            playerInstance.on('firstFrame', () => {
+                ls.classList.add('gone');
+            });
+
+            playerInstance.on('error', (e) => {
+                ls.classList.add('gone');
+                showErr('Playback error. The stream may be unavailable.');
+            });
+
+            playerInstance.on('setupError', () => {
+                ls.classList.add('gone');
+                showErr('Player failed to initialize. Try refreshing.');
+            });
+        }
+
         function buildPreStream(match) {
             const fc = match.STREAMING_CDN?.backup?.fancode_cdn;
             const dai = match.STREAMING_CDN?.backup?.fancode_dai_cdn;
+            const pw = document.getElementById('pw');
             const el = document.createElement('div');
             el.className = 'ps-ov';
             el.id = 'psov';
@@ -444,8 +409,8 @@
                 + '<div class="ps-badge"><span class="dot-a"></span>Pre-Match Stream Active</div>'
                 + '<div class="ps-title">' + (match.title || 'Match') + '</div>'
                 + '<div class="ps-sub">Match has not officially started, but the stream feed is live.<br>Select your preferred source:</div>'
-                + (fc ? '<button class="src-b src-fc" onclick="pickStream(\'' + fc + '\')"><i class="fas fa-bolt"></i> FanCode Live</button>' : '')
-                + (dai ? '<button class="src-b src-dai" onclick="pickStream(\'' + dai + '\')"><i class="fas fa-tv"></i> ADMi Stream</button>' : '')
+                + (fc ? '<button class="src-b src-fc" onclick="pickStream(\'' + fc + '\')"><i class="fas fa-bolt"></i> Watch Now</button>' : '')
+                + (dai ? '<button class="src-b src-dai" onclick="pickStream(\'' + dai + '\')"><i class="fas fa-tv"></i> ADMi — Ads Free</button>' : '')
                 + '</div>';
             pw.appendChild(el);
         }
@@ -453,165 +418,9 @@
         function pickStream(url) {
             const ov = document.getElementById('psov');
             if (ov) ov.remove();
-            ls.classList.remove('gone');
-            startHLS(url);
+            document.getElementById('ls').classList.remove('gone');
+            initJWPlayer(url);
         }
-
-        function startHLS(url) {
-            if (hlsInst) { hlsInst.destroy(); hlsInst = null; }
-            if (url.includes('.m3u8') && Hls.isSupported()) {
-                const hls = new Hls({ startLevel: -1, maxBufferLength: 30 });
-                hlsInst = hls;
-                hls.loadSource(url);
-                hls.attachMedia(vid);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    ls.classList.add('gone');
-                    vid.play().catch(() => {});
-                    buildQual(hls);
-                });
-                hls.on(Hls.Events.LEVEL_LOADED, (e, d) => {
-                    isLive = d.details.live;
-                    if (!isLive) { tl.textContent = '00:00 / 00:00'; pf.style.width = '0%'; }
-                });
-                hls.on(Hls.Events.ERROR, (e, d) => {
-                    if (!d.fatal) return;
-                    if (d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-                    else if (d.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-                });
-            } else if (vid.canPlayType('application/vnd.apple.mpegurl')) {
-                vid.src = url;
-                vid.addEventListener('loadedmetadata', () => {
-                    ls.classList.add('gone');
-                    vid.play().catch(() => {});
-                }, { once: true });
-            } else {
-                vid.src = url;
-                ls.classList.add('gone');
-                vid.play().catch(() => {});
-            }
-        }
-
-        function buildQual(hls) {
-            if (!hls.levels || hls.levels.length < 2) { qb.style.display = 'none'; return; }
-            let h = '<div class="q-o on" data-lv="-1">Auto</div>';
-            hls.levels.forEach((lv, i) => {
-                h += '<div class="q-o" data-lv="' + i + '">' + (lv.height ? lv.height + 'p' : 'Level ' + (i + 1)) + '</div>';
-            });
-            qp.innerHTML = h;
-            qp.querySelectorAll('.q-o').forEach(o => {
-                o.addEventListener('click', () => {
-                    hls.currentLevel = parseInt(o.dataset.lv);
-                    qp.querySelectorAll('.q-o').forEach(x => x.classList.remove('on'));
-                    o.classList.add('on');
-                    qp.classList.remove('open');
-                });
-            });
-        }
-
-        function syncPP() { ppb.querySelector('i').className = vid.paused ? 'fas fa-play' : 'fas fa-pause'; }
-
-        function syncVol() {
-            const i = mb.querySelector('i');
-            if (vid.muted || vid.volume === 0) i.className = 'fas fa-volume-mute';
-            else if (vid.volume < 0.5) i.className = 'fas fa-volume-down';
-            else i.className = 'fas fa-volume-up';
-        }
-
-        function showCtrl() {
-            ctrl.classList.remove('gone');
-            tgGrad.classList.remove('gone');
-            clearTimeout(hideT);
-            hideT = setTimeout(() => {
-                if (!vid.paused) { ctrl.classList.add('gone'); tgGrad.classList.add('gone'); }
-            }, 3500);
-        }
-
-        function flashRipple(icon) {
-            rc.innerHTML = '<i class="' + icon + '" style="margin-left:' + (icon.includes('pause') ? '0' : '3px') + ';"></i>';
-            rw.classList.add('show');
-            clearTimeout(rw._t);
-            rw._t = setTimeout(() => rw.classList.remove('show'), 500);
-        }
-
-        pw.addEventListener('click', e => {
-            if (e.target.closest('#ctrl') || e.target.closest('.qual-p') || e.target.closest('.ps-ov')) return;
-            if (ctrl.classList.contains('gone')) { showCtrl(); return; }
-            vid.paused ? vid.play() : vid.pause();
-            flashRipple(vid.paused ? 'fas fa-pause' : 'fas fa-play');
-        });
-
-        pw.addEventListener('mousemove', showCtrl);
-        pw.addEventListener('touchstart', showCtrl, { passive: true });
-
-        ppb.addEventListener('click', e => { e.stopPropagation(); vid.paused ? vid.play() : vid.pause(); });
-        mb.addEventListener('click', e => { e.stopPropagation(); vid.muted = !vid.muted; syncVol(); });
-
-        vr.addEventListener('input', e => {
-            e.stopPropagation();
-            vid.volume = e.target.value / 100;
-            vid.muted = +e.target.value === 0;
-            syncVol();
-        });
-
-        vid.addEventListener('play', () => { syncPP(); showCtrl(); });
-        vid.addEventListener('pause', () => { syncPP(); showCtrl(); });
-        vid.addEventListener('volumechange', syncVol);
-
-        vid.addEventListener('timeupdate', () => {
-            if (!isLive && vid.duration) {
-                pf.style.width = ((vid.currentTime / vid.duration) * 100) + '%';
-                tl.textContent = fmtTime(vid.currentTime) + ' / ' + fmtTime(vid.duration);
-            }
-            if (vid.buffered.length > 0 && vid.duration) {
-                bf.style.width = ((vid.buffered.end(vid.buffered.length - 1) / vid.duration) * 100) + '%';
-            }
-        });
-
-        vid.addEventListener('waiting', () => ls.classList.remove('gone'));
-        vid.addEventListener('playing', () => ls.classList.add('gone'));
-
-        prog.addEventListener('click', e => {
-            if (isLive || !vid.duration) return;
-            const r = prog.getBoundingClientRect();
-            vid.currentTime = ((e.clientX - r.left) / r.width) * vid.duration;
-        });
-
-        qb.addEventListener('click', e => { e.stopPropagation(); qp.classList.toggle('open'); });
-
-        document.addEventListener('click', e => {
-            if (!qp.contains(e.target) && !qb.contains(e.target)) qp.classList.remove('open');
-        });
-
-        thb.addEventListener('click', e => {
-            e.stopPropagation();
-            document.body.classList.toggle('theater');
-            thb.querySelector('i').className = document.body.classList.contains('theater') ? 'fas fa-compress' : 'fas fa-expand';
-        });
-
-        fsb.addEventListener('click', e => {
-            e.stopPropagation();
-            if (!document.fullscreenElement) {
-                (pw.requestFullscreen || pw.webkitRequestFullscreen).call(pw);
-            } else {
-                (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            fsb.querySelector('i').className = document.fullscreenElement ? 'fas fa-compress-arrows-alt' : 'fas fa-expand-arrows-alt';
-        });
-
-        document.addEventListener('keydown', e => {
-            if (e.target.tagName === 'INPUT') return;
-            switch (e.key.toLowerCase()) {
-                case ' ': case 'k': e.preventDefault(); vid.paused ? vid.play() : vid.pause(); break;
-                case 'f': (pw.requestFullscreen || pw.webkitRequestFullscreen)?.call(pw); break;
-                case 't': document.body.classList.toggle('theater'); break;
-                case 'm': vid.muted = !vid.muted; break;
-                case 'arrowup': vid.volume = Math.min(1, vid.volume + 0.1); break;
-                case 'arrowdown': vid.volume = Math.max(0, vid.volume - 0.1); break;
-            }
-        });
 
         document.getElementById('share-b').addEventListener('click', async () => {
             try {
@@ -644,7 +453,7 @@
             if (!id) { showErr('Missing match ID. Please go back and select a match.'); return; }
             try {
                 const res = await fetch(DATA_URL);
-                if (!res.ok) throw new Error('Failed to fetch data');
+                if (!res.ok) throw new Error('Failed to fetch match data');
                 const data = await res.json();
                 const match = data.matches?.find(m => String(m.match_id) === String(id));
                 if (!match) throw new Error('Match not found');
@@ -653,12 +462,12 @@
                 const liveS = match.status?.toUpperCase() === 'LIVE';
                 const strOn = match.streamingStatus?.toUpperCase() === 'STARTED';
                 if (!liveS && strOn) {
-                    ls.classList.add('gone');
+                    document.getElementById('ls').classList.add('gone');
                     buildPreStream(match);
                 } else {
-                    const url = cdn ? resolveUrl(match, cdn) : match.STREAMING_CDN?.fancode_cdn;
+                    const url = cdn ? resolveUrl(match, cdn) : match.STREAMING_CDN?.backup?.fancode_cdn;
                     if (!url || url === 'Unavailable') throw new Error('Stream unavailable for this match.');
-                    startHLS(url);
+                    initJWPlayer(url);
                 }
             } catch (e) {
                 showErr(e.message || 'Could not load stream.');

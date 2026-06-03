@@ -522,24 +522,20 @@
         function generateButtons(match, classes) {
             const id = encodeURIComponent(String(match.match_id ?? ''));
             const cdn = match.STREAMING_CDN || {};
-            const skipKeys = new Set(['is_drm', 'Primary_Playback_URL', 'language', 'backup']);
-            const labels = {
-                'fancode_cdn': '⚡ FanCode',
-                'fancode_bd_cdn': '🇧🇩 FanCode BD',
-                'fancode_np_cdn': '🇳🇵 FanCode NP',
-                'dai_google_cdn': '📺 Google DAI',
-                'cloudfront_cdn': '☁️ CloudFront',
-                'sony_cdn': '📡 Sony'
-            };
             let buttons = '';
-            for (const [key, val] of Object.entries(cdn)) {
-                if (skipKeys.has(key) || !val || val === 'Unavailable') continue;
-                const label = labels[key] || key.replace(/_/g, ' ').toUpperCase();
-                buttons += '<a href="' + PLAY_BASE + '?id=' + id + '&cdn=' + encodeURIComponent(key) + '" class="watch-btn text-center text-black font-semibold ' + classes + '">' + label + '</a>';
-            }
+
             if (cdn.backup?.fancode_cdn) {
-                buttons += '<a href="' + PLAY_BASE + '?id=' + id + '&cdn=backup_fc" class="watch-btn text-center text-black font-semibold ' + classes + '">🔁 Backup</a>';
+                buttons += '<a href="' + PLAY_BASE + '?id=' + id + '&cdn=backup_fc" class="watch-btn text-center text-black font-semibold ' + classes + '">▶ Watch Now</a>';
             }
+
+            if (cdn.backup?.fancode_dai_cdn) {
+                buttons += '<a href="' + PLAY_BASE + '?id=' + id + '&cdn=backup_dai" class="watch-btn text-center text-black font-bold ' + classes + '" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 15px -3px rgba(34,197,94,0.5);">🚫 Ads Free</a>';
+            }
+
+            if (cdn.sony_cdn && cdn.sony_cdn !== 'Unavailable') {
+                buttons += '<a href="' + PLAY_BASE + '?id=' + id + '&cdn=sony_cdn" class="watch-btn text-center text-white font-bold ' + classes + '" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 4px 15px -3px rgba(99,102,241,0.5);">📺 Sony Live</a>';
+            }
+
             return buttons || '<p class="text-slate-400 text-sm">Stream links will appear when available</p>';
         }
 
