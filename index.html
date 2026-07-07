@@ -1,108 +1,741 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRICKET STREAMING POINT | WATCH FREE HD SPORTS ONLINE</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FanCode Live — Match Board</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            heading: ['"Space Grotesk"', 'sans-serif'],
-            body: ['"Inter"', 'system-ui', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
+<!-- Fonts: condensed display face for the broadcast/scoreboard feel,
+     Inter for readable body text, JetBrains Mono for time/data readouts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
 
-  <style>
-    body { background: #09090b; }
-    #matchesGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg:            #0A0D13;
+  --surface:       #121826;
+  --surface-2:     #182036;
+  --border:        #232C42;
+  --border-soft:   #1B2236;
 
-    @keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    .card-enter { animation: cardIn 0.35s ease-out both; }
+  --live:          #FF4545;
+  --live-soft:     rgba(255,69,69,.16);
+  --gold:          #FFB020;
+  --gold-soft:     rgba(255,176,32,.16);
+  --cyan:          #2DD4E0;
+  --cyan-deep:     #129AA6;
+  --cyan-soft:     rgba(45,212,224,.14);
 
-    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
-    .live-dot { animation: livePulse 1.5s ease-in-out infinite; }
+  --text:          #EDF2FA;
+  --text-dim:      #94A1B8;
+  --text-faint:    #5B6580;
 
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-  </style>
+  --radius:        14px;
+  --radius-sm:     9px;
+
+  --font-display:  'Oswald', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{
+  margin:0; padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+*{ user-select:none; }
+button{ font-family:inherit; }
+img{ -webkit-user-drag:none; }
+
+::selection{ background:var(--cyan-soft); }
+
+a{ color:inherit; }
+
+/* Ambient studio glow behind everything — quiet, not a spotlight */
+.ambient{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.ambient::before,
+.ambient::after{
+  content:''; position:absolute; width:640px; height:640px; border-radius:50%;
+  filter:blur(140px); opacity:.10;
+}
+.ambient::before{ background:var(--cyan); top:-220px; left:-160px; }
+.ambient::after{ background:var(--gold); bottom:-260px; right:-180px; opacity:.07; }
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+.page-shell{
+  position:relative; z-index:1;
+  max-width:1360px;
+  margin:0 auto;
+  padding:28px 20px 64px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.site-header{
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  flex-wrap:wrap;
+  padding:18px 24px;
+  background:linear-gradient(180deg, var(--surface), var(--surface-2));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:34px;
+}
+.wordmark{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:26px;
+  letter-spacing:.5px;
+  color:var(--text);
+  display:flex; align-items:baseline; gap:8px;
+}
+.wordmark .accent{ color:var(--cyan); }
+.wordmark sup{
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:600;
+  color:var(--bg);
+  background:var(--live);
+  padding:3px 6px;
+  border-radius:5px;
+  letter-spacing:1px;
+  vertical-align:middle;
+  top:-8px;
+}
+
+.live-ticker{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:.5px;
+  color:var(--text-dim);
+  white-space:nowrap;
+}
+.live-ticker b{ color:var(--text); font-weight:600; }
+.ticker-pulse{
+  width:8px; height:8px; border-radius:50%;
+  background:var(--live);
+  box-shadow:0 0 0 0 var(--live-soft);
+  animation:tickerPulse 1.8s infinite;
+  flex:none;
+}
+@keyframes tickerPulse{
+  0%{ box-shadow:0 0 0 0 rgba(255,69,69,.55); }
+  70%{ box-shadow:0 0 0 9px rgba(255,69,69,0); }
+  100%{ box-shadow:0 0 0 0 rgba(255,69,69,0); }
+}
+.dot-sep{ color:var(--text-faint); }
+
+/* ============================================================
+   MATCH GRID
+   ============================================================ */
+.match-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));
+  gap:26px;
+}
+
+.loading-state, .grid-error{
+  grid-column:1/-1;
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  padding:60px 20px;
+  color:var(--text-dim);
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.5px;
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+}
+.loading-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--cyan);
+  animation:loadingBlink 1s infinite ease-in-out;
+}
+@keyframes loadingBlink{ 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
+
+/* ============================================================
+   MATCH CARD
+   ============================================================ */
+.match-card{
+  display:flex; flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.match-card:hover{
+  border-color:rgba(45,212,224,.45);
+  transform:translateY(-3px);
+  box-shadow:0 20px 40px -18px rgba(0,0,0,.65);
+}
+
+.card-media{
+  position:relative;
+  height:186px;
+  background:var(--surface-2);
+  overflow:hidden;
+}
+.card-media img{
+  width:100%; height:100%; object-fit:cover;
+  display:block;
+  transition:transform .5s ease;
+}
+.match-card:hover .card-media img{ transform:scale(1.05); }
+
+.card-media::after{
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(10,13,19,0) 45%, rgba(10,13,19,.85) 100%);
+}
+
+.chip{
+  position:absolute;
+  z-index:2;
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-mono);
+  font-size:11px; font-weight:600; letter-spacing:.6px;
+  padding:5px 10px;
+  border-radius:20px;
+  backdrop-filter:blur(6px);
+}
+.chip-live{
+  top:12px; left:12px;
+  background:rgba(255,69,69,.16);
+  border:1px solid rgba(255,69,69,.4);
+  color:#FFD3D3;
+}
+.chip-sched{
+  top:12px; left:12px;
+  background:var(--gold-soft);
+  border:1px solid rgba(255,176,32,.4);
+  color:#FFE3AE;
+}
+.chip-cat{
+  top:12px; right:12px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-weight:500;
+}
+
+.tally{ position:relative; width:8px; height:8px; display:inline-flex; }
+.tally-core{
+  width:8px; height:8px; border-radius:50%;
+  background:var(--live);
+  position:relative; z-index:1;
+}
+.tally-ring{
+  position:absolute; inset:-4px;
+  border-radius:50%;
+  border:1px solid rgba(255,69,69,.6);
+  animation:tallyPing 1.6s infinite ease-out;
+}
+@keyframes tallyPing{
+  0%{ transform:scale(.6); opacity:.9; }
+  100%{ transform:scale(2.1); opacity:0; }
+}
+
+.card-body{
+  display:flex; flex-direction:column; flex:1;
+  padding:18px 18px 20px;
+}
+.card-title{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:18px;
+  line-height:1.28;
+  margin:0 0 6px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.card-tournament{
+  margin:0 0 10px;
+  font-size:12.5px;
+  color:var(--text-dim);
+  display:-webkit-box;
+  -webkit-line-clamp:1;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.card-time{
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--text-faint);
+  margin-bottom:16px;
+}
+.card-time svg{ flex:none; opacity:.8; }
+
+.card-actions{
+  margin-top:auto;
+  display:flex; flex-direction:column; gap:10px;
+}
+
+/* Buttons */
+.btn-watch, .btn-ww{
+  appearance:none; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%;
+  font-family:var(--font-display);
+  font-weight:600; font-size:13.5px; letter-spacing:.6px;
+  padding:12px 14px;
+  border-radius:var(--radius-sm);
+  transition:filter .2s ease, transform .15s ease, background .2s ease;
+}
+.btn-watch{
+  background:linear-gradient(90deg, var(--cyan), var(--cyan-deep));
+  color:#04141A;
+}
+.btn-watch:hover{ filter:brightness(1.08); }
+.btn-watch:active{ transform:scale(.98); }
+
+.btn-ww{
+  background:transparent;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.btn-ww:hover{ border-color:rgba(45,212,224,.5); color:var(--cyan); }
+.btn-ww .chev{ margin-left:auto; transition:transform .3s ease; }
+.btn-ww.open .chev{ transform:rotate(180deg); }
+.btn-ww.open{ color:var(--cyan); border-color:rgba(45,212,224,.5); }
+
+.btn-watch.is-disabled, .not-live-pill{
+  background:var(--surface-2);
+  color:var(--text-faint);
+  cursor:not-allowed;
+  border:1px solid var(--border-soft);
+}
+.not-live-pill{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%;
+  font-family:var(--font-mono);
+  font-size:12px; letter-spacing:.6px;
+  padding:12px 14px;
+  border-radius:var(--radius-sm);
+}
+.tally-off{
+  width:7px; height:7px; border-radius:50%;
+  background:var(--text-faint);
+  flex:none;
+}
+
+/* World-wide accordion */
+.ww-panel-wrap{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transition:grid-template-rows .38s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+}
+.ww-panel-wrap.open{
+  grid-template-rows:1fr;
+  opacity:1;
+  margin-top:2px;
+}
+.ww-panel-inner{
+  overflow:hidden;
+  display:flex; flex-direction:column; gap:8px;
+}
+.ww-row{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px;
+  background:var(--surface-2);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:background .2s ease, border-color .2s ease, transform .15s ease;
+}
+.ww-row:hover{
+  background:var(--cyan-soft);
+  border-color:rgba(45,212,224,.4);
+  transform:translateX(2px);
+}
+.ww-flag{ font-size:17px; line-height:1; flex:none; }
+.ww-name{ font-size:13px; font-weight:500; flex:1; }
+.ww-code{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  letter-spacing:.5px;
+  color:var(--text-faint);
+}
+.ww-row:hover .ww-code{ color:var(--cyan); }
+
+/* ============================================================
+   MODAL (Telegram)
+   ============================================================ */
+.modal-overlay{
+  position:fixed; inset:0; z-index:999;
+  background:rgba(6,8,12,.65);
+  backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.modal-overlay.hidden{ display:none; }
+.modal-card{
+  width:100%; max-width:400px;
+  background:linear-gradient(180deg, var(--surface), var(--surface-2));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:28px 24px;
+  text-align:center;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.7);
+}
+.modal-card h2{
+  font-family:var(--font-display);
+  font-size:21px;
+  color:var(--gold);
+  margin:0 0 12px;
+}
+.modal-card p{
+  font-size:14px;
+  color:var(--text-dim);
+  line-height:1.55;
+  margin:0 0 22px;
+}
+.modal-card p strong{ color:var(--text); }
+.modal-btn{
+  width:100%;
+  border:none; cursor:pointer;
+  font-family:var(--font-display);
+  font-weight:600; font-size:14px; letter-spacing:.4px;
+  padding:13px;
+  border-radius:12px;
+  margin-bottom:10px;
+  transition:filter .2s ease;
+}
+.modal-btn:last-child{ margin-bottom:0; }
+.modal-btn:hover{ filter:brightness(1.08); }
+#joinButton{
+  background:linear-gradient(90deg, var(--cyan), var(--gold));
+  color:#0A0D13;
+}
+#closeButton{
+  background:rgba(255,255,255,.06);
+  color:var(--text-dim);
+  border:1px solid var(--border);
+}
+
+/* Focus visibility (accessibility floor) */
+button:focus-visible, .ww-row:focus-visible{
+  outline:2px solid var(--cyan);
+  outline-offset:2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}
+
+@media (max-width:520px){
+  .site-header{ padding:16px 18px; }
+  .wordmark{ font-size:22px; }
+  .live-ticker{ font-size:11px; }
+  .match-grid{ grid-template-columns:1fr; }
+}
+
+</style>
 </head>
 
-<body class="font-body text-zinc-300 min-h-screen flex flex-col">
+<body>
 
-  <header class="sticky top-0 z-50 border-b border-zinc-800/25 bg-zinc-950/90 backdrop-blur-xl">
-    <div class="max-w-[1400px] mx-auto px-5 py-3">
-      <div class="flex items-start justify-between gap-4">
-        <div class="min-w-0 pt-0.5">
-          <div class="font-heading font-bold text-[15px] text-zinc-100 tracking-tight leading-none">
-            CNP <span class="text-red-500">FANCODE</span>
-          </div>
-          <div id="lastUpdate" class="text-[9px] text-zinc-600 font-semibold tracking-[0.13em] mt-1.5 uppercase">Loading...</div>
-          <div id="authorWrap" class="hidden relative items-center gap-2.5 mt-1.5">
-            <div class="flex-1 h-px bg-zinc-800/25"></div>
-            <span id="authorName" class="text-[8px] text-zinc-600 font-medium tracking-[0.08em] whitespace-nowrap"></span>
-            <div class="flex-1 h-px bg-zinc-800/25"></div>
-          </div>
-        </div>
-        <button id="joinWhatsApp" class="flex items-center gap-2 pl-3.5 pr-3 py-[8px] rounded-lg bg-zinc-800/50 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-300 border border-zinc-800/40 hover:border-zinc-700/50 text-[10px] font-bold uppercase tracking-[0.08em] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex-shrink-0 mt-0.5">
-          <svg class="w-[14px] h-[14px] fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          <span class="hidden sm:inline">JOIN WHATSAPP</span>
-        </button>
-      </div>
+<div class="ambient"></div>
+
+<div class="page-shell">
+
+  <header class="site-header">
+    <div class="wordmark">FAN<span class="accent">CODE</span><sup>LIVE</sup></div>
+    <div class="live-ticker">
+      <span class="ticker-pulse"></span>
+      <span><b id="liveCount">0</b> LIVE NOW</span>
+      <span class="dot-sep">•</span>
+      <span><b id="totalCount">0</b> TRACKED</span>
     </div>
   </header>
 
-  <main class="flex-1 max-w-[1400px] w-full mx-auto px-5 pt-5 pb-8">
-    <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-      <div class="flex items-center gap-2.5">
-        <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-        <span class="font-heading text-[11px] font-semibold text-zinc-600 tracking-[0.12em] uppercase">Matches</span>
-        <div class="hidden sm:block h-px w-10 bg-zinc-800/40"></div>
-      </div>
-      <div class="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-[340px]">
-        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="text" placeholder="Search team or event..." aria-label="Search matches" class="w-full pl-10 pr-10 py-[9px] rounded-xl bg-zinc-900/60 border border-zinc-800/30 text-[12px] text-zinc-200 placeholder-zinc-600 font-medium outline-none transition-all duration-200 focus:border-zinc-700/40 focus:bg-zinc-900/80">
-        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-zinc-700 font-mono border border-zinc-800/30 rounded px-1.5 py-px hidden sm:inline-block pointer-events-none select-none">/</span>
-      </div>
-    </div>
-    <div id="matchesGrid"></div>
-    <div id="loadingIndicator" class="text-center py-20">
-      <div class="inline-flex flex-col items-center gap-3">
-        <div class="w-5 h-5 rounded-full border-[1.5px] border-zinc-800 border-t-zinc-500 animate-spin"></div>
-        <span class="text-[10px] text-zinc-600 font-semibold tracking-[0.15em] uppercase">Loading</span>
-      </div>
-    </div>
-  </main>
+  <div id="matchGrid" class="match-grid">
+    <div class="loading-state"><span class="loading-dot"></span> Loading the match board…</div>
+  </div>
 
-  <footer class="border-t border-zinc-800/20 mt-auto">
-    <div class="max-w-[1400px] mx-auto px-5 pt-6 pb-5">
-      <div class="flex flex-col items-center text-center gap-1.5 mb-4">
-        <div class="font-heading font-bold text-[12px] text-zinc-500 tracking-tight">CRICKET STREAMING <span class="text-red-500/70">POINT</span></div>
-        <p class="text-[10px] text-zinc-700">Free HD Sports Streaming</p>
-      </div>
-      <div class="flex items-center gap-3 mb-4">
-        <div class="flex-1 h-px bg-zinc-800/20"></div>
-        <span class="text-[8px] text-zinc-700 font-semibold tracking-[0.12em] uppercase whitespace-nowrap">Sayan OAI · All Rights Reserved</span>
-        <div class="flex-1 h-px bg-zinc-800/20"></div>
-      </div>
-      <div class="flex justify-center">
-        <script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script>
-        <script type="text/javascript">sc_online_i(1732944,"00FFCC","474747");</script>
-      </div>
-    </div>
-  </footer>
+</div>
 
-  <script src="script.js"></script>
+<!-- TELEGRAM MODAL -->
+<div id="telegramModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>Join our Telegram</h2>
+    <p>Stay updated with the latest <strong>live match links</strong> and updates. Join the official channel below.</p>
+    <button id="joinButton" class="modal-btn">Join Telegram</button>
+    <button id="closeButton" class="modal-btn">Already Joined</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA SOURCES
+   - CNPTV_SOURCE  -> only used for the "WATCH NOW" stream (cnptv_cdn)
+   - WORLD_SOURCE  -> match info (title/tournament/time/image) +
+                      World Wide Stream CDNs (LK / NP / BD)
+   ============================================================ */
+const CNPTV_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json';
+const WORLD_SOURCE  = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
+const PLAYER_PAGE   = 'fcplayer.html';
+const FALLBACK_IMG  = 'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+
+const LANG_CODE_MAP = {
+  ENGLISH:'eng', HINDI:'hin', BANGLA:'ban', BENGALI:'ban', TAMIL:'tam',
+  TELUGU:'tel', KANNADA:'kan', MARATHI:'mar', MALAYALAM:'mal', PUNJABI:'pan',
+  GUJARATI:'guj', URDU:'urd', ODIA:'ori', ASSAMESE:'asm', BHOJPURI:'bho'
+};
+
+const CATEGORY_ICON = {
+  Cricket:'🏏', Football:'⚽', MotoGP:'🏍️', Golf:'⛳', Tennis:'🎾',
+  Kabaddi:'🤼', 'Live Events':'📡'
+};
+
+const ICON_PLAY  = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const ICON_GLOBE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
+const ICON_CHEV  = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>';
+const ICON_CLOCK = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+
+const grid         = document.getElementById('matchGrid');
+const liveCountEl  = document.getElementById('liveCount');
+const totalCountEl = document.getElementById('totalCount');
+
+function esc(str){
+  return String(str == null ? '' : str).replace(/[&<>"']/g, s => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[s]));
+}
+
+/* "ENGLISH" -> "eng". BLOODY_SWEET is a placeholder the source uses
+   before commentary language is confirmed:
+   - if the match is LIVE and still shows it -> default to English
+   - if it's still UPCOMING -> language isn't decided yet (no code) */
+function langToCode(rawLang, isLive){
+  let lang = String(rawLang || '').trim().toUpperCase();
+  if(!lang || lang === 'BLOODY_SWEET'){
+    if(isLive){ lang = 'ENGLISH'; } else { return null; }
+  }
+  if(LANG_CODE_MAP[lang]) return LANG_CODE_MAP[lang];
+  const short = lang.slice(0,3).toLowerCase();
+  return short || 'eng';
+}
+
+/* Source format: "07 July 2026 08:45 AM" — parsed manually rather than
+   trusting Date() with a non-ISO string across browsers. */
+function parseMatchTime(str){
+  if(!str) return null;
+  const months = {january:0,february:1,march:2,april:3,may:4,june:5,july:6,
+                   august:7,september:8,october:9,november:10,december:11};
+  const m = String(str).match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\s+(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if(!m){ const d = new Date(str); return isNaN(d) ? null : d; }
+  let [, day, monthName, year, hour, min, ampm] = m;
+  const month = months[monthName.toLowerCase()];
+  if(month === undefined){ const d = new Date(str); return isNaN(d) ? null : d; }
+  day = +day; year = +year; hour = +hour; min = +min;
+  if(ampm){
+    ampm = ampm.toUpperCase();
+    if(ampm === 'PM' && hour < 12) hour += 12;
+    if(ampm === 'AM' && hour === 12) hour = 0;
+  }
+  return new Date(year, month, day, hour, min);
+}
+
+function formatMatchTime(date){
+  if(!date) return 'TIME TBA';
+  const datePart = date.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }).toUpperCase();
+  let h = date.getHours();
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if(h === 0) h = 12;
+  return `${datePart} · ${h}:${mm} ${ap}`;
+}
+
+function buildPlayerUrl(id, langCode, streamIndex){
+  return `${PLAYER_PAGE}?id=${id}_${langCode}&s=${streamIndex}`;
+}
+
+function renderCard(m){
+  const icon = CATEGORY_ICON[m.category] || '🎮';
+  const statusChip = m.isLive
+    ? `<span class="chip chip-live"><span class="tally"><span class="tally-core"></span><span class="tally-ring"></span></span>LIVE</span>`
+    : `<span class="chip chip-sched">${ICON_CLOCK} SCHEDULED</span>`;
+  const catChip = m.category
+    ? `<span class="chip chip-cat">${icon} ${esc(m.category)}</span>`
+    : '';
+
+  const canWatch = m.isLive && m.cnptvUrl && m.langCode;
+
+  const wwOptions = [
+    { key:'lk', flag:'🇱🇰', name:'Sri Lanka',  url:m.lk, idx:1 },
+    { key:'np', flag:'🇳🇵', name:'Nepal',      url:m.np, idx:2 },
+    { key:'bd', flag:'🇧🇩', name:'Bangladesh', url:m.bd, idx:3 }
+  ].filter(o => o.url);
+  const hasAnyWW = m.isLive && m.langCode && wwOptions.length > 0;
+
+  let actionsHtml;
+  if(!m.isLive){
+    actionsHtml = `<div class="not-live-pill"><span class="tally-off"></span>NOT LIVE YET</div>`;
+  } else {
+    const watchAttrs = canWatch
+      ? `data-url="${esc(buildPlayerUrl(m.id, m.langCode, 0))}"`
+      : 'disabled';
+    actionsHtml = `
+      <button type="button" class="btn-watch ${canWatch ? '' : 'is-disabled'}" ${watchAttrs}>
+        ${ICON_PLAY} WATCH NOW
+      </button>
+      ${hasAnyWW ? `
+      <button type="button" class="btn-ww" data-target="ww-${m.id}">
+        ${ICON_GLOBE} WORLD WIDE STREAM ${ICON_CHEV}
+      </button>
+      <div class="ww-panel-wrap" id="ww-${m.id}">
+        <div class="ww-panel-inner">
+          ${wwOptions.map(o => `
+            <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id, m.langCode, o.idx))}">
+              <span class="ww-flag">${o.flag}</span>
+              <span class="ww-name">${o.name}</span>
+              <span class="ww-code">${o.key.toUpperCase()}</span>
+            </div>`).join('')}
+        </div>
+      </div>` : ''}
+    `;
+  }
+
+  return `
+    <article class="match-card">
+      <div class="card-media">
+        <img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
+        ${statusChip}
+        ${catChip}
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">${esc(m.title)}</h3>
+        <p class="card-tournament">${esc(m.tournament)}</p>
+        <div class="card-time">${ICON_CLOCK} ${formatMatchTime(m.time)}</div>
+        <div class="card-actions">${actionsHtml}</div>
+      </div>
+    </article>
+  `;
+}
+
+function attachHandlers(){
+  grid.addEventListener('click', (e) => {
+    const watchBtn = e.target.closest('.btn-watch');
+    if(watchBtn && watchBtn.dataset.url){
+      window.location.href = watchBtn.dataset.url;
+      return;
+    }
+    const row = e.target.closest('.ww-row');
+    if(row && row.dataset.url){
+      window.location.href = row.dataset.url;
+      return;
+    }
+    const wwBtn = e.target.closest('.btn-ww');
+    if(wwBtn){
+      const panel = document.getElementById(wwBtn.dataset.target);
+      if(panel){
+        const willOpen = !panel.classList.contains('open');
+        panel.classList.toggle('open', willOpen);
+        wwBtn.classList.toggle('open', willOpen);
+      }
+    }
+  });
+
+  grid.addEventListener('keydown', (e) => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const row = e.target.closest('.ww-row');
+    if(row && row.dataset.url){
+      e.preventDefault();
+      window.location.href = row.dataset.url;
+    }
+  });
+}
+
+async function init(){
+  try{
+    const [cnptvData, worldData] = await Promise.all([
+      fetch(CNPTV_SOURCE).then(r => r.json()).catch(() => ({ matches: [] })),
+      fetch(WORLD_SOURCE).then(r => r.json())
+    ]);
+
+    const cnptvMap = {};
+    (cnptvData.matches || []).forEach(m => { cnptvMap[m.match_id] = m; });
+
+    let matches = (worldData.matches || []).map(m => {
+      const isLive = String(m.status || '').toUpperCase() === 'LIVE';
+      const cnptv = cnptvMap[m.match_id];
+      const cnptvUrl = cnptv && cnptv.cnptv_cdn ? cnptv.cnptv_cdn : null;
+      const streams = m.streams || {};
+
+      return {
+        id: m.match_id,
+        title: m.title || 'Match',
+        tournament: m.tournament || '',
+        category: m.category || '',
+        image: m.image || FALLBACK_IMG,
+        isLive,
+        time: parseMatchTime(m.startTime),
+        langCode: langToCode(m.language, isLive),
+        cnptvUrl,
+        lk: streams.fancode_lk_cdn || null,
+        np: streams.fancode_np_cdn || null,
+        bd: streams.fancode_bd_cdn || null
+      };
+    });
+
+    matches.sort((a, b) => {
+      if(a.isLive !== b.isLive) return a.isLive ? -1 : 1;
+      const at = a.time ? a.time.getTime() : Infinity;
+      const bt = b.time ? b.time.getTime() : Infinity;
+      return at - bt;
+    });
+
+    liveCountEl.textContent = matches.filter(m => m.isLive).length;
+    totalCountEl.textContent = matches.length;
+
+    grid.innerHTML = matches.length
+      ? matches.map(renderCard).join('')
+      : `<div class="grid-error">No matches found right now.</div>`;
+
+    attachHandlers();
+  } catch(err){
+    console.error('FanCode board failed to load:', err);
+    grid.innerHTML = `<div class="grid-error">Couldn't load the match board. Try refreshing.</div>`;
+  }
+}
+
+init();
+
+/* ============================================================
+   TELEGRAM POPUP
+   ============================================================ */
+const telegramModal = document.getElementById('telegramModal');
+window.addEventListener('load', () => {
+  if(!sessionStorage.getItem('fc_telegram_joined')){
+    telegramModal.classList.remove('hidden');
+  }
+});
+document.getElementById('joinButton').addEventListener('click', () => {
+  window.open('https://t.me/+JSkwy86_04M2Zjdl', '_blank');
+  sessionStorage.setItem('fc_telegram_joined', 'yes');
+  telegramModal.classList.add('hidden');
+});
+document.getElementById('closeButton').addEventListener('click', () => {
+  sessionStorage.setItem('fc_telegram_joined', 'yes');
+  telegramModal.classList.add('hidden');
+});
+</script>
+
 </body>
 </html>

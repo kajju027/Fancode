@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="no-referrer-when-downgrade">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>FanCode Live Player</title>
+<link rel="icon" href="https://livedakho.pages.dev/file_00000000d56c7208939f3cb5bb73adc0.png">
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G5NE717HVD"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-G5NE717HVD');</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Acme&family=Amaranth:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html {
+  height: 100%;
+  height: -webkit-fill-available;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  background: #000;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.logo-btn {
+  position: fixed;
+  top: 10px; left: 10px;
+  z-index: 50;
+  display: flex; align-items: center;
+  text-decoration: none;
+  transition: opacity .2s;
+}
+.logo-btn:hover { opacity: .8; }
+.logo-btn img {
+  height: 36px; width: auto;
+  border-radius: 7px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.8));
+}
+
+#loading-screen {
+  position: fixed; inset: 0; z-index: 100;
+  background: #0a0a0a;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 22px;
+}
+
+.loader {
+  position: relative;
+  width: 58px; height: 58px;
+}
+.loader-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #ffcc00;
+  border-right-color: rgba(255,204,0,0.18);
+  animation: loader-spin 1s cubic-bezier(0.55,0.1,0.45,0.9) infinite;
+}
+.loader-ring-inner {
+  position: absolute; inset: 11px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #1bcc26;
+  border-right-color: rgba(27,204,38,0.16);
+  animation: loader-spin-rev .8s cubic-bezier(0.55,0.1,0.45,0.9) infinite;
+}
+.loader-core {
+  position: absolute; inset: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,204,0,0.55) 0%, rgba(255,204,0,0) 72%);
+  animation: loader-pulse 1.6s ease-in-out infinite;
+}
+@keyframes loader-spin { to { transform: rotate(360deg); } }
+@keyframes loader-spin-rev { to { transform: rotate(-360deg); } }
+@keyframes loader-pulse {
+  0%, 100% { opacity: .35; transform: scale(.82); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.loading-text {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 7px;
+}
+.loading-label {
+  font-family: 'Amaranth', sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  color: rgba(255,255,255,.88);
+}
+.loading-sub {
+  display: flex; align-items: center; gap: 3px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: .3px;
+  color: rgba(255,255,255,.32);
+}
+.loading-sub span {
+  opacity: .25;
+  animation: dot-fade 1.3s ease-in-out infinite;
+}
+.loading-sub span:nth-child(2) { animation-delay: .16s; }
+.loading-sub span:nth-child(3) { animation-delay: .32s; }
+@keyframes dot-fade {
+  0%, 100% { opacity: .25; }
+  50% { opacity: 1; }
+}
+
+#player-shell {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: #000;
+  z-index: 1;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+#video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
+#center-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+#center-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.center-play-btn {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(20,20,22,.55);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: transform .15s ease, background .2s ease;
+}
+.center-play-btn svg { margin-left: 3px; }
+.center-play-btn:active { transform: scale(.92); }
+
+#controls-bar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 4;
+  padding: 22px 16px 14px;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.75) 60%, rgba(0,0,0,.88) 100%);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .28s ease, transform .28s ease;
+  pointer-events: none;
+}
+#player-shell.controls-visible #controls-bar {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#progress-track {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.22);
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+#progress-track.is-live-only { cursor: default; }
+#progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  border-radius: 4px;
+  background: #0A84FF;
+}
+#progress-thumb {
+  position: absolute;
+  top: 50%;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(10,132,255,.35);
+  transform: translate(-50%, -50%);
+  left: 0%;
+  transition: opacity .2s ease;
+}
+#progress-track.is-live-only #progress-thumb { opacity: 0; }
+
+#controls-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.player-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.92);
+  width: 34px; height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  flex: none;
+  transition: background .15s ease, color .15s ease;
+}
+.player-btn:hover { background: rgba(255,255,255,.12); }
+.player-btn:active { transform: scale(.9); }
+.unmute-hint {
+  color: #0A84FF;
+  animation: unmute-glow 1.1s ease-in-out infinite;
+}
+@keyframes unmute-glow {
+  0%, 100% { background: rgba(10,132,255,0); }
+  50% { background: rgba(10,132,255,.28); }
+}
+
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  color: #ff5a5a;
+  padding: 4px 8px 4px 6px;
+  border-radius: 20px;
+  background: rgba(255,69,69,.14);
+  border: 1px solid rgba(255,69,69,.35);
+  flex: none;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #ff4545;
+  animation: live-blink 1.4s infinite;
+}
+@keyframes live-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.controls-spacer { flex: 1; }
+
+#resizeBtn {
+  width: auto;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: rgba(255,255,255,.9);
+}
+
+#qualityMenu {
+  position: absolute;
+  right: 16px;
+  bottom: 74px;
+  z-index: 5;
+  min-width: 120px;
+  background: rgba(24,24,27,.82);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+#qualityMenu.open { display: flex; }
+.quality-option {
+  padding: 9px 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,.82);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.quality-option:hover { background: rgba(255,255,255,.1); }
+.quality-option.active { color: #0A84FF; font-weight: 600; }
+
+.popup-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.88);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  z-index: 99999;
+}
+.popup-overlay.visible { display: flex; }
+
+.popup-wrap {
+  position: relative;
+  width: 100%; max-width: 358px;
+  padding: 2px;
+  background: linear-gradient(145deg, rgba(255,204,0,0.8) 0%, rgba(255,224,80,0.4) 50%, rgba(255,204,0,0.8) 100%);
+  border-radius: 18px;
+  box-shadow: 0 0 50px rgba(255,204,0,0.14), 0 30px 70px rgba(0,0,0,0.72);
+  animation: popIn 0.42s cubic-bezier(0.175,0.885,0.32,1.275) both;
+}
+@keyframes popIn {
+  from { opacity:0; transform: scale(0.87) translateY(24px); }
+  to   { opacity:1; transform: scale(1)   translateY(0); }
+}
+
+.popup-box {
+  background: linear-gradient(168deg, #1e1e26 0%, #0e0e13 100%);
+  border-radius: 16px;
+  padding: 34px 24px 26px;
+  text-align: center;
+}
+
+.popup-title {
+  color: #ffcc00;
+  font-family: 'Acme', sans-serif;
+  font-size: 30px;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.popup-text {
+  color: #a0a0a8;
+  font-size: 14px;
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+.popup-text b {
+  color: #fff;
+  font-family: 'Amaranth', sans-serif;
+  font-size: 17px;
+  display: block;
+  margin-top: 7px;
+}
+
+.btn-popup {
+  width: 100%; padding: 14px; border: none;
+  border-radius: 13px;
+  font-family: 'Amaranth', sans-serif;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s;
+  -webkit-user-select: none; user-select: none;
+  -webkit-appearance: none; appearance: none;
+  touch-action: manipulation;
+  text-decoration: none;
+  display: block;
+}
+.btn-popup:active { transform: scale(0.95); }
+
+.btn-join-main {
+  background: linear-gradient(90deg, #1bcc26, #17b823);
+  color: #fff;
+  font-size: 18px; font-weight: 700;
+  letter-spacing: 0.6px;
+  box-shadow: 0 5px 20px rgba(23,184,35,0.32);
+  margin-bottom: 9px;
+  line-height: 1;
+  padding: 14px;
+  text-align: center;
+}
+.btn-join-main:hover { box-shadow: 0 8px 26px rgba(23,184,35,0.42); }
+
+.btn-joined-main {
+  background: transparent;
+  color: #484850;
+  font-size: 12px; font-weight: 400;
+  width: auto; margin: 0 auto;
+  padding: 7px 14px;
+  text-align: center;
+}
+
+#error-screen {
+  position: fixed; inset: 0; z-index: 80;
+  background: #0d0d16;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+#error-screen.show { display: flex; }
+
+.error-card {
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  padding: 52px 32px 42px;
+  max-width: 400px; width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  animation: popIn .35s cubic-bezier(.34,1.45,.64,1);
+}
+.error-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.05);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 22px;
+}
+.error-icon svg {
+  width: 36px; height: 36px;
+  stroke: rgba(255,255,255,.55); fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.error-title {
+  font-family: 'Acme', sans-serif;
+  font-size: clamp(22px, 6vw, 28px);
+  font-weight: 800; color: #efefef;
+  margin-bottom: 12px;
+}
+.error-badge {
+  display: inline-block;
+  background: rgba(245,165,0,.12);
+  border: 1px solid rgba(245,165,0,.28);
+  color: #f5a500;
+  font-size: 13.5px; font-weight: 700;
+  padding: 4px 16px; border-radius: 20px;
+  margin-bottom: 14px; letter-spacing: .4px;
+}
+.error-body {
+  font-size: 14px; color: rgba(255,255,255,.38);
+  line-height: 1.8; margin-bottom: 14px;
+  font-family: Arial, sans-serif;
+}
+.error-retry-note {
+  display: flex; align-items: center; justify-content: center;
+  gap: 7px;
+  font-size: 12.5px; color: rgba(255,255,255,.34);
+  font-family: Arial, sans-serif;
+  letter-spacing: .3px;
+  margin-bottom: 30px;
+}
+.error-retry-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #f5a500;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.1); } }
+.error-contact-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 13px 30px; border-radius: 50px;
+  background: rgba(255,255,255,.09);
+  border: 1.5px solid rgba(255,255,255,.16);
+  color: #fff; cursor: pointer;
+  font-family: 'Amaranth', sans-serif;
+  font-size: 15px; font-weight: 700;
+  text-decoration: none; letter-spacing: .3px;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.error-contact-btn:hover {
+  background: rgba(255,255,255,.15);
+  border-color: rgba(255,255,255,.28);
+  transform: translateY(-1px);
+}
+.error-contact-btn svg { width:16px; height:16px; fill:#fff; flex-shrink:0; }
+
+@media (hover: none) {
+  .logo-btn:hover { opacity: 1; }
+  .btn-join-main:hover { box-shadow: 0 5px 20px rgba(23,184,35,0.32); }
+  .error-contact-btn:hover { background: rgba(255,255,255,.09); transform: none; }
+  .player-btn:hover { background: transparent; }
+}
+</style>
+</head>
+<body>
+
+<div style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;" aria-hidden="true">
+  <script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script>
+  <script type="text/javascript">sc_online_i(1735331,"ffffff","28054a");</script>
+</div>
+
+<a href="https://t.me/CnpTVOfficial" class="logo-btn" target="_blank" rel="noopener noreferrer">
+  <img src="https://livedakho.pages.dev/file_00000000d56c7208939f3cb5bb73adc0.png" alt="Logo" loading="eager">
+</a>
+
+<div id="loading-screen">
+  <div class="loader">
+    <div class="loader-ring"></div>
+    <div class="loader-ring-inner"></div>
+    <div class="loader-core"></div>
+  </div>
+  <div class="loading-text">
+    <div class="loading-label">Connecting to Stream</div>
+    <div class="loading-sub">Fetching Live Stream<span>.</span><span>.</span><span>.</span></div>
+  </div>
+</div>
+
+<div id="player-shell">
+  <video id="video" playsinline webkit-playsinline muted autoplay preload="auto"></video>
+  <div id="center-overlay">
+    <button type="button" id="centerPlayBtn" class="center-play-btn" aria-label="Play"></button>
+  </div>
+  <div id="controls-bar">
+    <div id="progress-track">
+      <div id="progress-fill"></div>
+      <div id="progress-thumb"></div>
+    </div>
+    <div id="controls-row">
+      <button type="button" id="playPauseBtn" class="player-btn" aria-label="Play"></button>
+      <button type="button" id="muteBtn" class="player-btn" aria-label="Mute"></button>
+      <span class="live-pill"><span class="live-dot"></span>LIVE</span>
+      <span class="controls-spacer"></span>
+      <button type="button" id="resizeBtn" class="player-btn" aria-label="Resize">FIT</button>
+      <button type="button" id="qualityBtn" class="player-btn" aria-label="Quality"></button>
+      <button type="button" id="pipBtn" class="player-btn" aria-label="Picture in Picture"></button>
+      <button type="button" id="fullscreenBtn" class="player-btn" aria-label="Fullscreen"></button>
+    </div>
+  </div>
+  <div id="qualityMenu"></div>
+</div>
+
+<div class="popup-overlay" id="popup" role="dialog" aria-modal="true">
+  <div class="popup-wrap">
+    <div class="popup-box">
+      <div class="popup-title">Follow Us !!</div>
+      <div class="popup-text">
+        Join our WhatsApp channel<br>
+        <b>CRICKET NEWS POINT ™</b>
+        For Instant Updates &amp; Exclusive Links.
+      </div>
+      <a class="btn-popup btn-join-main" id="popupJoinBtn" target="_blank" rel="noopener noreferrer">JOIN NOW</a>
+      <button class="btn-popup btn-joined-main" id="popupSkipBtn">Already Joined</button>
+    </div>
+  </div>
+</div>
+
+<div id="error-screen">
+  <div class="error-card">
+    <div class="error-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+        <line x1="12" y1="2" x2="12" y2="12"/>
+      </svg>
+    </div>
+    <div class="error-title">Stream Not Found</div>
+    <div class="error-badge" id="error-badge">"Unknown"</div>
+    <div class="error-body">
+      The requested stream is not available right now.<br>
+      Please check the link or try again later.
+    </div>
+    <div class="error-retry-note">
+      <span class="error-retry-dot"></span>
+      <span>Retrying Automatically</span>
+    </div>
+    <a href="https://wa.me/message/BOF76S5WFJVMN1" target="_blank" rel="noopener noreferrer" class="error-contact-btn" id="error-contact-btn">
+      <svg viewBox="0 0 24 24">
+        <path d="M9.993 15.674l-.398 5.604c.57 0 .817-.245 1.113-.54l2.67-2.557 5.53 4.047c1.014.558 1.734.264 1.987-.939l3.6-16.86c.3-1.4-.506-1.95-1.496-1.58L1.27 9.64c-1.37.53-1.35 1.29-.233 1.64l5.68 1.77 13.337-8.418c.59-.39 1.13-.175.69.215"/>
+      </svg>
+      Contact Support
+    </a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var CNPTV_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json';
+  var WORLD_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
+  var CONTACT_LINK = 'https://wa.me/message/BOF76S5WFJVMN1';
+  var WA_CHANNEL = 'https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T';
+  var FETCH_TIMEOUT_MS = 8000;
+  var RETRY_DELAY_MS = 6000;
+  var PLAYBACK_SAFETY_MS = 15000;
+  var CONTROLS_HIDE_MS = 3200;
+  var UNMUTE_HINT_MS = 4500;
+
+  var video = document.getElementById('video');
+  var playerShell = document.getElementById('player-shell');
+  var loadScreen = document.getElementById('loading-screen');
+  var errScreen = document.getElementById('error-screen');
+  var errBadge = document.getElementById('error-badge');
+  var contactBtn = document.getElementById('error-contact-btn');
+  var popup = document.getElementById('popup');
+  var joinBtn = document.getElementById('popupJoinBtn');
+  var skipBtn = document.getElementById('popupSkipBtn');
+
+  var centerOverlay = document.getElementById('center-overlay');
+  var centerPlayBtn = document.getElementById('centerPlayBtn');
+  var playPauseBtn = document.getElementById('playPauseBtn');
+  var muteBtn = document.getElementById('muteBtn');
+  var resizeBtn = document.getElementById('resizeBtn');
+  var qualityBtn = document.getElementById('qualityBtn');
+  var qualityMenu = document.getElementById('qualityMenu');
+  var pipBtn = document.getElementById('pipBtn');
+  var fullscreenBtn = document.getElementById('fullscreenBtn');
+  var progressTrack = document.getElementById('progress-track');
+  var progressFill = document.getElementById('progress-fill');
+  var progressThumb = document.getElementById('progress-thumb');
+
+  var ICON_PLAY = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>';
+  var ICON_PAUSE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+  var ICON_VOLUME = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a9 9 0 0 1 0 12"/></svg>';
+  var ICON_MUTE = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>';
+  var ICON_PIP = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12.5" y="11.5" width="7" height="5" rx="1" fill="currentColor" stroke="none"/></svg>';
+  var ICON_FS_ENTER = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/><path d="M15 20h5v-5"/></svg>';
+  var ICON_FS_EXIT = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>';
+  var ICON_GEAR = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2.6-1.5L14 2h-4l-.5 2.4a7.6 7.6 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.3-1a7.6 7.6 0 0 0 2.6 1.5L10 22h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.3 1 2-3.4z"/></svg>';
+
+  contactBtn.href = CONTACT_LINK;
+  joinBtn.href = WA_CHANNEL;
+  centerPlayBtn.innerHTML = ICON_PLAY;
+  playPauseBtn.innerHTML = ICON_PLAY;
+  muteBtn.innerHTML = ICON_MUTE;
+  qualityBtn.innerHTML = ICON_GEAR;
+  pipBtn.innerHTML = ICON_PIP;
+  fullscreenBtn.innerHTML = ICON_FS_ENTER;
+
+  popup.classList.add('visible');
+
+  function closePopup() {
+    popup.style.opacity = '0';
+    popup.style.transition = 'opacity .2s';
+    setTimeout(function () { popup.style.display = 'none'; }, 220);
+  }
+
+  joinBtn.addEventListener('click', function () {
+    setTimeout(closePopup, 300);
+  });
+
+  skipBtn.addEventListener('click', closePopup);
+
+  var loaderHidden = false;
+  var safetyTimer = null;
+  var hls = null;
+  var currentMatchId = null;
+  var currentStreamIndex = null;
+  var resizeModes = ['fit', 'fill', 'normal'];
+  var resizeIndex = 0;
+  var controlsTimer = null;
+  var retryTimer = null;
+
+  function hideLoader() {
+    if (loaderHidden) return;
+    loaderHidden = true;
+    loadScreen.style.transition = 'opacity .35s';
+    loadScreen.style.opacity = '0';
+    playerShell.style.visibility = 'visible';
+    setTimeout(function () { loadScreen.style.display = 'none'; }, 370);
+  }
+
+  function showError(label) {
+    clearTimeout(safetyTimer);
+    loadScreen.style.display = 'none';
+    playerShell.style.visibility = 'hidden';
+    errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
+    errScreen.classList.add('show');
+    scheduleRetry();
+  }
+
+  function hideError() {
+    errScreen.classList.remove('show');
+    clearTimeout(retryTimer);
+  }
+
+  function scheduleRetry() {
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(function () {
+      attemptLoad(currentMatchId, currentStreamIndex);
+    }, RETRY_DELAY_MS);
+  }
+
+  function tryLandscape() {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(function () {});
+    }
+  }
+  function exitLandscape() {
+    if (screen.orientation && screen.orientation.unlock) {
+      try { screen.orientation.unlock(); } catch (e) {}
+    }
+  }
+  function onFSChange() {
+    var fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    if (fsEl) { tryLandscape(); } else { exitLandscape(); }
+    updateFullscreenIcon();
+  }
+  document.addEventListener('fullscreenchange', onFSChange);
+  document.addEventListener('webkitfullscreenchange', onFSChange);
+  document.addEventListener('mozfullscreenchange', onFSChange);
+  document.addEventListener('MSFullscreenChange', onFSChange);
+  video.addEventListener('webkitbeginfullscreen', tryLandscape);
+  video.addEventListener('webkitendfullscreen', exitLandscape);
+
+  function freshUrl(url) {
+    var sep = url.indexOf('?') === -1 ? '?' : '&';
+    return url + sep + 'nocache=' + Date.now();
+  }
+
+  function fetchJSON(url) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
+    return fetch(freshUrl(url), { cache: 'no-store', signal: controller.signal }).then(function (r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('bad response');
+      return r.json();
+    }).catch(function (err) {
+      clearTimeout(timer);
+      throw err;
+    });
+  }
+
+  function resolveStreamUrl(matchId, streamIndex) {
+    if (streamIndex === 0) {
+      return fetchJSON(CNPTV_SOURCE).then(function (data) {
+        var list = (data && data.matches) || [];
+        var match = null;
+        for (var i = 0; i < list.length; i++) {
+          if (String(list[i].match_id) === String(matchId)) { match = list[i]; break; }
+        }
+        return match && match.cnptv_cdn ? match.cnptv_cdn : null;
+      });
+    }
+    return fetchJSON(WORLD_SOURCE).then(function (data) {
+      var list = (data && data.matches) || [];
+      var match = null;
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].match_id) === String(matchId)) { match = list[i]; break; }
+      }
+      if (!match) return null;
+      var streams = match.streams || {};
+      if (streamIndex === 1) return streams.fancode_lk_cdn || null;
+      if (streamIndex === 2) return streams.fancode_np_cdn || null;
+      if (streamIndex === 3) return streams.fancode_bd_cdn || null;
+      return null;
+    });
+  }
+
+  function destroyHls() {
+    if (hls) {
+      hls.destroy();
+      hls = null;
+    }
+    video.removeAttribute('src');
+    video.load();
+  }
+
+  function attemptPlay() {
+    var p = video.play();
+    if (p && p.catch) {
+      p.catch(function () {});
+    }
+  }
+
+  function handleFatalError() {
+    destroyHls();
+    showError(currentMatchId + '_' + currentStreamIndex);
+  }
+
+  function buildQualityMenu(levels) {
+    if (!levels || !levels.length) {
+      qualityBtn.style.display = 'none';
+      return;
+    }
+    qualityBtn.style.display = '';
+    var items = [];
+    for (var i = 0; i < levels.length; i++) {
+      items.push({ idx: i, height: levels[i].height || 0 });
+    }
+    items.sort(function (a, b) { return b.height - a.height; });
+    var html = '<div class="quality-option active" data-level="-1">Auto</div>';
+    for (var j = 0; j < items.length; j++) {
+      html += '<div class="quality-option" data-level="' + items[j].idx + '">' + items[j].height + 'p</div>';
+    }
+    qualityMenu.innerHTML = html;
+  }
+
+  function playStream(url) {
+    clearTimeout(safetyTimer);
+    hideError();
+    destroyHls();
+    qualityBtn.style.display = 'none';
+
+    if (window.Hls && window.Hls.isSupported()) {
+      hls = new window.Hls({
+        enableWorker: true,
+        maxBufferLength: 30,
+        backBufferLength: 60,
+        liveSyncDurationCount: 3
+      });
+      hls.on(window.Hls.Events.MANIFEST_PARSED, function (event, data) {
+        buildQualityMenu(data.levels);
+        attemptPlay();
+      });
+      hls.on(window.Hls.Events.ERROR, function (event, data) {
+        if (data.fatal) { handleFatalError(); }
+      });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', attemptPlay, { once: true });
+    } else {
+      handleFatalError();
+      return;
+    }
+
+    safetyTimer = setTimeout(handleFatalError, PLAYBACK_SAFETY_MS);
+  }
+
+  function attemptLoad(matchId, streamIndex) {
+    currentMatchId = matchId;
+    currentStreamIndex = streamIndex;
+    resolveStreamUrl(matchId, streamIndex).then(function (url) {
+      if (!url) {
+        showError(matchId + '_' + streamIndex);
+        return;
+      }
+      playStream(url);
+    }).catch(function () {
+      showError(matchId + '_' + streamIndex);
+    });
+  }
+
+  function updatePlayIcon() {
+    var icon = video.paused ? ICON_PLAY : ICON_PAUSE;
+    playPauseBtn.innerHTML = icon;
+    centerPlayBtn.innerHTML = icon;
+    centerOverlay.classList.toggle('show', video.paused);
+  }
+
+  function togglePlay() {
+    if (video.paused) { attemptPlay(); } else { video.pause(); }
+  }
+
+  playPauseBtn.addEventListener('click', togglePlay);
+  centerPlayBtn.addEventListener('click', togglePlay);
+
+  function updateMuteIcon() {
+    muteBtn.innerHTML = (video.muted || video.volume === 0) ? ICON_MUTE : ICON_VOLUME;
+  }
+
+  muteBtn.addEventListener('click', function () {
+    video.muted = !video.muted;
+    if (!video.muted && video.volume === 0) { video.volume = 1; }
+    muteBtn.classList.remove('unmute-hint');
+    updateMuteIcon();
+  });
+
+  function applyResizeMode() {
+    var mode = resizeModes[resizeIndex];
+    if (mode === 'fit') { video.style.objectFit = 'contain'; resizeBtn.textContent = 'FIT'; }
+    else if (mode === 'fill') { video.style.objectFit = 'cover'; resizeBtn.textContent = 'FILL'; }
+    else { video.style.objectFit = 'fill'; resizeBtn.textContent = 'NORMAL'; }
+  }
+  resizeBtn.addEventListener('click', function () {
+    resizeIndex = (resizeIndex + 1) % resizeModes.length;
+    applyResizeMode();
+  });
+  applyResizeMode();
+
+  qualityBtn.addEventListener('click', function () {
+    qualityMenu.classList.toggle('open');
+  });
+  qualityMenu.addEventListener('click', function (e) {
+    var opt = e.target.closest('.quality-option');
+    if (!opt || !hls) return;
+    hls.currentLevel = parseInt(opt.getAttribute('data-level'), 10);
+    qualityMenu.classList.remove('open');
+    var all = qualityMenu.querySelectorAll('.quality-option');
+    for (var i = 0; i < all.length; i++) { all[i].classList.remove('active'); }
+    opt.classList.add('active');
+  });
+
+  function updatePipAvailability() {
+    var standard = document.pictureInPictureEnabled && !video.disablePictureInPicture;
+    var iosMode = typeof video.webkitSupportsPresentationMode === 'function' && video.webkitSupportsPresentationMode('picture-in-picture');
+    if (!standard && !iosMode) { pipBtn.style.display = 'none'; }
+  }
+  pipBtn.addEventListener('click', function () {
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture().catch(function () {});
+      return;
+    }
+    if (video.requestPictureInPicture) {
+      video.requestPictureInPicture().catch(function () {
+        if (typeof video.webkitSetPresentationMode === 'function') {
+          video.webkitSetPresentationMode('picture-in-picture');
+        }
+      });
+    } else if (typeof video.webkitSetPresentationMode === 'function') {
+      video.webkitSetPresentationMode(video.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture');
+    }
+  });
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  }
+  function requestFs(el) {
+    if (el.requestFullscreen) return el.requestFullscreen();
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
+    if (el.msRequestFullscreen) return el.msRequestFullscreen();
+    return Promise.reject(new Error('unsupported'));
+  }
+  function exitFs() {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
+    if (document.msExitFullscreen) return document.msExitFullscreen();
+    return Promise.resolve();
+  }
+  function updateFullscreenIcon() {
+    fullscreenBtn.innerHTML = isFullscreen() ? ICON_FS_EXIT : ICON_FS_ENTER;
+  }
+  fullscreenBtn.addEventListener('click', function () {
+    if (isFullscreen()) {
+      exitFs();
+      return;
+    }
+    var req = requestFs(playerShell);
+    if (req && req.catch) {
+      req.catch(function () {
+        if (typeof video.webkitEnterFullscreen === 'function') {
+          video.webkitEnterFullscreen();
+        }
+      });
+    }
+  });
+
+  function showControls() {
+    playerShell.classList.add('controls-visible');
+    clearTimeout(controlsTimer);
+    if (!video.paused) {
+      controlsTimer = setTimeout(function () {
+        playerShell.classList.remove('controls-visible');
+        qualityMenu.classList.remove('open');
+      }, CONTROLS_HIDE_MS);
+    }
+  }
+
+  video.addEventListener('click', showControls);
+  playerShell.addEventListener('mousemove', showControls);
+  playerShell.addEventListener('touchstart', showControls, { passive: true });
+
+  function updateProgress() {
+    if (!video.duration || !isFinite(video.duration)) {
+      progressFill.style.width = '100%';
+      progressTrack.classList.add('is-live-only');
+      return;
+    }
+    progressTrack.classList.remove('is-live-only');
+    var ratio = video.currentTime / video.duration;
+    progressFill.style.width = (ratio * 100) + '%';
+    progressThumb.style.left = (ratio * 100) + '%';
+  }
+
+  function seekFromEvent(e) {
+    if (!video.duration || !isFinite(video.duration)) return;
+    var rect = progressTrack.getBoundingClientRect();
+    var clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+    var ratio = (clientX - rect.left) / rect.width;
+    ratio = Math.min(1, Math.max(0, ratio));
+    video.currentTime = ratio * video.duration;
+  }
+  progressTrack.addEventListener('click', seekFromEvent);
+
+  video.addEventListener('playing', function () {
+    clearTimeout(safetyTimer);
+    hideLoader();
+    showControls();
+  });
+  video.addEventListener('play', updatePlayIcon);
+  video.addEventListener('pause', updatePlayIcon);
+  video.addEventListener('volumechange', updateMuteIcon);
+  video.addEventListener('timeupdate', updateProgress);
+  video.addEventListener('progress', updateProgress);
+  video.addEventListener('loadedmetadata', updatePipAvailability);
+
+  muteBtn.classList.add('unmute-hint');
+  setTimeout(function () { muteBtn.classList.remove('unmute-hint'); }, UNMUTE_HINT_MS);
+
+  function getUrlParams() {
+    var params = new URLSearchParams(window.location.search);
+    var idParam = params.get('id');
+    var streamParam = params.get('s');
+    if (!idParam || streamParam === null) { return null; }
+    var underscoreIndex = idParam.indexOf('_');
+    if (underscoreIndex === -1) { return null; }
+    var matchId = idParam.slice(0, underscoreIndex);
+    var streamIndex = parseInt(streamParam, 10);
+    if (isNaN(streamIndex)) { return null; }
+    return { matchId: matchId, streamIndex: streamIndex };
+  }
+
+  var parsed = getUrlParams();
+  if (parsed) {
+    attemptLoad(parsed.matchId, parsed.streamIndex);
+  } else {
+    showError(null);
+  }
+
+})();
+</script>
+</body>
+</html>
