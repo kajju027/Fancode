@@ -7,329 +7,256 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Acme&family=Amaranth:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Acme&family=Amaranth:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 
 :root{
-  --bg:            #0A0D13;
-  --bg-2:          #0D111A;
-  --surface:       #121826;
-  --surface-2:     #182036;
-  --border:        #232C42;
-  --border-soft:   #1B2236;
-
-  --live:          #FF4545;
-  --live-soft:     rgba(255,69,69,.16);
-  --gold:          #FFB020;
-  --gold-soft:     rgba(255,176,32,.14);
-  --cyan:          #2DD4E0;
-  --cyan-deep:     #129AA6;
-  --cyan-soft:     rgba(45,212,224,.14);
-
-  --text:          #EDF2FA;
-  --text-dim:      #94A1B8;
-  --text-faint:    #5B6580;
-
-  --radius:        16px;
-  --radius-sm:     10px;
-
-  --font-display:  'Big Shoulders Display', sans-serif;
-  --font-body:     'Inter', sans-serif;
-  --font-mono:     'JetBrains Mono', monospace;
+  --bg:#02060c;
+  --card:#0d1117;
+  --card-2:#141b24;
+  --border:#1f2733;
+  --muted:#8b949e;
+  --text:#f0f6fc;
+  --gold:#ffd700;
+  --accent-live:#198754;
+  --accent-live-shadow:rgba(25,135,84,0.4);
+  --accent-upcoming:#dc3545;
+  --accent-upcoming-dark:#a31a25;
+  --accent-upcoming-shadow:rgba(220,53,69,0.4);
 }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body{
-  margin:0; padding:0;
+html,body{ margin:0; padding:0; }
+body{
   background:var(--bg);
   color:var(--text);
-  font-family:var(--font-body);
+  font-family:'Momo Trust Display', 'Segoe UI', Arial, sans-serif;
   -webkit-font-smoothing:antialiased;
 }
 *{ user-select:none; }
-button{ font-family:inherit; }
+button, input{ font-family:inherit; }
 img{ -webkit-user-drag:none; }
-::selection{ background:var(--cyan-soft); }
-a{ color:inherit; }
+a{ color:inherit; text-decoration:none; }
 
-.ambient{
-  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
-  background:
-    radial-gradient(1100px 620px at 12% -8%, rgba(45,212,224,.10), transparent 60%),
-    radial-gradient(900px 560px at 108% 8%, rgba(255,176,32,.07), transparent 60%),
-    radial-gradient(1200px 700px at 50% 118%, rgba(255,69,69,.05), transparent 60%),
-    linear-gradient(180deg, var(--bg-2), var(--bg) 40%);
-}
+.app{ max-width:1360px; margin:0 auto; padding:0 20px 60px; }
 
-.grain{
-  position:fixed; inset:0; z-index:2; pointer-events:none;
-  opacity:.05; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+header{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap;
+  padding:16px 4px;
+  background:rgba(2,6,12,0.88);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  margin-bottom:26px;
 }
-
-.page-shell{
-  position:relative; z-index:1;
-  max-width:1360px;
-  margin:0 auto;
-  padding:26px 20px 70px;
-}
-
-.site-header{
-  display:flex; align-items:center; justify-content:space-between; gap:20px;
-  flex-wrap:wrap;
-  padding:20px 26px;
-  background:linear-gradient(165deg, var(--surface), var(--surface-2));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  margin-bottom:36px;
-  position:relative;
-  overflow:hidden;
-}
-.site-header::before{
-  content:'';
-  position:absolute; inset:0;
-  background:linear-gradient(90deg, rgba(45,212,224,.5), rgba(255,176,32,.5), rgba(255,69,69,.5));
-  height:2px; top:0; left:0; right:0;
-  opacity:.6;
-}
-.wordmark{
-  font-family:var(--font-display);
-  font-weight:800;
-  font-size:30px;
-  line-height:1;
-  letter-spacing:.2px;
-  color:var(--text);
-  display:flex; align-items:center; gap:9px;
-}
-.wordmark .accent{ color:var(--cyan); }
-.wordmark sup{
-  font-family:var(--font-mono);
-  font-size:10px;
-  font-weight:600;
-  color:var(--bg);
-  background:var(--live);
-  padding:3px 7px;
-  border-radius:5px;
+.brand{ display:flex; flex-direction:column; gap:4px; }
+.title{
+  font-size:23px;
+  font-weight:900;
+  color:#ff4b4b;
   letter-spacing:1px;
-  align-self:flex-start;
-  margin-top:3px;
+  line-height:1;
 }
-
-.readout{
-  display:flex; align-items:center; gap:14px;
-  flex-wrap:wrap;
-  font-family:var(--font-mono);
-  font-size:12px;
+.last-update{
+  font-size:11.5px;
+  color:var(--muted);
   letter-spacing:.4px;
-  color:var(--text-dim);
 }
-.readout-item{ display:flex; align-items:center; gap:7px; white-space:nowrap; }
-.readout-item b{ color:var(--text); font-weight:600; }
-.readout-sep{ color:var(--text-faint); }
-.ticker-pulse{
-  width:7px; height:7px; border-radius:50%;
-  background:var(--live);
-  box-shadow:0 0 0 0 var(--live-soft);
-  animation:tickerPulse 1.8s infinite;
-  flex:none;
-}
-@keyframes tickerPulse{
-  0%{ box-shadow:0 0 0 0 rgba(255,69,69,.55); }
-  70%{ box-shadow:0 0 0 8px rgba(255,69,69,0); }
-  100%{ box-shadow:0 0 0 0 rgba(255,69,69,0); }
-}
-.sync-dot{
-  width:6px; height:6px; border-radius:50%;
-  background:var(--cyan);
-  flex:none;
-}
-
-.section-head{
-  display:flex; align-items:center; gap:11px;
-  margin:0 0 18px;
-  padding-top:6px;
-}
-.section-head h2{
-  font-family:var(--font-display);
+.join-btn{
+  appearance:none; border:none; cursor:pointer;
+  display:flex; align-items:center; gap:8px;
+  background:#0d6efd;
+  color:#fff;
   font-weight:700;
-  font-size:22px;
-  letter-spacing:.3px;
-  margin:0;
-  color:var(--text);
-}
-.section-dot{
-  width:9px; height:9px; border-radius:50%;
-  flex:none;
-}
-.section-dot.is-live{ background:var(--live); animation:tickerPulse 1.8s infinite; }
-.section-dot.is-upcoming{ background:var(--gold); }
-.section-count{
-  font-family:var(--font-mono);
-  font-size:12px;
-  color:var(--text-faint);
-  background:var(--surface-2);
-  border:1px solid var(--border-soft);
-  padding:2px 9px;
-  border-radius:20px;
-  margin-left:2px;
-}
-.section{ margin-bottom:46px; }
-.section:last-child{ margin-bottom:0; }
-
-.empty-live{
-  display:flex; align-items:center; gap:12px;
-  padding:22px 22px;
-  border:1px dashed var(--border);
-  border-radius:var(--radius);
-  color:var(--text-dim);
-  font-size:13.5px;
-  background:rgba(255,255,255,.015);
-}
-.empty-live svg{ flex:none; opacity:.55; }
-
-.live-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));
-  gap:26px;
-}
-
-.loading-state, .grid-error{
-  grid-column:1/-1;
-  display:flex; align-items:center; justify-content:center; gap:12px;
-  padding:60px 20px;
-  color:var(--text-dim);
-  font-family:var(--font-mono);
   font-size:13px;
   letter-spacing:.5px;
-  border:1px dashed var(--border);
-  border-radius:var(--radius);
+  padding:11px 18px;
+  border-radius:10px;
+  box-shadow:0 4px 15px rgba(13,110,253,.35);
+  transition:filter .2s ease, transform .15s ease;
 }
-.loading-dot{
-  width:8px; height:8px; border-radius:50%; background:var(--cyan);
-  animation:loadingBlink 1s infinite ease-in-out;
-}
-@keyframes loadingBlink{ 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
+.join-btn:hover{ filter:brightness(1.1); }
+.join-btn:active{ transform:scale(.96); }
 
-.match-card{
-  display:flex; flex-direction:column;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  overflow:hidden;
-  transition:border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+.controls{
+  display:flex; justify-content:flex-end;
+  margin-bottom:22px;
 }
-.match-card:hover{
-  border-color:rgba(45,212,224,.45);
-  transform:translateY(-3px);
-  box-shadow:0 20px 40px -18px rgba(0,0,0,.65);
-}
-
-.card-media{
+.search-wrap{
   position:relative;
-  height:184px;
-  background:var(--surface-2);
-  overflow:hidden;
+  width:100%; max-width:340px;
 }
-.card-media img{
-  width:100%; height:100%; object-fit:cover;
-  display:block;
-  transition:transform .5s ease;
+.search-wrap svg{
+  position:absolute; left:13px; top:50%; transform:translateY(-50%);
+  opacity:.5; pointer-events:none;
 }
-.match-card:hover .card-media img{ transform:scale(1.05); }
-.card-media::after{
-  content:'';
-  position:absolute; inset:0;
-  background:linear-gradient(180deg, rgba(10,13,19,0) 55%, rgba(10,13,19,.9) 100%);
-}
-
-.card-body{
-  display:flex; flex-direction:column; flex:1;
-  padding:18px 18px 20px;
-}
-.card-title{
-  font-family:var(--font-display);
-  font-weight:700;
-  font-size:21px;
-  line-height:1.15;
-  letter-spacing:.2px;
-  margin:0 0 5px;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-.card-tournament{
-  margin:0 0 12px;
-  font-size:12.5px;
-  color:var(--text-dim);
-  display:-webkit-box;
-  -webkit-line-clamp:1;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-.status-line{
-  display:flex; align-items:center; gap:8px;
-  font-family:var(--font-mono);
-  font-size:11.5px;
-  letter-spacing:.4px;
-  color:var(--text-faint);
-  margin-bottom:14px;
-  padding-bottom:14px;
-  border-bottom:1px solid var(--border-soft);
-}
-.status-live-text{ color:#ffb3b3; font-weight:600; letter-spacing:.6px; }
-.status-sep{ color:var(--text-faint); }
-
-.tally{ position:relative; width:8px; height:8px; display:inline-flex; flex:none; }
-.tally-core{
-  width:8px; height:8px; border-radius:50%;
-  background:var(--live);
-  position:relative; z-index:1;
-}
-.tally-ring{
-  position:absolute; inset:-4px;
-  border-radius:50%;
-  border:1px solid rgba(255,69,69,.6);
-  animation:tallyPing 1.6s infinite ease-out;
-}
-@keyframes tallyPing{
-  0%{ transform:scale(.6); opacity:.9; }
-  100%{ transform:scale(2.1); opacity:0; }
-}
-
-.card-actions{
-  margin-top:auto;
-  display:flex; flex-direction:column; gap:10px;
-}
-
-.btn-watch, .btn-ww{
-  appearance:none; border:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
+.search-wrap input{
   width:100%;
-  font-family:var(--font-display);
-  font-weight:700; font-size:14.5px; letter-spacing:.5px;
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:13px;
+  letter-spacing:.3px;
+  padding:11px 14px 11px 38px;
+  border-radius:10px;
+  outline:none;
+  transition:border-color .2s ease;
+}
+.search-wrap input::placeholder{ color:var(--muted); }
+.search-wrap input:focus{ border-color:rgba(120,180,255,.55); }
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:25px;
+}
+
+.loading-state, .empty-state{
+  grid-column:1/-1;
+  text-align:center;
+  padding:60px 20px;
+  color:var(--muted);
+  font-size:13.5px;
+  letter-spacing:.5px;
+  border:1px dashed var(--border);
+  border-radius:14px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 10px 26px -14px rgba(0,0,0,.7);
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  display:flex; flex-direction:column;
+}
+.card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(120,180,255,.32);
+  box-shadow:0 18px 34px -16px rgba(0,0,0,.8);
+}
+
+.thumb-wrap{
+  position:relative;
+  width:100%;
+  height:180px;
+  background:#000;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.thumb-wrap img{
+  width:100%; height:100%;
+  object-fit:contain;
+  display:block;
+}
+.lang-badge{
+  position:absolute; top:10px; left:10px;
+  display:flex; align-items:center; gap:5px;
+  background:rgba(0,0,0,.72);
+  border:1px solid var(--gold);
+  color:var(--gold);
+  font-size:10.5px;
+  font-weight:700;
+  letter-spacing:.6px;
+  padding:5px 10px;
+  border-radius:20px;
+}
+.lang-badge svg{ flex:none; }
+
+.meta{
+  padding:16px 18px 18px;
+  display:flex; flex-direction:column; gap:9px;
+  flex:1;
+  text-align:center;
+}
+.teams{
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+  line-height:1.28;
+}
+.event{
+  font-size:13px;
+  color:var(--muted);
+  letter-spacing:.2px;
+}
+
+.status-badge{
+  position:absolute; top:10px; right:10px;
+  display:flex; align-items:center; gap:5px;
+  background:rgba(0,0,0,.55);
+  font-size:9.5px;
+  font-weight:700;
+  letter-spacing:.6px;
+  padding:4px 9px;
+  border-radius:20px;
+  opacity:.9;
+}
+.status-badge.live{ color:#7fd9a0; border:1px solid rgba(25,135,84,.4); }
+.status-badge.upcoming{ color:#e8a0a5; border:1px solid rgba(163,26,37,.4); }
+.status-badge.completed{ color:#c8ccd1; border:1px solid rgba(248,249,250,.2); }
+.status-dot-mini{ width:5px; height:5px; border-radius:50%; background:currentColor; flex:none; }
+.status-badge.live .status-dot-mini{ animation:miniPulse 1.8s infinite; }
+@keyframes miniPulse{
+  0%,100%{ opacity:1; }
+  50%{ opacity:.4; }
+}
+
+.card-time{
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:.3px;
+}
+
+.actions{ margin-top:auto; display:flex; flex-direction:column; gap:9px; padding-top:4px; }
+
+.btn{
+  appearance:none; border:none; cursor:pointer;
+  width:100%;
+  font-weight:800;
+  font-size:13.5px;
+  letter-spacing:.6px;
   padding:12px 14px;
-  border-radius:var(--radius-sm);
-  transition:filter .2s ease, transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:filter .2s ease, transform .15s ease;
 }
-.btn-watch{
-  background:linear-gradient(90deg, var(--cyan), var(--cyan-deep));
-  color:#04141A;
+.btn:active{ transform:scale(.97); }
+.btn-watch-now{
+  background:var(--accent-live);
+  color:#fff;
+  box-shadow:0 4px 15px var(--accent-live-shadow);
 }
-.btn-watch:hover{ filter:brightness(1.08); }
-.btn-watch:active{ transform:scale(.98); }
+.btn-watch-now:hover{ filter:brightness(1.1); }
+.btn-watch-now.is-disabled{
+  background:#2a2f38; color:var(--muted); box-shadow:none; cursor:not-allowed;
+}
+.btn-upcoming{
+  background:var(--accent-upcoming);
+  color:#fff;
+  box-shadow:0 4px 15px var(--accent-upcoming-shadow);
+}
+.btn-upcoming:hover{ filter:brightness(1.1); }
+.btn-completed{
+  background:#f8f9fa;
+  color:#000;
+  box-shadow:0 4px 15px rgba(248,249,250,.2);
+}
 
 .btn-ww{
-  background:transparent;
-  color:var(--text);
-  border:1px solid var(--border);
+  background:rgba(120,180,255,.06);
+  color:#9cc7ff;
+  border:1px solid rgba(120,180,255,.3);
 }
-.btn-ww:hover{ border-color:rgba(45,212,224,.5); color:var(--cyan); }
+.btn-ww:hover{ background:rgba(120,180,255,.13); }
 .btn-ww .chev{ margin-left:auto; transition:transform .3s ease; }
+.btn-ww.open{ background:rgba(120,180,255,.13); }
 .btn-ww.open .chev{ transform:rotate(180deg); }
-.btn-ww.open{ color:var(--cyan); border-color:rgba(45,212,224,.5); }
 
 .ww-panel-wrap{
   display:grid;
@@ -337,91 +264,55 @@ a{ color:inherit; }
   opacity:0;
   transition:grid-template-rows .38s cubic-bezier(.4,0,.2,1), opacity .3s ease;
 }
-.ww-panel-wrap.open{
-  grid-template-rows:1fr;
-  opacity:1;
-  margin-top:2px;
-}
-.ww-panel-inner{
-  overflow:hidden;
-  display:flex; flex-direction:column; gap:8px;
-}
+.ww-panel-wrap.open{ grid-template-rows:1fr; opacity:1; margin-top:1px; }
+.ww-panel-inner{ overflow:hidden; display:flex; flex-direction:column; gap:7px; }
 .ww-row{
   display:flex; align-items:center; gap:10px;
   padding:10px 12px;
-  background:var(--surface-2);
-  border:1px solid var(--border-soft);
-  border-radius:var(--radius-sm);
+  background:var(--card-2);
+  border:1px solid var(--border);
+  border-radius:9px;
   cursor:pointer;
   transition:background .2s ease, border-color .2s ease, transform .15s ease;
 }
 .ww-row:hover{
-  background:var(--cyan-soft);
-  border-color:rgba(45,212,224,.4);
+  background:rgba(120,180,255,.08);
+  border-color:rgba(120,180,255,.32);
   transform:translateX(2px);
 }
-.ww-flag{ font-size:17px; line-height:1; flex:none; }
-.ww-name{ font-size:13px; font-weight:500; flex:1; }
-.ww-code{
-  font-family:var(--font-mono);
-  font-size:10.5px;
-  letter-spacing:.5px;
-  color:var(--text-faint);
-}
-.ww-row:hover .ww-code{ color:var(--cyan); }
+.ww-flag{ font-size:16px; line-height:1; flex:none; }
+.ww-name{ font-size:12px; font-weight:700; flex:1; text-align:left; letter-spacing:.2px; }
+.ww-code{ font-size:10px; font-weight:700; letter-spacing:.5px; color:var(--muted); }
+.ww-row:hover .ww-code{ color:#9cc7ff; }
 
-.upcoming-list{
-  display:flex; flex-direction:column;
+footer{
+  margin-top:50px;
+  padding-top:26px;
+  border-top:1px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  text-align:center;
+}
+footer .note{
+  font-size:11.5px;
+  letter-spacing:1px;
+  color:var(--muted);
+  font-weight:700;
+}
+.visitor-counter-box{
+  display:flex; align-items:center; gap:12px;
+  padding:9px 18px;
+  background:var(--card);
   border:1px solid var(--border);
-  border-radius:var(--radius);
-  overflow:hidden;
-  background:var(--surface);
-}
-.upcoming-row{
-  display:flex; align-items:center; gap:14px;
-  padding:13px 18px;
-  border-bottom:1px solid var(--border-soft);
-  transition:background .18s ease;
-}
-.upcoming-row:last-child{ border-bottom:none; }
-.upcoming-row:hover{ background:rgba(255,255,255,.02); }
-.upcoming-thumb{
-  width:52px; height:52px;
   border-radius:10px;
-  object-fit:cover;
-  flex:none;
-  background:var(--surface-2);
 }
-.upcoming-info{ flex:1; min-width:0; }
-.upcoming-title{
-  font-family:var(--font-display);
-  font-weight:600;
-  font-size:15.5px;
-  letter-spacing:.2px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+.vc-item{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+.vc-value{
+  font-size:15px; font-weight:800; color:var(--text);
+  letter-spacing:.5px; font-variant-numeric:tabular-nums;
+  font-family:'Segoe UI', Arial, sans-serif;
 }
-.upcoming-meta{
-  font-size:12px;
-  color:var(--text-dim);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  margin-top:2px;
-}
-.upcoming-meta .upcoming-time{
-  font-family:var(--font-mono);
-  color:var(--text-faint);
-}
-.upcoming-tag{
-  display:flex; align-items:center; gap:5px;
-  flex:none;
-  font-family:var(--font-mono);
-  font-size:10.5px; font-weight:600; letter-spacing:.6px;
-  color:#ffe3ae;
-  background:var(--gold-soft);
-  border:1px solid rgba(255,176,32,.35);
-  padding:5px 10px;
-  border-radius:20px;
-}
-.upcoming-tag svg{ flex:none; opacity:.9; }
+.vc-label{ font-size:8.5px; letter-spacing:.8px; color:var(--muted); text-transform:uppercase; }
+.vc-sep{ width:1px; height:22px; background:var(--border); }
 
 .popup-overlay{
   position:fixed; inset:0;
@@ -464,6 +355,7 @@ a{ color:inherit; }
   font-size:14px;
   line-height:1.65;
   margin-bottom:24px;
+  font-family:'Segoe UI', Arial, sans-serif;
 }
 .popup-text b{
   color:#fff;
@@ -504,41 +396,20 @@ a{ color:inherit; }
   text-align:center;
 }
 
-footer{
-  margin-top:56px;
-  padding-top:26px;
-  border-top:1px solid var(--border-soft);
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  flex-wrap:wrap;
-  font-family:var(--font-mono);
-  font-size:11.5px;
-  letter-spacing:.4px;
-  color:var(--text-faint);
-  text-align:center;
-}
-footer a{ color:var(--cyan); text-decoration:none; }
-footer a:hover{ text-decoration:underline; }
-
-button:focus-visible, .ww-row:focus-visible, a:focus-visible{
-  outline:2px solid var(--cyan);
+button:focus-visible, .ww-row:focus-visible, input:focus-visible{
+  outline:2px solid #6cb2ff;
   outline-offset:2px;
-}
-
-@media (hover:none){
-  .btn-join-main:hover{ box-shadow:0 5px 20px rgba(23,184,35,.32); }
 }
 
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
 }
 
-@media (max-width:520px){
-  .site-header{ padding:17px 18px; }
-  .wordmark{ font-size:25px; }
-  .readout{ font-size:11px; gap:10px; }
-  .live-grid{ grid-template-columns:1fr; }
-  .card-title{ font-size:19px; }
-  .upcoming-thumb{ width:44px; height:44px; }
+@media (max-width:450px){
+  .title{ font-size:19px; }
+  .join-btn{ padding:9px 14px; font-size:12px; }
+  .controls{ justify-content:stretch; }
+  .search-wrap{ max-width:100%; }
 }
 
 </style>
@@ -546,48 +417,37 @@ button:focus-visible, .ww-row:focus-visible, a:focus-visible{
 
 <body>
 
-<div class="ambient"></div>
-<div class="grain"></div>
+<div class="app">
 
-<div class="page-shell">
-
-  <header class="site-header">
-    <div class="wordmark">FAN<span class="accent">CODE</span><sup>LIVE</sup></div>
-    <div class="readout">
-      <span class="readout-item"><span class="ticker-pulse"></span><b id="liveCount">0</b> LIVE NOW</span>
-      <span class="readout-sep">·</span>
-      <span class="readout-item"><b id="totalCount">0</b> TRACKED</span>
-      <span class="readout-sep">·</span>
-      <span class="readout-item"><span class="sync-dot"></span>SYNCED <b id="syncedAgo">—</b></span>
+  <header>
+    <div class="brand">
+      <div class="title">FANCODE LIVE</div>
+      <div class="last-update" id="lastUpdate">LAST UPDATE: LOADING...</div>
     </div>
+    <button type="button" class="join-btn" id="joinTelegramBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.5L2.7 11.9c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14c.3-1.3-.5-1.9-1.8-1.8z"/></svg>
+      JOIN TELEGRAM
+    </button>
   </header>
 
-  <div id="liveSection" class="section">
-    <div class="section-head">
-      <span class="section-dot is-live"></span>
-      <h2>Live Now</h2>
-      <span class="section-count" id="liveSectionCount">0</span>
-    </div>
-    <div id="liveGrid" class="live-grid">
-      <div class="loading-state"><span class="loading-dot"></span> Loading the match board…</div>
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="SEARCH TEAM OR EVENT...">
     </div>
   </div>
 
-  <div id="upcomingSection" class="section" style="display:none;">
-    <div class="section-head">
-      <span class="section-dot is-upcoming"></span>
-      <h2>Upcoming</h2>
-      <span class="section-count" id="upcomingSectionCount">0</span>
-    </div>
-    <div id="upcomingList" class="upcoming-list"></div>
+  <div id="matchesGrid" class="grid">
+    <div class="loading-state">LOADING MATCHES...</div>
   </div>
 
   <footer>
-    <span>FANCODE LIVE</span>
-    <span>·</span>
-    <span>Board refreshes automatically</span>
-    <span>·</span>
-    <a href="https://t.me/+JSkwy86_04M2Zjdl" target="_blank" rel="noopener noreferrer">Telegram</a>
+    <div class="note">SAYAN OAI | ALL RIGHTS RESERVED</div>
+    <div class="visitor-counter-box" id="visitorCounter">
+      <div class="vc-item"><span class="vc-value" id="vcTotal">—</span><span class="vc-label">Visits</span></div>
+      <div class="vc-sep"></div>
+      <div class="vc-item"><span class="vc-value" id="vcUnique">—</span><span class="vc-label">Unique</span></div>
+    </div>
   </footer>
 
 </div>
@@ -611,9 +471,10 @@ button:focus-visible, .ww-row:focus-visible, a:focus-visible{
 const CNPTV_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json';
 const WORLD_SOURCE  = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
 const PLAYER_PAGE   = 'fcplayer.html';
+const TELEGRAM_LINK = 'https://t.me/+JSkwy86_04M2Zjdl';
 const FALLBACK_IMG  = 'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+const HIT_COUNTER_URL = 'https://sayan-prime.pages.dev/api/hit?key=Fancode';
 const REFRESH_INTERVAL_MS = 60000;
-const CLOCK_TICK_MS = 20000;
 
 const LANG_CODE_MAP = {
   ENGLISH:'eng', HINDI:'hin', BANGLA:'ban', BENGALI:'ban', TAMIL:'tam',
@@ -621,22 +482,15 @@ const LANG_CODE_MAP = {
   GUJARATI:'guj', URDU:'urd', ODIA:'ori', ASSAMESE:'asm', BHOJPURI:'bho'
 };
 
-const ICON_PLAY  = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-const ICON_GLOBE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
-const ICON_CHEV  = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>';
-const ICON_CLOCK = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
-const ICON_EMPTY = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1.2 1 2.6 1.5 4 1.5s2.8-.5 4-1.5"/></svg>';
+const ICON_GLOBE = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
+const ICON_WW    = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
+const ICON_CHEV  = '<svg class="chev" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>';
 
-const liveGrid          = document.getElementById('liveGrid');
-const upcomingList      = document.getElementById('upcomingList');
-const liveSection       = document.getElementById('liveSection');
-const upcomingSection    = document.getElementById('upcomingSection');
-const liveCountEl       = document.getElementById('liveCount');
-const totalCountEl      = document.getElementById('totalCount');
-const syncedAgoEl       = document.getElementById('syncedAgo');
-const liveSectionCount  = document.getElementById('liveSectionCount');
-const upcomingSectionCount = document.getElementById('upcomingSectionCount');
+const grid       = document.getElementById('matchesGrid');
+const lastUpdateEl = document.getElementById('lastUpdate');
+const searchInput  = document.getElementById('searchInput');
 
+let allMatches = [];
 let lastUpdatedAt = null;
 let lastWorldSnapshot = null;
 let openPanels = new Set();
@@ -655,6 +509,13 @@ function langToCode(rawLang, isLive){
   if(LANG_CODE_MAP[lang]) return LANG_CODE_MAP[lang];
   const short = lang.slice(0,3).toLowerCase();
   return short || 'eng';
+}
+
+function langLabel(rawLang){
+  const lang = String(rawLang || '').trim().toUpperCase();
+  if(!lang) return null;
+  if(lang === 'BLOODY_SWEET') return 'MULTI';
+  return lang;
 }
 
 function parseMatchTime(str){
@@ -693,94 +554,91 @@ function formatMatchTime(date){
   const mm = String(date.getMinutes()).padStart(2, '0');
   const ap = h >= 12 ? 'PM' : 'AM';
   h = h % 12; if(h === 0) h = 12;
-  return `${datePart} · ${h}:${mm} ${ap}`;
+  return `${datePart}, ${h}:${mm} ${ap}`;
 }
 
-function formatRelative(date){
-  if(!date) return '—';
-  const diffSec = Math.round((Date.now() - date.getTime()) / 1000);
-  if(diffSec < 15) return 'just now';
-  if(diffSec < 60) return diffSec + 's ago';
-  const diffMin = Math.round(diffSec / 60);
-  if(diffMin < 60) return diffMin + 'm ago';
-  const diffHr = Math.round(diffMin / 60);
-  return diffHr + 'h ago';
+function formatAbsoluteIST(date){
+  if(!date) return 'UNAVAILABLE';
+  const datePart = date.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }).toUpperCase();
+  let h = date.getHours();
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if(h === 0) h = 12;
+  return `${datePart}, ${h}:${mm} ${ap} IST`;
 }
 
 function buildPlayerUrl(id, langCode, streamIndex){
   return `${PLAYER_PAGE}?id=${id}_${langCode}&s=${streamIndex}`;
 }
 
-function renderLiveCard(m){
-  const canWatch = m.cnptvUrl && m.langCode;
-  const wwOptions = [
-    { key:'lk', flag:'🇱🇰', name:'Sri Lanka',  url:m.lk, idx:1 },
-    { key:'np', flag:'🇳🇵', name:'Nepal',      url:m.np, idx:2 },
-    { key:'bd', flag:'🇧🇩', name:'Bangladesh', url:m.bd, idx:3 }
-  ].filter(o => o.url);
-  const hasAnyWW = m.langCode && wwOptions.length > 0;
-  const isOpen = openPanels.has(String(m.id));
+function renderCard(m){
+  const langTag = m.status === 'LIVE' ? langLabel(m.language) : null;
+  const timeLabel = formatMatchTime(m.time);
 
-  const watchAttrs = canWatch
-    ? `data-url="${esc(buildPlayerUrl(m.id, m.langCode, 0))}"`
-    : 'disabled';
+  let statusHtml = '';
+  let actionsHtml = '';
 
-  const actionsHtml = `
-    <button type="button" class="btn-watch ${canWatch ? '' : 'is-disabled'}" ${watchAttrs}>
-      ${ICON_PLAY} WATCH NOW
-    </button>
-    ${hasAnyWW ? `
-    <button type="button" class="btn-ww ${isOpen ? 'open' : ''}" data-target="ww-${m.id}">
-      ${ICON_GLOBE} WORLD WIDE STREAM ${ICON_CHEV}
-    </button>
-    <div class="ww-panel-wrap ${isOpen ? 'open' : ''}" id="ww-${m.id}">
-      <div class="ww-panel-inner">
-        ${wwOptions.map(o => `
-          <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id, m.langCode, o.idx))}">
-            <span class="ww-flag">${o.flag}</span>
-            <span class="ww-name">${o.name}</span>
-            <span class="ww-code">${o.key.toUpperCase()}</span>
-          </div>`).join('')}
-      </div>
-    </div>` : ''}
-  `;
+  if(m.status === 'LIVE'){
+    statusHtml = `<span class="status-badge live"><span class="status-dot-mini"></span>LIVE</span>`;
+
+    const canWatch = m.cnptvUrl && m.langCode;
+    const watchAttrs = canWatch
+      ? `data-url="${esc(buildPlayerUrl(m.id, m.langCode, 0))}"`
+      : 'disabled';
+
+    const wwOptions = [
+      { key:'lk', flag:'🇱🇰', name:'Only Sri Lanka User',  url:m.lk, idx:1 },
+      { key:'np', flag:'🇳🇵', name:'Only Nepal User',      url:m.np, idx:2 },
+      { key:'bd', flag:'🇧🇩', name:'Only Bangladesh User', url:m.bd, idx:3 }
+    ].filter(o => o.url);
+    const hasAnyWW = m.langCode && wwOptions.length > 0;
+    const isOpen = openPanels.has(String(m.id));
+
+    actionsHtml = `
+      <button type="button" class="btn btn-watch-now ${canWatch ? '' : 'is-disabled'}" ${watchAttrs}>WATCH NOW</button>
+      ${hasAnyWW ? `
+      <button type="button" class="btn btn-ww ${isOpen ? 'open' : ''}" data-target="ww-${m.id}">
+        ${ICON_WW} WORLD WIDE STREAM ${ICON_CHEV}
+      </button>
+      <div class="ww-panel-wrap ${isOpen ? 'open' : ''}" id="ww-${m.id}">
+        <div class="ww-panel-inner">
+          ${wwOptions.map(o => `
+            <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id, m.langCode, o.idx))}">
+              <span class="ww-flag">${o.flag}</span>
+              <span class="ww-name">${o.name}</span>
+              <span class="ww-code">${o.key.toUpperCase()}</span>
+            </div>`).join('')}
+        </div>
+      </div>` : ''}
+    `;
+  } else if(m.status === 'COMPLETED'){
+    statusHtml = `<span class="status-badge completed"><span class="status-dot-mini"></span>COMPLETED</span>`;
+    actionsHtml = `<a class="btn btn-completed" href="${TELEGRAM_LINK}" target="_blank" rel="noopener noreferrer">THANK YOU</a>`;
+  } else {
+    statusHtml = `<span class="status-badge upcoming"><span class="status-dot-mini"></span>UPCOMING</span>`;
+    actionsHtml = `<button type="button" class="btn btn-upcoming" data-upcoming-time="${esc(timeLabel)}">UPCOMING</button>`;
+  }
 
   return `
-    <article class="match-card" data-match-id="${esc(m.id)}">
-      <div class="card-media">
+    <article class="card" data-match-id="${esc(m.id)}">
+      <div class="thumb-wrap">
         <img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
+        ${langTag ? `<span class="lang-badge">${ICON_GLOBE}${esc(langTag)}</span>` : ''}
+        ${statusHtml}
       </div>
-      <div class="card-body">
-        <h3 class="card-title">${esc(m.title)}</h3>
-        <p class="card-tournament">${esc(m.tournament)}</p>
-        <div class="status-line">
-          <span class="tally"><span class="tally-core"></span><span class="tally-ring"></span></span>
-          <span class="status-live-text">LIVE NOW</span>
-          <span class="status-sep">·</span>
-          <span>${formatMatchTime(m.time)}</span>
-        </div>
-        <div class="card-actions">${actionsHtml}</div>
+      <div class="meta">
+        <div class="teams">${esc(m.title)}</div>
+        <div class="event">${esc(m.tournament)}</div>
+        <div class="card-time">${esc(timeLabel)}</div>
+        <div class="actions">${actionsHtml}</div>
       </div>
     </article>
   `;
 }
 
-function renderUpcomingRow(m){
-  return `
-    <div class="upcoming-row">
-      <img class="upcoming-thumb" src="${esc(m.image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
-      <div class="upcoming-info">
-        <div class="upcoming-title">${esc(m.title)}</div>
-        <div class="upcoming-meta">${esc(m.tournament)} <span class="upcoming-time">· ${formatMatchTime(m.time)}</span></div>
-      </div>
-      <span class="upcoming-tag">${ICON_CLOCK} Upcoming</span>
-    </div>
-  `;
-}
-
 function attachHandlers(){
-  liveGrid.addEventListener('click', (e) => {
-    const watchBtn = e.target.closest('.btn-watch');
+  grid.addEventListener('click', (e) => {
+    const watchBtn = e.target.closest('.btn-watch-now');
     if(watchBtn && watchBtn.dataset.url){
       window.location.href = watchBtn.dataset.url;
       return;
@@ -792,7 +650,7 @@ function attachHandlers(){
     }
     const wwBtn = e.target.closest('.btn-ww');
     if(wwBtn){
-      const matchId = wwBtn.closest('.match-card').dataset.matchId;
+      const matchId = wwBtn.closest('.card').dataset.matchId;
       const panel = document.getElementById(wwBtn.dataset.target);
       if(panel){
         const willOpen = !panel.classList.contains('open');
@@ -800,10 +658,15 @@ function attachHandlers(){
         wwBtn.classList.toggle('open', willOpen);
         if(willOpen){ openPanels.add(matchId); } else { openPanels.delete(matchId); }
       }
+      return;
+    }
+    const upcomingBtn = e.target.closest('.btn-upcoming');
+    if(upcomingBtn){
+      alert('This match is scheduled to start at:\n' + upcomingBtn.dataset.upcomingTime);
     }
   });
 
-  liveGrid.addEventListener('keydown', (e) => {
+  grid.addEventListener('keydown', (e) => {
     if(e.key !== 'Enter' && e.key !== ' ') return;
     const row = e.target.closest('.ww-row');
     if(row && row.dataset.url){
@@ -811,29 +674,23 @@ function attachHandlers(){
       window.location.href = row.dataset.url;
     }
   });
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if(!q){ renderGrid(allMatches); return; }
+    const filtered = allMatches.filter(m =>
+      m.title.toLowerCase().includes(q) || m.tournament.toLowerCase().includes(q)
+    );
+    renderGrid(filtered);
+  });
 }
 
-function renderBoard(matches){
-  const liveMatches = matches.filter(m => m.isLive);
-  const upcomingMatches = matches.filter(m => !m.isLive);
-
-  liveCountEl.textContent = liveMatches.length;
-  totalCountEl.textContent = matches.length;
-  liveSectionCount.textContent = liveMatches.length;
-  upcomingSectionCount.textContent = upcomingMatches.length;
-
-  if(liveMatches.length){
-    liveGrid.innerHTML = liveMatches.map(renderLiveCard).join('');
-  } else {
-    liveGrid.innerHTML = `<div class="empty-live">${ICON_EMPTY} No matches are live right now. Check the upcoming list below, or check back shortly.</div>`;
+function renderGrid(matches){
+  if(!matches.length){
+    grid.innerHTML = `<div class="empty-state">No matches found.</div>`;
+    return;
   }
-
-  if(upcomingMatches.length){
-    upcomingSection.style.display = '';
-    upcomingList.innerHTML = upcomingMatches.map(renderUpcomingRow).join('');
-  } else {
-    upcomingSection.style.display = 'none';
-  }
+  grid.innerHTML = matches.map(renderCard).join('');
 }
 
 function buildMatches(cnptvData, worldData){
@@ -841,7 +698,8 @@ function buildMatches(cnptvData, worldData){
   (cnptvData.matches || []).forEach(m => { cnptvMap[m.match_id] = m; });
 
   const matches = (worldData.matches || []).map(m => {
-    const isLive = String(m.status || '').toUpperCase() === 'LIVE';
+    const status = String(m.status || '').toUpperCase();
+    const isLive = status === 'LIVE';
     const cnptv = cnptvMap[m.match_id];
     const cnptvUrl = cnptv && cnptv.cnptv_cdn ? cnptv.cnptv_cdn : null;
     const streams = m.streams || {};
@@ -851,6 +709,8 @@ function buildMatches(cnptvData, worldData){
       title: m.title || 'Match',
       tournament: m.tournament || '',
       image: m.image || FALLBACK_IMG,
+      status: status === 'LIVE' || status === 'COMPLETED' ? status : 'UPCOMING',
+      language: m.language,
       isLive,
       time: parseMatchTime(m.startTime),
       langCode: langToCode(m.language, isLive),
@@ -882,26 +742,49 @@ async function refresh(isFirstLoad){
 
     const snapshot = JSON.stringify(worldData.matches || []);
     if(!isFirstLoad && snapshot === lastWorldSnapshot){
-      syncedAgoEl.textContent = formatRelative(lastUpdatedAt);
+      lastUpdateEl.textContent = 'LAST UPDATE: ' + formatAbsoluteIST(lastUpdatedAt);
       return;
     }
     lastWorldSnapshot = snapshot;
 
-    const matches = buildMatches(cnptvData, worldData);
-    renderBoard(matches);
-    syncedAgoEl.textContent = formatRelative(lastUpdatedAt);
+    allMatches = buildMatches(cnptvData, worldData);
+    const q = searchInput.value.trim().toLowerCase();
+    if(q){
+      renderGrid(allMatches.filter(m => m.title.toLowerCase().includes(q) || m.tournament.toLowerCase().includes(q)));
+    } else {
+      renderGrid(allMatches);
+    }
+    lastUpdateEl.textContent = 'LAST UPDATE: ' + formatAbsoluteIST(lastUpdatedAt);
   } catch(err){
     console.error('FanCode board failed to load:', err);
     if(isFirstLoad){
-      liveGrid.innerHTML = `<div class="grid-error">Couldn't load the match board. Try refreshing.</div>`;
+      grid.innerHTML = `<div class="empty-state">Couldn't load the match board. Try refreshing.</div>`;
+      lastUpdateEl.textContent = 'LAST UPDATE: UNAVAILABLE';
     }
   }
 }
 
+function loadVisitorCounter(){
+  fetch(HIT_COUNTER_URL, { cache:'no-store' })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('vcTotal').textContent = data.total_formatted != null ? data.total_formatted : '—';
+      document.getElementById('vcUnique').textContent = data.unique_formatted != null ? data.unique_formatted : '—';
+    })
+    .catch(() => {
+      const box = document.getElementById('visitorCounter');
+      if(box){ box.style.display = 'none'; }
+    });
+}
+
 attachHandlers();
 refresh(true);
+loadVisitorCounter();
 setInterval(() => refresh(false), REFRESH_INTERVAL_MS);
-setInterval(() => { syncedAgoEl.textContent = formatRelative(lastUpdatedAt); }, CLOCK_TICK_MS);
+
+document.getElementById('joinTelegramBtn').addEventListener('click', () => {
+  window.open(TELEGRAM_LINK, '_blank');
+});
 
 const telegramModal = document.getElementById('telegramModal');
 window.addEventListener('load', () => {
