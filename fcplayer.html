@@ -166,21 +166,41 @@ body {
   pointer-events: auto;
 }
 .center-play-btn {
-  width: 72px; height: 72px;
+  width: 60px; height: 60px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.25);
-  background: rgba(20,20,22,.55);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  backdrop-filter: blur(18px) saturate(180%);
+  border: none;
+  background:
+    linear-gradient(155deg, rgba(255,255,255,.22), rgba(255,255,255,.02) 60%),
+    rgba(18,18,22,.44);
+  -webkit-backdrop-filter: blur(22px) saturate(200%);
+  backdrop-filter: blur(22px) saturate(200%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -7px 12px rgba(0,0,0,.24),
+    0 14px 30px -10px rgba(0,0,0,.6),
+    0 0 0 1px rgba(255,255,255,.07);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   cursor: pointer;
-  transition: transform .15s ease, background .2s ease;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
 }
-.center-play-btn svg { margin-left: 3px; }
-.center-play-btn:active { transform: scale(.92); }
+.center-play-btn svg {
+  width: 22px; height: 22px;
+  margin-left: 3px;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.4));
+}
+.center-play-btn:hover {
+  transform: scale(1.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 -7px 12px rgba(0,0,0,.24),
+    0 16px 34px -8px rgba(0,0,0,.65),
+    0 0 0 1px rgba(10,132,255,.4),
+    0 0 26px rgba(10,132,255,.28);
+}
+.center-play-btn:active { transform: scale(.9); }
 
 #controls-bar {
   position: absolute;
@@ -246,83 +266,139 @@ body {
   cursor: pointer;
   border-radius: 8px;
   flex: none;
-  transition: background .15s ease, color .15s ease;
+  transition: background .18s ease, color .15s ease, transform .15s cubic-bezier(.34,1.56,.64,1);
 }
-.player-btn:hover { background: rgba(255,255,255,.12); }
-.player-btn:active { transform: scale(.9); }
+.player-btn:hover { background: rgba(255,255,255,.13); transform: translateY(-1px); }
+.player-btn:active { transform: scale(.88); }
 .unmute-hint {
   color: #0A84FF;
-  animation: unmute-glow 1.1s ease-in-out infinite;
+  animation: unmute-glow 1.7s ease-in-out infinite;
 }
 @keyframes unmute-glow {
-  0%, 100% { background: rgba(10,132,255,0); }
-  50% { background: rgba(10,132,255,.28); }
+  0%, 100% { background: rgba(10,132,255,.08); box-shadow: 0 0 0 0 rgba(10,132,255,.4); }
+  50% { background: rgba(10,132,255,.32); box-shadow: 0 0 0 7px rgba(10,132,255,0); }
 }
 
 .live-pill {
+  appearance: none;
+  border: none;
+  cursor: default;
   display: flex;
   align-items: center;
   gap: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: .6px;
   color: #ff5a5a;
-  padding: 4px 8px 4px 6px;
+  padding: 4px 9px 4px 6px;
   border-radius: 20px;
   background: rgba(255,69,69,.14);
   border: 1px solid rgba(255,69,69,.35);
   flex: none;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
 }
 .live-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
   background: #ff4545;
   animation: live-blink 1.4s infinite;
+  flex: none;
 }
 @keyframes live-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: .3; }
 }
+.live-pill.is-behind {
+  color: #ffb020;
+  background: rgba(255,176,32,.14);
+  border-color: rgba(255,176,32,.35);
+  cursor: pointer;
+}
+.live-pill.is-behind:hover { background: rgba(255,176,32,.24); transform: translateY(-1px); }
+.live-pill.is-behind:active { transform: scale(.92); }
+.live-pill.is-behind .live-dot {
+  background: #ffb020;
+  animation: none;
+  opacity: 1;
+}
+#livePillText { min-width: 0; }
 
 .controls-spacer { flex: 1; }
 
 #resizeBtn {
   width: auto;
-  padding: 0 10px;
-  font-size: 11.5px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: .5px;
-  color: rgba(255,255,255,.9);
+  letter-spacing: .6px;
+  color: rgba(255,255,255,.86);
 }
+#resizeBtn:hover { background: rgba(255,255,255,.16); }
 
 #qualityMenu {
   position: absolute;
   right: 16px;
   bottom: 74px;
   z-index: 5;
-  min-width: 120px;
-  background: rgba(24,24,27,.82);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 12px;
-  padding: 6px;
-  display: none;
+  min-width: 158px;
+  background: linear-gradient(165deg, rgba(34,34,40,.92), rgba(18,18,22,.92));
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 8px;
+  display: flex;
   flex-direction: column;
-  gap: 2px;
-  max-height: 240px;
+  gap: 1px;
+  max-height: 260px;
   overflow-y: auto;
+  box-shadow: 0 20px 45px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  transform-origin: bottom right;
+  transform: scale(.9) translateY(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
 }
-#qualityMenu.open { display: flex; }
+#qualityMenu.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.quality-menu-label {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+  padding: 6px 10px 8px;
+}
 .quality-option {
-  padding: 9px 12px;
-  font-size: 13px;
-  color: rgba(255,255,255,.82);
-  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,.78);
+  border-radius: 10px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background .15s ease, color .15s ease;
 }
-.quality-option:hover { background: rgba(255,255,255,.1); }
-.quality-option.active { color: #0A84FF; font-weight: 600; }
+.quality-option:hover { background: rgba(255,255,255,.09); color: #fff; }
+.quality-option.active { color: #0A84FF; font-weight: 700; background: rgba(10,132,255,.12); }
+.quality-option.active::after {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #0A84FF;
+  flex: none;
+}
 
 .popup-overlay {
   position: fixed; inset: 0;
@@ -498,10 +574,31 @@ body {
 }
 .error-contact-btn svg { width:16px; height:16px; fill:#fff; flex-shrink:0; }
 
+.error-switch-btn {
+  display: none;
+  align-items: center; justify-content: center; gap: 9px;
+  width: 100%;
+  padding: 14px 20px; border-radius: 50px;
+  background: linear-gradient(90deg, #0A84FF, #38a4ff);
+  border: none;
+  color: #fff; cursor: pointer;
+  font-family: 'Amaranth', sans-serif;
+  font-size: 15.5px; font-weight: 700;
+  text-decoration: none; letter-spacing: .3px;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 24px rgba(10,132,255,.34);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.error-switch-btn.show { display: inline-flex; }
+.error-switch-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(10,132,255,.44); }
+.error-switch-btn:active { transform: scale(.97); }
+.error-switch-btn svg { width:17px; height:17px; fill:#fff; flex-shrink:0; }
+
 @media (hover: none) {
   .logo-btn:hover { opacity: 1; }
   .btn-join-main:hover { box-shadow: 0 5px 20px rgba(23,184,35,0.32); }
   .error-contact-btn:hover { background: rgba(255,255,255,.09); transform: none; }
+  .error-switch-btn:hover { box-shadow: 0 8px 24px rgba(10,132,255,.34); transform: none; }
   .player-btn:hover { background: transparent; }
 }
 </style>
@@ -542,7 +639,7 @@ body {
     <div id="controls-row">
       <button type="button" id="playPauseBtn" class="player-btn" aria-label="Play"></button>
       <button type="button" id="muteBtn" class="player-btn" aria-label="Mute"></button>
-      <span class="live-pill"><span class="live-dot"></span>LIVE</span>
+      <button type="button" class="live-pill" id="livePill"><span class="live-dot"></span><span id="livePillText">LIVE</span></button>
       <span class="controls-spacer"></span>
       <button type="button" id="resizeBtn" class="player-btn" aria-label="Resize">FIT</button>
       <button type="button" id="qualityBtn" class="player-btn" aria-label="Quality"></button>
@@ -570,22 +667,26 @@ body {
 
 <div id="error-screen">
   <div class="error-card">
-    <div class="error-icon">
+    <div class="error-icon" id="error-icon">
       <svg viewBox="0 0 24 24">
         <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
         <line x1="12" y1="2" x2="12" y2="12"/>
       </svg>
     </div>
-    <div class="error-title">Stream Not Found</div>
+    <div class="error-title" id="error-title">Stream Not Found</div>
     <div class="error-badge" id="error-badge">"Unknown"</div>
-    <div class="error-body">
+    <div class="error-body" id="error-body">
       The requested stream is not available right now.<br>
       Please check the link or try again later.
     </div>
-    <div class="error-retry-note">
+    <div class="error-retry-note" id="error-retry-note">
       <span class="error-retry-dot"></span>
       <span>Retrying Automatically</span>
     </div>
+    <a href="#" class="error-switch-btn" id="error-switch-btn">
+      <svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
+      Switch to Watch Now
+    </a>
     <a href="https://wa.me/message/BOF76S5WFJVMN1" target="_blank" rel="noopener noreferrer" class="error-contact-btn" id="error-contact-btn">
       <svg viewBox="0 0 24 24">
         <path d="M9.993 15.674l-.398 5.604c.57 0 .817-.245 1.113-.54l2.67-2.557 5.53 4.047c1.014.558 1.734.264 1.987-.939l3.6-16.86c.3-1.4-.506-1.95-1.496-1.58L1.27 9.64c-1.37.53-1.35 1.29-.233 1.64l5.68 1.77 13.337-8.418c.59-.39 1.13-.175.69.215"/>
@@ -614,7 +715,12 @@ body {
   var playerShell = document.getElementById('player-shell');
   var loadScreen = document.getElementById('loading-screen');
   var errScreen = document.getElementById('error-screen');
+  var errIcon = document.getElementById('error-icon');
+  var errTitle = document.getElementById('error-title');
   var errBadge = document.getElementById('error-badge');
+  var errBody = document.getElementById('error-body');
+  var errRetryNote = document.getElementById('error-retry-note');
+  var errSwitchBtn = document.getElementById('error-switch-btn');
   var contactBtn = document.getElementById('error-contact-btn');
   var popup = document.getElementById('popup');
   var joinBtn = document.getElementById('popupJoinBtn');
@@ -632,6 +738,8 @@ body {
   var progressTrack = document.getElementById('progress-track');
   var progressFill = document.getElementById('progress-fill');
   var progressThumb = document.getElementById('progress-thumb');
+  var livePill = document.getElementById('livePill');
+  var livePillText = document.getElementById('livePillText');
 
   var ICON_PLAY = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
@@ -641,6 +749,11 @@ body {
   var ICON_FS_ENTER = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/><path d="M15 20h5v-5"/></svg>';
   var ICON_FS_EXIT = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>';
   var ICON_GEAR = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2.6-1.5L14 2h-4l-.5 2.4a7.6 7.6 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.3-1a7.6 7.6 0 0 0 2.6 1.5L10 22h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.3 1 2-3.4z"/></svg>';
+  var ICON_ALERT = '<svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>';
+  var ICON_GEO_BLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/><line x1="4.5" y1="4.5" x2="19.5" y2="19.5"/></svg>';
+
+  var REGION_NAMES = { 1: 'Sri Lanka', 2: 'Nepal', 3: 'Bangladesh' };
+  var LIVE_EDGE_TOLERANCE = 60;
 
   contactBtn.href = CONTACT_LINK;
   joinBtn.href = WA_CHANNEL;
@@ -684,17 +797,45 @@ body {
     setTimeout(function () { loadScreen.style.display = 'none'; }, 370);
   }
 
-  function showError(label) {
+  function showError(type, label) {
     clearTimeout(safetyTimer);
     loadScreen.style.display = 'none';
     playerShell.style.visibility = 'hidden';
-    errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
+
+    var region = REGION_NAMES[currentStreamIndex];
+
+    if (type === 'regional' && region) {
+      errIcon.innerHTML = ICON_GEO_BLOCK;
+      errTitle.textContent = 'Regional Stream Unavailable';
+      errBadge.textContent = region.toUpperCase() + ' FEED';
+      errBody.innerHTML = 'This is the ' + region + ' relay, and it looks like it cannot be reached from your current location.<br>It is meant for viewers inside ' + region + '. Try Watch Now instead.';
+      errRetryNote.style.display = 'none';
+      errSwitchBtn.href = 'fcplayer.html?id=' + currentMatchId + '_eng&s=0';
+      errSwitchBtn.classList.add('show');
+    } else if (type === 'notfound') {
+      errIcon.innerHTML = ICON_ALERT;
+      errTitle.textContent = 'Stream Not Found';
+      errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
+      errBody.innerHTML = 'This match link is not available right now.<br>It may have already ended, or the live feed has not started yet.';
+      errRetryNote.style.display = 'flex';
+      errSwitchBtn.classList.remove('show');
+      scheduleRetry();
+    } else {
+      errIcon.innerHTML = ICON_ALERT;
+      errTitle.textContent = 'Connection Trouble';
+      errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
+      errBody.innerHTML = 'Having trouble connecting to this stream right now.<br>Please check your internet connection.';
+      errRetryNote.style.display = 'flex';
+      errSwitchBtn.classList.remove('show');
+      scheduleRetry();
+    }
+
     errScreen.classList.add('show');
-    scheduleRetry();
   }
 
   function hideError() {
     errScreen.classList.remove('show');
+    errSwitchBtn.classList.remove('show');
     clearTimeout(retryTimer);
   }
 
@@ -789,7 +930,8 @@ body {
 
   function handleFatalError() {
     destroyHls();
-    showError(currentMatchId + '_' + currentStreamIndex);
+    var type = REGION_NAMES[currentStreamIndex] ? 'regional' : 'connection';
+    showError(type, currentMatchId + '_' + currentStreamIndex);
   }
 
   function buildQualityMenu(levels) {
@@ -803,7 +945,8 @@ body {
       items.push({ idx: i, height: levels[i].height || 0 });
     }
     items.sort(function (a, b) { return b.height - a.height; });
-    var html = '<div class="quality-option active" data-level="-1">Auto</div>';
+    var html = '<div class="quality-menu-label">Quality</div>';
+    html += '<div class="quality-option active" data-level="-1">Auto</div>';
     for (var j = 0; j < items.length; j++) {
       html += '<div class="quality-option" data-level="' + items[j].idx + '">' + items[j].height + 'p</div>';
     }
@@ -848,12 +991,12 @@ body {
     currentStreamIndex = streamIndex;
     resolveStreamUrl(matchId, streamIndex).then(function (url) {
       if (!url) {
-        showError(matchId + '_' + streamIndex);
+        showError('notfound', matchId + '_' + streamIndex);
         return;
       }
       playStream(url);
     }).catch(function () {
-      showError(matchId + '_' + streamIndex);
+      showError('connection', matchId + '_' + streamIndex);
     });
   }
 
@@ -1000,6 +1143,46 @@ body {
   }
   progressTrack.addEventListener('click', seekFromEvent);
 
+  function getLiveEdge() {
+    if (hls && typeof hls.liveSyncPosition === 'number' && isFinite(hls.liveSyncPosition)) {
+      return hls.liveSyncPosition;
+    }
+    if (video.seekable && video.seekable.length) {
+      return video.seekable.end(video.seekable.length - 1);
+    }
+    if (isFinite(video.duration)) { return video.duration; }
+    return null;
+  }
+
+  function formatBehind(seconds) {
+    var s = Math.max(0, Math.round(seconds));
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return '-' + m + ':' + (r < 10 ? '0' + r : r);
+  }
+
+  function updateLiveStatus() {
+    if (video.duration && isFinite(video.duration)) {
+      livePill.classList.remove('is-behind');
+      livePillText.textContent = 'LIVE';
+      return;
+    }
+    var edge = getLiveEdge();
+    var behind = (edge !== null) ? (edge - video.currentTime) : 0;
+    if (behind <= LIVE_EDGE_TOLERANCE) {
+      livePill.classList.remove('is-behind');
+      livePillText.textContent = 'LIVE';
+    } else {
+      livePill.classList.add('is-behind');
+      livePillText.textContent = formatBehind(behind);
+    }
+  }
+
+  livePill.addEventListener('click', function () {
+    var edge = getLiveEdge();
+    if (edge !== null) { video.currentTime = edge; }
+  });
+
   video.addEventListener('playing', function () {
     clearTimeout(safetyTimer);
     hideLoader();
@@ -1009,7 +1192,9 @@ body {
   video.addEventListener('pause', updatePlayIcon);
   video.addEventListener('volumechange', updateMuteIcon);
   video.addEventListener('timeupdate', updateProgress);
+  video.addEventListener('timeupdate', updateLiveStatus);
   video.addEventListener('progress', updateProgress);
+  video.addEventListener('progress', updateLiveStatus);
   video.addEventListener('loadedmetadata', updatePipAvailability);
 
   muteBtn.classList.add('unmute-hint');
@@ -1032,7 +1217,7 @@ body {
   if (parsed) {
     attemptLoad(parsed.matchId, parsed.streamIndex);
   } else {
-    showError(null);
+    showError('notfound', 'Invalid Link');
   }
 
 })();

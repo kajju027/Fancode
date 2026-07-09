@@ -5,18 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FanCode Live — Match Board</title>
 
-<!-- Fonts: condensed display face for the broadcast/scoreboard feel,
-     Inter for readable body text, JetBrains Mono for time/data readouts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Acme&family=Amaranth:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 
-/* ============================================================
-   DESIGN TOKENS
-   ============================================================ */
 :root{
   --bg:            #0A0D13;
+  --bg-2:          #0D111A;
   --surface:       #121826;
   --surface-2:     #182036;
   --border:        #232C42;
@@ -25,7 +22,7 @@
   --live:          #FF4545;
   --live-soft:     rgba(255,69,69,.16);
   --gold:          #FFB020;
-  --gold-soft:     rgba(255,176,32,.16);
+  --gold-soft:     rgba(255,176,32,.14);
   --cyan:          #2DD4E0;
   --cyan-deep:     #129AA6;
   --cyan-soft:     rgba(45,212,224,.14);
@@ -34,10 +31,10 @@
   --text-dim:      #94A1B8;
   --text-faint:    #5B6580;
 
-  --radius:        14px;
-  --radius-sm:     9px;
+  --radius:        16px;
+  --radius-sm:     10px;
 
-  --font-display:  'Oswald', sans-serif;
+  --font-display:  'Big Shoulders Display', sans-serif;
   --font-body:     'Inter', sans-serif;
   --font-mono:     'JetBrains Mono', monospace;
 }
@@ -53,52 +50,57 @@ html,body{
 *{ user-select:none; }
 button{ font-family:inherit; }
 img{ -webkit-user-drag:none; }
-
 ::selection{ background:var(--cyan-soft); }
-
 a{ color:inherit; }
 
-/* Ambient studio glow behind everything — quiet, not a spotlight */
 .ambient{
   position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgba(45,212,224,.10), transparent 60%),
+    radial-gradient(900px 560px at 108% 8%, rgba(255,176,32,.07), transparent 60%),
+    radial-gradient(1200px 700px at 50% 118%, rgba(255,69,69,.05), transparent 60%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 40%);
 }
-.ambient::before,
-.ambient::after{
-  content:''; position:absolute; width:640px; height:640px; border-radius:50%;
-  filter:blur(140px); opacity:.10;
-}
-.ambient::before{ background:var(--cyan); top:-220px; left:-160px; }
-.ambient::after{ background:var(--gold); bottom:-260px; right:-180px; opacity:.07; }
 
-/* ============================================================
-   LAYOUT SHELL
-   ============================================================ */
+.grain{
+  position:fixed; inset:0; z-index:2; pointer-events:none;
+  opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 .page-shell{
   position:relative; z-index:1;
   max-width:1360px;
   margin:0 auto;
-  padding:28px 20px 64px;
+  padding:26px 20px 70px;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
 .site-header{
-  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  display:flex; align-items:center; justify-content:space-between; gap:20px;
   flex-wrap:wrap;
-  padding:18px 24px;
-  background:linear-gradient(180deg, var(--surface), var(--surface-2));
+  padding:20px 26px;
+  background:linear-gradient(165deg, var(--surface), var(--surface-2));
   border:1px solid var(--border);
   border-radius:var(--radius);
-  margin-bottom:34px;
+  margin-bottom:36px;
+  position:relative;
+  overflow:hidden;
+}
+.site-header::before{
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(90deg, rgba(45,212,224,.5), rgba(255,176,32,.5), rgba(255,69,69,.5));
+  height:2px; top:0; left:0; right:0;
+  opacity:.6;
 }
 .wordmark{
   font-family:var(--font-display);
-  font-weight:700;
-  font-size:26px;
-  letter-spacing:.5px;
+  font-weight:800;
+  font-size:30px;
+  line-height:1;
+  letter-spacing:.2px;
   color:var(--text);
-  display:flex; align-items:baseline; gap:8px;
+  display:flex; align-items:center; gap:9px;
 }
 .wordmark .accent{ color:var(--cyan); }
 .wordmark sup{
@@ -107,24 +109,26 @@ a{ color:inherit; }
   font-weight:600;
   color:var(--bg);
   background:var(--live);
-  padding:3px 6px;
+  padding:3px 7px;
   border-radius:5px;
   letter-spacing:1px;
-  vertical-align:middle;
-  top:-8px;
+  align-self:flex-start;
+  margin-top:3px;
 }
 
-.live-ticker{
-  display:flex; align-items:center; gap:10px;
+.readout{
+  display:flex; align-items:center; gap:14px;
+  flex-wrap:wrap;
   font-family:var(--font-mono);
   font-size:12px;
-  letter-spacing:.5px;
+  letter-spacing:.4px;
   color:var(--text-dim);
-  white-space:nowrap;
 }
-.live-ticker b{ color:var(--text); font-weight:600; }
+.readout-item{ display:flex; align-items:center; gap:7px; white-space:nowrap; }
+.readout-item b{ color:var(--text); font-weight:600; }
+.readout-sep{ color:var(--text-faint); }
 .ticker-pulse{
-  width:8px; height:8px; border-radius:50%;
+  width:7px; height:7px; border-radius:50%;
   background:var(--live);
   box-shadow:0 0 0 0 var(--live-soft);
   animation:tickerPulse 1.8s infinite;
@@ -132,15 +136,59 @@ a{ color:inherit; }
 }
 @keyframes tickerPulse{
   0%{ box-shadow:0 0 0 0 rgba(255,69,69,.55); }
-  70%{ box-shadow:0 0 0 9px rgba(255,69,69,0); }
+  70%{ box-shadow:0 0 0 8px rgba(255,69,69,0); }
   100%{ box-shadow:0 0 0 0 rgba(255,69,69,0); }
 }
-.dot-sep{ color:var(--text-faint); }
+.sync-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--cyan);
+  flex:none;
+}
 
-/* ============================================================
-   MATCH GRID
-   ============================================================ */
-.match-grid{
+.section-head{
+  display:flex; align-items:center; gap:11px;
+  margin:0 0 18px;
+  padding-top:6px;
+}
+.section-head h2{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:.3px;
+  margin:0;
+  color:var(--text);
+}
+.section-dot{
+  width:9px; height:9px; border-radius:50%;
+  flex:none;
+}
+.section-dot.is-live{ background:var(--live); animation:tickerPulse 1.8s infinite; }
+.section-dot.is-upcoming{ background:var(--gold); }
+.section-count{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--text-faint);
+  background:var(--surface-2);
+  border:1px solid var(--border-soft);
+  padding:2px 9px;
+  border-radius:20px;
+  margin-left:2px;
+}
+.section{ margin-bottom:46px; }
+.section:last-child{ margin-bottom:0; }
+
+.empty-live{
+  display:flex; align-items:center; gap:12px;
+  padding:22px 22px;
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+  color:var(--text-dim);
+  font-size:13.5px;
+  background:rgba(255,255,255,.015);
+}
+.empty-live svg{ flex:none; opacity:.55; }
+
+.live-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));
   gap:26px;
@@ -163,9 +211,6 @@ a{ color:inherit; }
 }
 @keyframes loadingBlink{ 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
 
-/* ============================================================
-   MATCH CARD
-   ============================================================ */
 .match-card{
   display:flex; flex-direction:column;
   background:var(--surface);
@@ -182,7 +227,7 @@ a{ color:inherit; }
 
 .card-media{
   position:relative;
-  height:186px;
+  height:184px;
   background:var(--surface-2);
   overflow:hidden;
 }
@@ -192,45 +237,52 @@ a{ color:inherit; }
   transition:transform .5s ease;
 }
 .match-card:hover .card-media img{ transform:scale(1.05); }
-
 .card-media::after{
   content:'';
   position:absolute; inset:0;
-  background:linear-gradient(180deg, rgba(10,13,19,0) 45%, rgba(10,13,19,.85) 100%);
+  background:linear-gradient(180deg, rgba(10,13,19,0) 55%, rgba(10,13,19,.9) 100%);
 }
 
-.chip{
-  position:absolute;
-  z-index:2;
-  display:inline-flex; align-items:center; gap:6px;
+.card-body{
+  display:flex; flex-direction:column; flex:1;
+  padding:18px 18px 20px;
+}
+.card-title{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:21px;
+  line-height:1.15;
+  letter-spacing:.2px;
+  margin:0 0 5px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.card-tournament{
+  margin:0 0 12px;
+  font-size:12.5px;
+  color:var(--text-dim);
+  display:-webkit-box;
+  -webkit-line-clamp:1;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.status-line{
+  display:flex; align-items:center; gap:8px;
   font-family:var(--font-mono);
-  font-size:11px; font-weight:600; letter-spacing:.6px;
-  padding:5px 10px;
-  border-radius:20px;
-  backdrop-filter:blur(6px);
+  font-size:11.5px;
+  letter-spacing:.4px;
+  color:var(--text-faint);
+  margin-bottom:14px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border-soft);
 }
-.chip-live{
-  top:12px; left:12px;
-  background:rgba(255,69,69,.16);
-  border:1px solid rgba(255,69,69,.4);
-  color:#FFD3D3;
-}
-.chip-sched{
-  top:12px; left:12px;
-  background:var(--gold-soft);
-  border:1px solid rgba(255,176,32,.4);
-  color:#FFE3AE;
-}
-.chip-cat{
-  top:12px; right:12px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.14);
-  color:var(--text);
-  font-family:var(--font-body);
-  font-weight:500;
-}
+.status-live-text{ color:#ffb3b3; font-weight:600; letter-spacing:.6px; }
+.status-sep{ color:var(--text-faint); }
 
-.tally{ position:relative; width:8px; height:8px; display:inline-flex; }
+.tally{ position:relative; width:8px; height:8px; display:inline-flex; flex:none; }
 .tally-core{
   width:8px; height:8px; border-radius:50%;
   background:var(--live);
@@ -247,54 +299,20 @@ a{ color:inherit; }
   100%{ transform:scale(2.1); opacity:0; }
 }
 
-.card-body{
-  display:flex; flex-direction:column; flex:1;
-  padding:18px 18px 20px;
-}
-.card-title{
-  font-family:var(--font-display);
-  font-weight:600;
-  font-size:18px;
-  line-height:1.28;
-  margin:0 0 6px;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-.card-tournament{
-  margin:0 0 10px;
-  font-size:12.5px;
-  color:var(--text-dim);
-  display:-webkit-box;
-  -webkit-line-clamp:1;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-.card-time{
-  display:flex; align-items:center; gap:6px;
-  font-family:var(--font-mono);
-  font-size:12px;
-  color:var(--text-faint);
-  margin-bottom:16px;
-}
-.card-time svg{ flex:none; opacity:.8; }
-
 .card-actions{
   margin-top:auto;
   display:flex; flex-direction:column; gap:10px;
 }
 
-/* Buttons */
 .btn-watch, .btn-ww{
   appearance:none; border:none; cursor:pointer;
   display:flex; align-items:center; justify-content:center; gap:8px;
   width:100%;
   font-family:var(--font-display);
-  font-weight:600; font-size:13.5px; letter-spacing:.6px;
+  font-weight:700; font-size:14.5px; letter-spacing:.5px;
   padding:12px 14px;
   border-radius:var(--radius-sm);
-  transition:filter .2s ease, transform .15s ease, background .2s ease;
+  transition:filter .2s ease, transform .15s ease, background .2s ease, border-color .2s ease, color .2s ease;
 }
 .btn-watch{
   background:linear-gradient(90deg, var(--cyan), var(--cyan-deep));
@@ -313,27 +331,6 @@ a{ color:inherit; }
 .btn-ww.open .chev{ transform:rotate(180deg); }
 .btn-ww.open{ color:var(--cyan); border-color:rgba(45,212,224,.5); }
 
-.btn-watch.is-disabled, .not-live-pill{
-  background:var(--surface-2);
-  color:var(--text-faint);
-  cursor:not-allowed;
-  border:1px solid var(--border-soft);
-}
-.not-live-pill{
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  width:100%;
-  font-family:var(--font-mono);
-  font-size:12px; letter-spacing:.6px;
-  padding:12px 14px;
-  border-radius:var(--radius-sm);
-}
-.tally-off{
-  width:7px; height:7px; border-radius:50%;
-  background:var(--text-faint);
-  flex:none;
-}
-
-/* World-wide accordion */
 .ww-panel-wrap{
   display:grid;
   grid-template-rows:0fr;
@@ -373,65 +370,162 @@ a{ color:inherit; }
 }
 .ww-row:hover .ww-code{ color:var(--cyan); }
 
-/* ============================================================
-   MODAL (Telegram)
-   ============================================================ */
-.modal-overlay{
-  position:fixed; inset:0; z-index:999;
-  background:rgba(6,8,12,.65);
-  backdrop-filter:blur(6px);
+.upcoming-list{
+  display:flex; flex-direction:column;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--surface);
+}
+.upcoming-row{
+  display:flex; align-items:center; gap:14px;
+  padding:13px 18px;
+  border-bottom:1px solid var(--border-soft);
+  transition:background .18s ease;
+}
+.upcoming-row:last-child{ border-bottom:none; }
+.upcoming-row:hover{ background:rgba(255,255,255,.02); }
+.upcoming-thumb{
+  width:52px; height:52px;
+  border-radius:10px;
+  object-fit:cover;
+  flex:none;
+  background:var(--surface-2);
+}
+.upcoming-info{ flex:1; min-width:0; }
+.upcoming-title{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:15.5px;
+  letter-spacing:.2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.upcoming-meta{
+  font-size:12px;
+  color:var(--text-dim);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-top:2px;
+}
+.upcoming-meta .upcoming-time{
+  font-family:var(--font-mono);
+  color:var(--text-faint);
+}
+.upcoming-tag{
+  display:flex; align-items:center; gap:5px;
+  flex:none;
+  font-family:var(--font-mono);
+  font-size:10.5px; font-weight:600; letter-spacing:.6px;
+  color:#ffe3ae;
+  background:var(--gold-soft);
+  border:1px solid rgba(255,176,32,.35);
+  padding:5px 10px;
+  border-radius:20px;
+}
+.upcoming-tag svg{ flex:none; opacity:.9; }
+
+.popup-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.86);
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
   display:flex; align-items:center; justify-content:center;
   padding:20px;
+  z-index:99999;
 }
-.modal-overlay.hidden{ display:none; }
-.modal-card{
-  width:100%; max-width:400px;
-  background:linear-gradient(180deg, var(--surface), var(--surface-2));
-  border:1px solid var(--border);
+.popup-overlay.hidden{ display:none; }
+.popup-wrap{
+  position:relative;
+  width:100%; max-width:358px;
+  padding:2px;
+  background:linear-gradient(145deg, rgba(255,204,0,.8) 0%, rgba(255,224,80,.4) 50%, rgba(255,204,0,.8) 100%);
   border-radius:18px;
-  padding:28px 24px;
+  box-shadow:0 0 50px rgba(255,204,0,.14), 0 30px 70px rgba(0,0,0,.72);
+  animation:popIn .42s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes popIn{
+  from{ opacity:0; transform:scale(.87) translateY(24px); }
+  to{ opacity:1; transform:scale(1) translateY(0); }
+}
+.popup-box{
+  background:linear-gradient(168deg, #1e1e26 0%, #0e0e13 100%);
+  border-radius:16px;
+  padding:34px 24px 26px;
   text-align:center;
-  box-shadow:0 30px 60px -20px rgba(0,0,0,.7);
 }
-.modal-card h2{
-  font-family:var(--font-display);
-  font-size:21px;
-  color:var(--gold);
-  margin:0 0 12px;
+.popup-title{
+  color:#ffcc00;
+  font-family:'Acme', sans-serif;
+  font-size:30px;
+  letter-spacing:.5px;
+  margin-bottom:12px;
 }
-.modal-card p{
+.popup-text{
+  color:#a0a0a8;
   font-size:14px;
-  color:var(--text-dim);
-  line-height:1.55;
-  margin:0 0 22px;
+  line-height:1.65;
+  margin-bottom:24px;
 }
-.modal-card p strong{ color:var(--text); }
-.modal-btn{
-  width:100%;
-  border:none; cursor:pointer;
-  font-family:var(--font-display);
-  font-weight:600; font-size:14px; letter-spacing:.4px;
-  padding:13px;
-  border-radius:12px;
-  margin-bottom:10px;
-  transition:filter .2s ease;
+.popup-text b{
+  color:#fff;
+  font-family:'Amaranth', sans-serif;
+  font-size:17px;
+  display:block;
+  margin-top:7px;
 }
-.modal-btn:last-child{ margin-bottom:0; }
-.modal-btn:hover{ filter:brightness(1.08); }
-#joinButton{
-  background:linear-gradient(90deg, var(--cyan), var(--gold));
-  color:#0A0D13;
+.btn-popup{
+  width:100%; padding:14px; border:none;
+  border-radius:13px;
+  font-family:'Amaranth', sans-serif;
+  cursor:pointer;
+  transition:transform .18s, box-shadow .18s;
+  appearance:none;
+  touch-action:manipulation;
+  text-decoration:none;
+  display:block;
 }
-#closeButton{
-  background:rgba(255,255,255,.06);
-  color:var(--text-dim);
-  border:1px solid var(--border);
+.btn-popup:active{ transform:scale(.95); }
+.btn-join-main{
+  background:linear-gradient(90deg, #1bcc26, #17b823);
+  color:#fff;
+  font-size:18px; font-weight:700;
+  letter-spacing:.6px;
+  box-shadow:0 5px 20px rgba(23,184,35,.32);
+  margin-bottom:9px;
+  line-height:1;
+  text-align:center;
+}
+.btn-join-main:hover{ box-shadow:0 8px 26px rgba(23,184,35,.42); }
+.btn-joined-main{
+  background:transparent;
+  color:#484850;
+  font-size:12px; font-weight:400;
+  width:auto; margin:0 auto;
+  padding:7px 14px;
+  text-align:center;
 }
 
-/* Focus visibility (accessibility floor) */
-button:focus-visible, .ww-row:focus-visible{
+footer{
+  margin-top:56px;
+  padding-top:26px;
+  border-top:1px solid var(--border-soft);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  flex-wrap:wrap;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.4px;
+  color:var(--text-faint);
+  text-align:center;
+}
+footer a{ color:var(--cyan); text-decoration:none; }
+footer a:hover{ text-decoration:underline; }
+
+button:focus-visible, .ww-row:focus-visible, a:focus-visible{
   outline:2px solid var(--cyan);
   outline-offset:2px;
+}
+
+@media (hover:none){
+  .btn-join-main:hover{ box-shadow:0 5px 20px rgba(23,184,35,.32); }
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -439,10 +533,12 @@ button:focus-visible, .ww-row:focus-visible{
 }
 
 @media (max-width:520px){
-  .site-header{ padding:16px 18px; }
-  .wordmark{ font-size:22px; }
-  .live-ticker{ font-size:11px; }
-  .match-grid{ grid-template-columns:1fr; }
+  .site-header{ padding:17px 18px; }
+  .wordmark{ font-size:25px; }
+  .readout{ font-size:11px; gap:10px; }
+  .live-grid{ grid-template-columns:1fr; }
+  .card-title{ font-size:19px; }
+  .upcoming-thumb{ width:44px; height:44px; }
 }
 
 </style>
@@ -451,46 +547,73 @@ button:focus-visible, .ww-row:focus-visible{
 <body>
 
 <div class="ambient"></div>
+<div class="grain"></div>
 
 <div class="page-shell">
 
   <header class="site-header">
     <div class="wordmark">FAN<span class="accent">CODE</span><sup>LIVE</sup></div>
-    <div class="live-ticker">
-      <span class="ticker-pulse"></span>
-      <span><b id="liveCount">0</b> LIVE NOW</span>
-      <span class="dot-sep">•</span>
-      <span><b id="totalCount">0</b> TRACKED</span>
+    <div class="readout">
+      <span class="readout-item"><span class="ticker-pulse"></span><b id="liveCount">0</b> LIVE NOW</span>
+      <span class="readout-sep">·</span>
+      <span class="readout-item"><b id="totalCount">0</b> TRACKED</span>
+      <span class="readout-sep">·</span>
+      <span class="readout-item"><span class="sync-dot"></span>SYNCED <b id="syncedAgo">—</b></span>
     </div>
   </header>
 
-  <div id="matchGrid" class="match-grid">
-    <div class="loading-state"><span class="loading-dot"></span> Loading the match board…</div>
+  <div id="liveSection" class="section">
+    <div class="section-head">
+      <span class="section-dot is-live"></span>
+      <h2>Live Now</h2>
+      <span class="section-count" id="liveSectionCount">0</span>
+    </div>
+    <div id="liveGrid" class="live-grid">
+      <div class="loading-state"><span class="loading-dot"></span> Loading the match board…</div>
+    </div>
   </div>
+
+  <div id="upcomingSection" class="section" style="display:none;">
+    <div class="section-head">
+      <span class="section-dot is-upcoming"></span>
+      <h2>Upcoming</h2>
+      <span class="section-count" id="upcomingSectionCount">0</span>
+    </div>
+    <div id="upcomingList" class="upcoming-list"></div>
+  </div>
+
+  <footer>
+    <span>FANCODE LIVE</span>
+    <span>·</span>
+    <span>Board refreshes automatically</span>
+    <span>·</span>
+    <a href="https://t.me/+JSkwy86_04M2Zjdl" target="_blank" rel="noopener noreferrer">Telegram</a>
+  </footer>
 
 </div>
 
-<!-- TELEGRAM MODAL -->
-<div id="telegramModal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <h2>Join our Telegram</h2>
-    <p>Stay updated with the latest <strong>live match links</strong> and updates. Join the official channel below.</p>
-    <button id="joinButton" class="modal-btn">Join Telegram</button>
-    <button id="closeButton" class="modal-btn">Already Joined</button>
+<div class="popup-overlay hidden" id="telegramModal">
+  <div class="popup-wrap">
+    <div class="popup-box">
+      <div class="popup-title">Follow Us !!</div>
+      <div class="popup-text">
+        Join our Telegram channel<br>
+        <b>FANCODE LIVE</b>
+        For instant match links and live updates.
+      </div>
+      <a class="btn-popup btn-join-main" id="joinButton" target="_blank" rel="noopener noreferrer" href="https://t.me/+JSkwy86_04M2Zjdl">JOIN NOW</a>
+      <button class="btn-popup btn-joined-main" id="closeButton" type="button">Already Joined</button>
+    </div>
   </div>
 </div>
 
 <script>
-/* ============================================================
-   DATA SOURCES
-   - CNPTV_SOURCE  -> only used for the "WATCH NOW" stream (cnptv_cdn)
-   - WORLD_SOURCE  -> match info (title/tournament/time/image) +
-                      World Wide Stream CDNs (LK / NP / BD)
-   ============================================================ */
 const CNPTV_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json';
 const WORLD_SOURCE  = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
 const PLAYER_PAGE   = 'fcplayer.html';
 const FALLBACK_IMG  = 'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+const REFRESH_INTERVAL_MS = 60000;
+const CLOCK_TICK_MS = 20000;
 
 const LANG_CODE_MAP = {
   ENGLISH:'eng', HINDI:'hin', BANGLA:'ban', BENGALI:'ban', TAMIL:'tam',
@@ -498,19 +621,25 @@ const LANG_CODE_MAP = {
   GUJARATI:'guj', URDU:'urd', ODIA:'ori', ASSAMESE:'asm', BHOJPURI:'bho'
 };
 
-const CATEGORY_ICON = {
-  Cricket:'🏏', Football:'⚽', MotoGP:'🏍️', Golf:'⛳', Tennis:'🎾',
-  Kabaddi:'🤼', 'Live Events':'📡'
-};
-
 const ICON_PLAY  = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 const ICON_GLOBE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
 const ICON_CHEV  = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>';
 const ICON_CLOCK = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+const ICON_EMPTY = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1.2 1 2.6 1.5 4 1.5s2.8-.5 4-1.5"/></svg>';
 
-const grid         = document.getElementById('matchGrid');
-const liveCountEl  = document.getElementById('liveCount');
-const totalCountEl = document.getElementById('totalCount');
+const liveGrid          = document.getElementById('liveGrid');
+const upcomingList      = document.getElementById('upcomingList');
+const liveSection       = document.getElementById('liveSection');
+const upcomingSection    = document.getElementById('upcomingSection');
+const liveCountEl       = document.getElementById('liveCount');
+const totalCountEl      = document.getElementById('totalCount');
+const syncedAgoEl       = document.getElementById('syncedAgo');
+const liveSectionCount  = document.getElementById('liveSectionCount');
+const upcomingSectionCount = document.getElementById('upcomingSectionCount');
+
+let lastUpdatedAt = null;
+let lastWorldSnapshot = null;
+let openPanels = new Set();
 
 function esc(str){
   return String(str == null ? '' : str).replace(/[&<>"']/g, s => ({
@@ -518,10 +647,6 @@ function esc(str){
   }[s]));
 }
 
-/* "ENGLISH" -> "eng". BLOODY_SWEET is a placeholder the source uses
-   before commentary language is confirmed:
-   - if the match is LIVE and still shows it -> default to English
-   - if it's still UPCOMING -> language isn't decided yet (no code) */
 function langToCode(rawLang, isLive){
   let lang = String(rawLang || '').trim().toUpperCase();
   if(!lang || lang === 'BLOODY_SWEET'){
@@ -532,8 +657,6 @@ function langToCode(rawLang, isLive){
   return short || 'eng';
 }
 
-/* Source format: "07 July 2026 08:45 AM" — parsed manually rather than
-   trusting Date() with a non-ISO string across browsers. */
 function parseMatchTime(str){
   if(!str) return null;
   const months = {january:0,february:1,march:2,april:3,may:4,june:5,july:6,
@@ -552,6 +675,17 @@ function parseMatchTime(str){
   return new Date(year, month, day, hour, min);
 }
 
+function parseUpdatedAt(str){
+  if(!str) return null;
+  const m = String(str).match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(\d{1,2}):(\d{2}):(\d{2})\s*(am|pm)/i);
+  if(!m){ const d = new Date(str); return isNaN(d) ? null : d; }
+  let day = +m[1], month = +m[2], year = +m[3], hour = +m[4], min = +m[5], sec = +m[6];
+  const ampm = m[7].toLowerCase();
+  if(ampm === 'pm' && hour < 12) hour += 12;
+  if(ampm === 'am' && hour === 12) hour = 0;
+  return new Date(year, month - 1, day, hour, min, sec);
+}
+
 function formatMatchTime(date){
   if(!date) return 'TIME TBA';
   const datePart = date.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }).toUpperCase();
@@ -562,75 +696,90 @@ function formatMatchTime(date){
   return `${datePart} · ${h}:${mm} ${ap}`;
 }
 
+function formatRelative(date){
+  if(!date) return '—';
+  const diffSec = Math.round((Date.now() - date.getTime()) / 1000);
+  if(diffSec < 15) return 'just now';
+  if(diffSec < 60) return diffSec + 's ago';
+  const diffMin = Math.round(diffSec / 60);
+  if(diffMin < 60) return diffMin + 'm ago';
+  const diffHr = Math.round(diffMin / 60);
+  return diffHr + 'h ago';
+}
+
 function buildPlayerUrl(id, langCode, streamIndex){
   return `${PLAYER_PAGE}?id=${id}_${langCode}&s=${streamIndex}`;
 }
 
-function renderCard(m){
-  const icon = CATEGORY_ICON[m.category] || '🎮';
-  const statusChip = m.isLive
-    ? `<span class="chip chip-live"><span class="tally"><span class="tally-core"></span><span class="tally-ring"></span></span>LIVE</span>`
-    : `<span class="chip chip-sched">${ICON_CLOCK} SCHEDULED</span>`;
-  const catChip = m.category
-    ? `<span class="chip chip-cat">${icon} ${esc(m.category)}</span>`
-    : '';
-
-  const canWatch = m.isLive && m.cnptvUrl && m.langCode;
-
+function renderLiveCard(m){
+  const canWatch = m.cnptvUrl && m.langCode;
   const wwOptions = [
     { key:'lk', flag:'🇱🇰', name:'Sri Lanka',  url:m.lk, idx:1 },
     { key:'np', flag:'🇳🇵', name:'Nepal',      url:m.np, idx:2 },
     { key:'bd', flag:'🇧🇩', name:'Bangladesh', url:m.bd, idx:3 }
   ].filter(o => o.url);
-  const hasAnyWW = m.isLive && m.langCode && wwOptions.length > 0;
+  const hasAnyWW = m.langCode && wwOptions.length > 0;
+  const isOpen = openPanels.has(String(m.id));
 
-  let actionsHtml;
-  if(!m.isLive){
-    actionsHtml = `<div class="not-live-pill"><span class="tally-off"></span>NOT LIVE YET</div>`;
-  } else {
-    const watchAttrs = canWatch
-      ? `data-url="${esc(buildPlayerUrl(m.id, m.langCode, 0))}"`
-      : 'disabled';
-    actionsHtml = `
-      <button type="button" class="btn-watch ${canWatch ? '' : 'is-disabled'}" ${watchAttrs}>
-        ${ICON_PLAY} WATCH NOW
-      </button>
-      ${hasAnyWW ? `
-      <button type="button" class="btn-ww" data-target="ww-${m.id}">
-        ${ICON_GLOBE} WORLD WIDE STREAM ${ICON_CHEV}
-      </button>
-      <div class="ww-panel-wrap" id="ww-${m.id}">
-        <div class="ww-panel-inner">
-          ${wwOptions.map(o => `
-            <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id, m.langCode, o.idx))}">
-              <span class="ww-flag">${o.flag}</span>
-              <span class="ww-name">${o.name}</span>
-              <span class="ww-code">${o.key.toUpperCase()}</span>
-            </div>`).join('')}
-        </div>
-      </div>` : ''}
-    `;
-  }
+  const watchAttrs = canWatch
+    ? `data-url="${esc(buildPlayerUrl(m.id, m.langCode, 0))}"`
+    : 'disabled';
+
+  const actionsHtml = `
+    <button type="button" class="btn-watch ${canWatch ? '' : 'is-disabled'}" ${watchAttrs}>
+      ${ICON_PLAY} WATCH NOW
+    </button>
+    ${hasAnyWW ? `
+    <button type="button" class="btn-ww ${isOpen ? 'open' : ''}" data-target="ww-${m.id}">
+      ${ICON_GLOBE} WORLD WIDE STREAM ${ICON_CHEV}
+    </button>
+    <div class="ww-panel-wrap ${isOpen ? 'open' : ''}" id="ww-${m.id}">
+      <div class="ww-panel-inner">
+        ${wwOptions.map(o => `
+          <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id, m.langCode, o.idx))}">
+            <span class="ww-flag">${o.flag}</span>
+            <span class="ww-name">${o.name}</span>
+            <span class="ww-code">${o.key.toUpperCase()}</span>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
 
   return `
-    <article class="match-card">
+    <article class="match-card" data-match-id="${esc(m.id)}">
       <div class="card-media">
         <img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
-        ${statusChip}
-        ${catChip}
       </div>
       <div class="card-body">
         <h3 class="card-title">${esc(m.title)}</h3>
         <p class="card-tournament">${esc(m.tournament)}</p>
-        <div class="card-time">${ICON_CLOCK} ${formatMatchTime(m.time)}</div>
+        <div class="status-line">
+          <span class="tally"><span class="tally-core"></span><span class="tally-ring"></span></span>
+          <span class="status-live-text">LIVE NOW</span>
+          <span class="status-sep">·</span>
+          <span>${formatMatchTime(m.time)}</span>
+        </div>
         <div class="card-actions">${actionsHtml}</div>
       </div>
     </article>
   `;
 }
 
+function renderUpcomingRow(m){
+  return `
+    <div class="upcoming-row">
+      <img class="upcoming-thumb" src="${esc(m.image)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
+      <div class="upcoming-info">
+        <div class="upcoming-title">${esc(m.title)}</div>
+        <div class="upcoming-meta">${esc(m.tournament)} <span class="upcoming-time">· ${formatMatchTime(m.time)}</span></div>
+      </div>
+      <span class="upcoming-tag">${ICON_CLOCK} Upcoming</span>
+    </div>
+  `;
+}
+
 function attachHandlers(){
-  grid.addEventListener('click', (e) => {
+  liveGrid.addEventListener('click', (e) => {
     const watchBtn = e.target.closest('.btn-watch');
     if(watchBtn && watchBtn.dataset.url){
       window.location.href = watchBtn.dataset.url;
@@ -643,16 +792,18 @@ function attachHandlers(){
     }
     const wwBtn = e.target.closest('.btn-ww');
     if(wwBtn){
+      const matchId = wwBtn.closest('.match-card').dataset.matchId;
       const panel = document.getElementById(wwBtn.dataset.target);
       if(panel){
         const willOpen = !panel.classList.contains('open');
         panel.classList.toggle('open', willOpen);
         wwBtn.classList.toggle('open', willOpen);
+        if(willOpen){ openPanels.add(matchId); } else { openPanels.delete(matchId); }
       }
     }
   });
 
-  grid.addEventListener('keydown', (e) => {
+  liveGrid.addEventListener('keydown', (e) => {
     if(e.key !== 'Enter' && e.key !== ' ') return;
     const row = e.target.closest('.ww-row');
     if(row && row.dataset.url){
@@ -662,64 +813,96 @@ function attachHandlers(){
   });
 }
 
-async function init(){
-  try{
-    const [cnptvData, worldData] = await Promise.all([
-      fetch(CNPTV_SOURCE).then(r => r.json()).catch(() => ({ matches: [] })),
-      fetch(WORLD_SOURCE).then(r => r.json())
-    ]);
+function renderBoard(matches){
+  const liveMatches = matches.filter(m => m.isLive);
+  const upcomingMatches = matches.filter(m => !m.isLive);
 
-    const cnptvMap = {};
-    (cnptvData.matches || []).forEach(m => { cnptvMap[m.match_id] = m; });
+  liveCountEl.textContent = liveMatches.length;
+  totalCountEl.textContent = matches.length;
+  liveSectionCount.textContent = liveMatches.length;
+  upcomingSectionCount.textContent = upcomingMatches.length;
 
-    let matches = (worldData.matches || []).map(m => {
-      const isLive = String(m.status || '').toUpperCase() === 'LIVE';
-      const cnptv = cnptvMap[m.match_id];
-      const cnptvUrl = cnptv && cnptv.cnptv_cdn ? cnptv.cnptv_cdn : null;
-      const streams = m.streams || {};
+  if(liveMatches.length){
+    liveGrid.innerHTML = liveMatches.map(renderLiveCard).join('');
+  } else {
+    liveGrid.innerHTML = `<div class="empty-live">${ICON_EMPTY} No matches are live right now. Check the upcoming list below, or check back shortly.</div>`;
+  }
 
-      return {
-        id: m.match_id,
-        title: m.title || 'Match',
-        tournament: m.tournament || '',
-        category: m.category || '',
-        image: m.image || FALLBACK_IMG,
-        isLive,
-        time: parseMatchTime(m.startTime),
-        langCode: langToCode(m.language, isLive),
-        cnptvUrl,
-        lk: streams.fancode_lk_cdn || null,
-        np: streams.fancode_np_cdn || null,
-        bd: streams.fancode_bd_cdn || null
-      };
-    });
-
-    matches.sort((a, b) => {
-      if(a.isLive !== b.isLive) return a.isLive ? -1 : 1;
-      const at = a.time ? a.time.getTime() : Infinity;
-      const bt = b.time ? b.time.getTime() : Infinity;
-      return at - bt;
-    });
-
-    liveCountEl.textContent = matches.filter(m => m.isLive).length;
-    totalCountEl.textContent = matches.length;
-
-    grid.innerHTML = matches.length
-      ? matches.map(renderCard).join('')
-      : `<div class="grid-error">No matches found right now.</div>`;
-
-    attachHandlers();
-  } catch(err){
-    console.error('FanCode board failed to load:', err);
-    grid.innerHTML = `<div class="grid-error">Couldn't load the match board. Try refreshing.</div>`;
+  if(upcomingMatches.length){
+    upcomingSection.style.display = '';
+    upcomingList.innerHTML = upcomingMatches.map(renderUpcomingRow).join('');
+  } else {
+    upcomingSection.style.display = 'none';
   }
 }
 
-init();
+function buildMatches(cnptvData, worldData){
+  const cnptvMap = {};
+  (cnptvData.matches || []).forEach(m => { cnptvMap[m.match_id] = m; });
 
-/* ============================================================
-   TELEGRAM POPUP
-   ============================================================ */
+  const matches = (worldData.matches || []).map(m => {
+    const isLive = String(m.status || '').toUpperCase() === 'LIVE';
+    const cnptv = cnptvMap[m.match_id];
+    const cnptvUrl = cnptv && cnptv.cnptv_cdn ? cnptv.cnptv_cdn : null;
+    const streams = m.streams || {};
+
+    return {
+      id: m.match_id,
+      title: m.title || 'Match',
+      tournament: m.tournament || '',
+      image: m.image || FALLBACK_IMG,
+      isLive,
+      time: parseMatchTime(m.startTime),
+      langCode: langToCode(m.language, isLive),
+      cnptvUrl,
+      lk: streams.fancode_lk_cdn || null,
+      np: streams.fancode_np_cdn || null,
+      bd: streams.fancode_bd_cdn || null
+    };
+  });
+
+  matches.sort((a, b) => {
+    if(a.isLive !== b.isLive) return a.isLive ? -1 : 1;
+    const at = a.time ? a.time.getTime() : Infinity;
+    const bt = b.time ? b.time.getTime() : Infinity;
+    return at - bt;
+  });
+
+  return matches;
+}
+
+async function refresh(isFirstLoad){
+  try{
+    const [cnptvData, worldData] = await Promise.all([
+      fetch(CNPTV_SOURCE, { cache:'no-store' }).then(r => r.json()).catch(() => ({ matches: [] })),
+      fetch(WORLD_SOURCE, { cache:'no-store' }).then(r => r.json())
+    ]);
+
+    lastUpdatedAt = parseUpdatedAt(worldData.updatedAt) || new Date();
+
+    const snapshot = JSON.stringify(worldData.matches || []);
+    if(!isFirstLoad && snapshot === lastWorldSnapshot){
+      syncedAgoEl.textContent = formatRelative(lastUpdatedAt);
+      return;
+    }
+    lastWorldSnapshot = snapshot;
+
+    const matches = buildMatches(cnptvData, worldData);
+    renderBoard(matches);
+    syncedAgoEl.textContent = formatRelative(lastUpdatedAt);
+  } catch(err){
+    console.error('FanCode board failed to load:', err);
+    if(isFirstLoad){
+      liveGrid.innerHTML = `<div class="grid-error">Couldn't load the match board. Try refreshing.</div>`;
+    }
+  }
+}
+
+attachHandlers();
+refresh(true);
+setInterval(() => refresh(false), REFRESH_INTERVAL_MS);
+setInterval(() => { syncedAgoEl.textContent = formatRelative(lastUpdatedAt); }, CLOCK_TICK_MS);
+
 const telegramModal = document.getElementById('telegramModal');
 window.addEventListener('load', () => {
   if(!sessionStorage.getItem('fc_telegram_joined')){
@@ -727,7 +910,6 @@ window.addEventListener('load', () => {
   }
 });
 document.getElementById('joinButton').addEventListener('click', () => {
-  window.open('https://t.me/+JSkwy86_04M2Zjdl', '_blank');
   sessionStorage.setItem('fc_telegram_joined', 'yes');
   telegramModal.classList.add('hidden');
 });
