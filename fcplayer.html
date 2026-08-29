@@ -1,714 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-<meta name="referrer" content="no-referrer">
-<title>FanCode Live Player</title>
-<link rel="icon" href="https://livedakho.pages.dev/file_00000000d56c7208939f3cb5bb73adc0.png">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-G5NE717HVD"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-G5NE717HVD');</script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
-<style>
-*, *::before, *::after {
-  margin: 0; padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-html {
-  height: 100%; height: -webkit-fill-available;
-  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
-}
-body {
-  width: 100%; height: 100%;
-  min-height: 100dvh; min-height: -webkit-fill-available;
-  background: #000; overflow: hidden;
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+    <meta charset="UTF-8">
+    <title>DILLZY</title>
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L7VPXZYQPN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-L7VPXZYQPN');
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-.logo-btn {
-  position: fixed; top: 10px; left: 10px; z-index: 50;
-  display: flex; align-items: center; text-decoration: none; transition: opacity .2s;
-}
-.logo-btn img {
-  height: 36px; width: auto; border-radius: 7px;
-  object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,.8));
-}
+        html, body {
+            width: 100%; height: 100%;
+            background: #000; overflow: hidden;
+            font-family: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-#loading-screen {
-  position: fixed; inset: 0; z-index: 100; background: #0a0a0a;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 22px;
-  transition: opacity .4s;
-}
-.loader { position: relative; width: 58px; height: 58px; }
-.loader-ring {
-  position: absolute; inset: 0; border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #ff3b30; border-right-color: rgba(255,59,48,.18);
-  animation: spin-fwd 1s cubic-bezier(.55,.1,.45,.9) infinite;
-}
-.loader-ring-inner {
-  position: absolute; inset: 11px; border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: rgba(255,255,255,.65); border-right-color: rgba(255,255,255,.1);
-  animation: spin-rev .8s cubic-bezier(.55,.1,.45,.9) infinite;
-}
-.loader-core {
-  position: absolute; inset: 22px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,59,48,.55) 0%, rgba(255,59,48,0) 72%);
-  animation: loader-pulse 1.6s ease-in-out infinite;
-}
-@keyframes spin-fwd { to { transform: rotate(360deg); } }
-@keyframes spin-rev  { to { transform: rotate(-360deg); } }
-@keyframes loader-pulse {
-  0%, 100% { opacity: .35; transform: scale(.82); }
-  50% { opacity: 1; transform: scale(1); }
-}
-.loading-text { display: flex; flex-direction: column; align-items: center; gap: 7px; }
-.loading-label { font-size: 15px; font-weight: 600; letter-spacing: .8px; color: rgba(255,255,255,.88); }
-.loading-sub {
-  display: flex; align-items: center; gap: 3px;
-  font-size: 12px; letter-spacing: .3px; color: rgba(255,255,255,.32);
-}
-.loading-sub span { opacity: .25; animation: dot-fade 1.3s ease-in-out infinite; }
-.loading-sub span:nth-child(2) { animation-delay: .16s; }
-.loading-sub span:nth-child(3) { animation-delay: .32s; }
-@keyframes dot-fade { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+        .shaka-video-container {
+            position: fixed; inset: 0; background: #000;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-.shaka-video-container {
-  position: fixed; inset: 0; background: #000;
-  display: flex; align-items: center; justify-content: center;
-}
-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        video {
+            width: 100%; height: 100%;
+            object-fit: contain; background: #000;
+        }
 
-.custom-watermark {
-  position: absolute; z-index: 40; pointer-events: none;
-  bottom: 80px; right: 20px; font-size: 11px; font-weight: 600;
-  color: rgba(255,255,255,.10); letter-spacing: .5px; text-transform: uppercase;
-}
+        .custom-watermark {
+            position: absolute; z-index: 40; pointer-events: none;
+            bottom: 80px; right: 20px; font-size: 11px; font-weight: 600;
+            color: rgba(255, 255, 255, 0.10); letter-spacing: 0.5px; text-transform: uppercase;
+        }
 
-#quality-menu {
-  position: absolute; bottom: 70px; right: 58px; z-index: 3000;
-  min-width: 142px;
-  background: linear-gradient(160deg, rgba(22,22,28,.97), rgba(11,11,15,.97));
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  backdrop-filter: blur(22px) saturate(180%);
-  border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 6px;
-  transform-origin: bottom right;
-  transform: scale(.9) translateY(8px); opacity: 0; pointer-events: none;
-  transition: transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
-}
-#quality-menu.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-.qm-header {
-  font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: rgba(255,255,255,.3); padding: 6px 10px 8px;
-}
-.qm-opt {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px; border-radius: 9px;
-  font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,.78);
-  cursor: pointer; transition: background .15s, color .15s;
-}
-.qm-opt:hover { background: rgba(255,255,255,.08); color: #fff; }
-.qm-opt.active { color: #ff3b30; font-weight: 700; background: rgba(255,59,48,.1); }
-.qm-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #ff3b30; opacity: 0; flex-shrink: 0;
-}
-.qm-opt.active .qm-dot { opacity: 1; }
+        .loading-overlay {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            background: #000; color: #fff; z-index: 2000; pointer-events: none;
+        }
 
-#quality-btn {
-  appearance: none; border: none; background: transparent; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  padding: 8px 6px; border-radius: 8px; flex: none; transition: background .18s;
-}
-#quality-btn:hover { background: rgba(255,255,255,.1); }
-#quality-btn #qlabel {
-  font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600;
-  color: #fff; min-width: 38px; text-align: center; line-height: 1;
-}
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, .15);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin-bottom: 12px;
+        }
 
-.shaka-controls-container { background: transparent !important; }
-.shaka-bottom-controls {
-  padding: 10px 16px;
-  display: flex !important; flex-direction: column !important;
-}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-.shaka-seek-bar-container {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  height: 22px !important;
-  margin: 0 0 6px 0 !important;
-  padding: 0 !important;
-  order: -1 !important;
-  overflow: visible !important;
-  position: relative !important;
-  flex-shrink: 0 !important;
-}
-.shaka-seek-bar {
-  width: 100% !important;
-  height: 4px !important;
-  border-radius: 50px;
-  background: rgba(255,255,255,.15) !important;
-  overflow: visible !important;
-  position: relative !important;
-}
-.shaka-seek-bar .shaka-range-element {
-  position: absolute !important;
-  left: 0 !important; top: 50% !important;
-  transform: translateY(-50%) !important;
-  width: 100% !important;
-  height: 22px !important;
-  margin: 0 !important;
-  cursor: pointer !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background: transparent !important;
-  outline: none !important;
-  border: none !important;
-}
-.shaka-seek-bar .shaka-range-element::-webkit-slider-runnable-track {
-  height: 4px !important;
-  border-radius: 50px;
-  background: transparent !important;
-  cursor: pointer;
-}
-.shaka-seek-bar .shaka-range-element::-webkit-slider-thumb {
-  -webkit-appearance: none !important;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ff3b30;
-  cursor: pointer;
-  border: 2.5px solid rgba(255,255,255,.92);
-  box-shadow: 0 0 0 3px rgba(255,59,48,.28), 0 0 10px rgba(255,59,48,.55);
-  margin-top: -6px;
-  position: relative;
-  z-index: 10;
-}
-.shaka-seek-bar .shaka-range-element::-moz-range-track {
-  height: 4px !important;
-  border-radius: 50px;
-  background: transparent !important;
-}
-.shaka-seek-bar .shaka-range-element::-moz-range-thumb {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: #ff3b30;
-  cursor: pointer;
-  border: 2.5px solid rgba(255,255,255,.92);
-  box-shadow: 0 0 0 3px rgba(255,59,48,.28), 0 0 10px rgba(255,59,48,.55);
-}
+        .shaka-controls-container { background: transparent !important; }
 
-.shaka-current-time, .shaka-time-duration {
-  font-size: 13px; font-weight: 600; color: #fff; padding: 0 6px;
-}
-.shaka-bottom-controls > div {
-  display: flex !important; align-items: center !important; gap: 4px !important;
-}
-.shaka-controls-container button,
-.shaka-controls-container .shaka-current-time,
-.shaka-controls-container .shaka-time-duration,
-.shaka-controls-container .shaka-volume-slider,
-.shaka-controls-container .shaka-spacer {
-  box-shadow: none !important;
-  filter: drop-shadow(0 0 0 transparent) !important;
-  text-shadow: none !important;
-}
-.shaka-controls-container, .shaka-bottom-controls {
-  box-shadow: none !important; filter: none !important;
-}
-.shaka-overflow-menu, .shaka-settings-menu {
-  border-radius: 12px;
-  backdrop-filter: blur(18px);
-  background: rgba(20,20,20,.92);
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow: none !important; filter: none !important;
-}
-.shaka-volume-slider { width: 60px; box-shadow: none !important; }
+        .shaka-bottom-controls {
+            padding: 10px 16px;
+            display: flex !important; flex-direction: column !important;
+        }
 
-#error-screen {
-  position: fixed; inset: 0; z-index: 80; background: #0d0d16;
-  display: none; align-items: center; justify-content: center; padding: 24px;
-}
-#error-screen.show { display: flex; }
-.error-card {
-  background: rgba(255,255,255,.04); border: 1.5px solid rgba(255,255,255,.1);
-  border-radius: 20px; padding: 52px 32px 42px;
-  max-width: 400px; width: 100%; text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
-}
-.err-icon-wrap {
-  width: 72px; height: 72px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05);
-  display: flex; align-items: center; justify-content: center; margin: 0 auto 22px;
-}
-.err-icon-wrap svg {
-  width: 36px; height: 36px; stroke: rgba(255,255,255,.55); fill: none;
-  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-}
-.err-title { font-size: clamp(20px,5vw,26px); font-weight: 700; color: #efefef; margin-bottom: 10px; }
-.err-badge {
-  display: inline-block; background: rgba(245,165,0,.12);
-  border: 1px solid rgba(245,165,0,.28); color: #f5a500;
-  font-size: 13px; font-weight: 700; padding: 4px 16px; border-radius: 20px; margin-bottom: 14px;
-}
-.err-body { font-size: 14px; color: rgba(255,255,255,.38); line-height: 1.8; margin-bottom: 14px; }
-.err-retry {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  font-size: 12px; color: rgba(255,255,255,.34); margin-bottom: 28px;
-}
-.retry-dot { width: 6px; height: 6px; border-radius: 50%; background: #f5a500; animation: pulse 1.4s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.1); } }
-.err-switch {
-  display: none; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 14px 20px; border-radius: 50px; margin-bottom: 12px;
-  background: linear-gradient(90deg, #0A84FF, #38a4ff); border: none;
-  color: #fff; cursor: pointer; font-size: 15px; font-weight: 700;
-  text-decoration: none; box-shadow: 0 8px 24px rgba(10,132,255,.34);
-}
-.err-switch.show { display: inline-flex; }
-.err-switch svg { width: 17px; height: 17px; fill: #fff; }
-.err-contact {
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 12px 28px; border-radius: 50px;
-  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.15);
-  color: #fff; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none;
-}
-.err-contact svg { width: 16px; height: 16px; fill: #fff; flex-shrink: 0; }
+        .shaka-seek-bar-container {
+            display: flex !important; align-items: center !important;
+            width: 100% !important; height: 22px !important;
+            margin: 0 0 8px 0 !important; padding: 0 !important;
+            order: -1 !important; overflow: visible !important;
+            position: relative !important; flex-shrink: 0 !important;
+        }
 
-.popup-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.88);
-  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-  display: none; align-items: center; justify-content: center; padding: 20px; z-index: 99999;
-}
-.popup-overlay.visible { display: flex; }
-.popup-wrap {
-  width: 100%; max-width: 358px; padding: 2px;
-  background: linear-gradient(145deg, rgba(255,204,0,.8), rgba(255,224,80,.4) 50%, rgba(255,204,0,.8));
-  border-radius: 18px; box-shadow: 0 0 50px rgba(255,204,0,.14), 0 30px 70px rgba(0,0,0,.72);
-  animation: pop-in .42s cubic-bezier(.175,.885,.32,1.275) both;
-}
-@keyframes pop-in {
-  from { opacity: 0; transform: scale(.87) translateY(24px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.popup-box {
-  background: linear-gradient(168deg, #1e1e26, #0e0e13);
-  border-radius: 16px; padding: 34px 24px 26px; text-align: center;
-}
-.popup-title { color: #ffcc00; font-size: 28px; font-weight: 800; letter-spacing: .5px; margin-bottom: 12px; }
-.popup-text { color: #a0a0a8; font-size: 14px; line-height: 1.65; margin-bottom: 24px; }
-.popup-text b { color: #fff; font-size: 17px; display: block; margin-top: 7px; }
-.btn-popup {
-  width: 100%; padding: 14px; border: none; border-radius: 13px;
-  cursor: pointer; -webkit-appearance: none; appearance: none;
-  touch-action: manipulation; text-decoration: none; display: block;
-  font-family: 'Poppins', sans-serif; font-weight: 600; transition: transform .18s;
-}
-.btn-popup:active { transform: scale(.95); }
-.btn-join {
-  background: linear-gradient(90deg, #1bcc26, #17b823); color: #fff;
-  font-size: 17px; letter-spacing: .5px;
-  box-shadow: 0 5px 20px rgba(23,184,35,.32); margin-bottom: 9px; text-align: center;
-}
-.btn-joined {
-  background: transparent; color: #484850; font-size: 12px;
-  font-weight: 400; width: auto; margin: 0 auto; padding: 7px 14px;
-}
+        .shaka-seek-bar {
+            width: 100% !important; height: 4px !important;
+            border-radius: 50px; background: rgba(255, 255, 255, 0.15) !important;
+            overflow: visible !important; position: relative !important;
+        }
 
-@media (max-width: 700px) {
-  .custom-watermark { font-size: 9px; bottom: 70px; right: 14px; }
-  #quality-menu { right: 46px; bottom: 64px; }
-  #quality-btn #qlabel { font-size: 11px; min-width: 30px; }
-}
-</style>
+        .shaka-seek-bar .shaka-range-element {
+            position: absolute !important; left: 0 !important; top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 100% !important; height: 22px !important; margin: 0 !important;
+            cursor: pointer !important; -webkit-appearance: none !important;
+            appearance: none !important; background: transparent !important;
+            outline: none !important; border: none !important;
+        }
+
+        .shaka-seek-bar .shaka-range-element::-webkit-slider-runnable-track {
+            height: 4px !important; border-radius: 50px; background: transparent !important;
+        }
+
+        .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb {
+            -webkit-appearance: none !important;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #ff3b30; cursor: pointer;
+            border: 2.5px solid rgba(255, 255, 255, .92);
+            box-shadow: 0 0 0 3px rgba(255, 59, 48, .28), 0 0 10px rgba(255, 59, 48, .55);
+            margin-top: -6px; position: relative; z-index: 10;
+        }
+
+        .shaka-seek-bar .shaka-range-element::-moz-range-track {
+            height: 4px !important; border-radius: 50px; background: transparent !important;
+        }
+
+        .shaka-seek-bar .shaka-range-element::-moz-range-thumb {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #ff3b30; cursor: pointer;
+            border: 2.5px solid rgba(255, 255, 255, .92);
+            box-shadow: 0 0 0 3px rgba(255, 59, 48, .28), 0 0 10px rgba(255, 59, 48, .55);
+        }
+
+        .shaka-current-time, .shaka-time-duration {
+            font-size: 14px; font-weight: 600; color: #fff; padding: 0 8px;
+        }
+
+        .shaka-bottom-controls > div {
+            display: flex !important; align-items: center !important; gap: 4px !important;
+        }
+
+        .shaka-controls-container button,
+        .shaka-controls-container .shaka-play-button,
+        .shaka-controls-container .shaka-mute-button,
+        .shaka-controls-container .shaka-fullscreen-button,
+        .shaka-controls-container .shaka-pip-button,
+        .shaka-controls-container .shaka-overflow-menu-button,
+        .shaka-controls-container .shaka-settings-menu-button,
+        .shaka-controls-container .shaka-current-time,
+        .shaka-controls-container .shaka-time-duration,
+        .shaka-controls-container .shaka-volume-slider,
+        .shaka-controls-container .shaka-spacer,
+        .shaka-controls-container .shaka-seek-bar-container,
+        .shaka-controls-container .shaka-play-button-container {
+            box-shadow: none !important;
+            filter: drop-shadow(0 0 0 transparent) !important;
+            text-shadow: none !important;
+        }
+
+        .shaka-controls-container { box-shadow: none !important; filter: none !important; }
+        .shaka-bottom-controls    { box-shadow: none !important; filter: none !important; }
+
+        .shaka-overflow-menu, .shaka-settings-menu {
+            border-radius: 12px; backdrop-filter: blur(18px);
+            background: rgba(20, 20, 20, 0.92);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: none !important; filter: none !important;
+        }
+
+        .shaka-volume-slider { width: 60px; box-shadow: none !important; filter: none !important; }
+
+        #telegramModal, .modal, .modal-content, #joinButton, #closeButton, .btn {
+            display: none !important; visibility: hidden !important; opacity: 0 !important;
+            pointer-events: none !important; width: 0 !important; height: 0 !important;
+            overflow: hidden !important; position: absolute !important; z-index: -9999 !important;
+            border: 0 !important; padding: 0 !important; margin: 0 !important;
+        }
+
+        #quality-btn {
+            appearance: none; border: none; background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            padding: 8px 6px; border-radius: 8px; flex: none; transition: background .18s;
+        }
+        #quality-btn:hover { background: rgba(255,255,255,.1); }
+        #quality-btn #qlabel {
+            font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600;
+            color: #fff; min-width: 38px; text-align: center; line-height: 1;
+        }
+
+        #quality-menu {
+            position: absolute; bottom: 70px; right: 58px; z-index: 3000; min-width: 140px;
+            background: linear-gradient(160deg, rgba(22,22,28,.97), rgba(11,11,15,.97));
+            -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px);
+            border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 6px;
+            transform-origin: bottom right;
+            transform: scale(.9) translateY(8px); opacity: 0; pointer-events: none;
+            transition: transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
+        }
+        #quality-menu.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
+        .qm-header {
+            font-size: 10px; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; color: rgba(255,255,255,.3); padding: 6px 10px 8px;
+        }
+        .qm-opt {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; border-radius: 9px; font-size: 13.5px; font-weight: 500;
+            color: rgba(255,255,255,.78); cursor: pointer; transition: background .15s, color .15s;
+        }
+        .qm-opt:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .qm-opt.active { color: #ff3b30; font-weight: 700; background: rgba(255,59,48,.1); }
+        .qm-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #ff3b30; opacity: 0; flex-shrink: 0;
+        }
+        .qm-opt.active .qm-dot { opacity: 1; }
+
+        @media (max-width: 700px) {
+            .custom-watermark { font-size: 9px; bottom: 70px; right: 14px; }
+            #quality-menu { right: 46px; bottom: 64px; }
+            #quality-btn #qlabel { font-size: 11px; min-width: 30px; }
+        }
+    </style>
 </head>
 <body>
 
-<div style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;" aria-hidden="true">
-  <script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script>
-  <script type="text/javascript">sc_online_i(1735331,"ffffff","28054a");</script>
-</div>
-
-<a href="https://t.me/CnpTVOfficial" class="logo-btn" target="_blank" rel="noopener noreferrer">
-  <img src="https://livedakho.pages.dev/file_00000000d56c7208939f3cb5bb73adc0.png" alt="">
-</a>
-
-<div id="loading-screen">
-  <div class="loader">
-    <div class="loader-ring"></div>
-    <div class="loader-ring-inner"></div>
-    <div class="loader-core"></div>
-  </div>
-  <div class="loading-text">
-    <div class="loading-label">Connecting to Stream</div>
-    <div class="loading-sub">Fetching Live Stream<span>.</span><span>.</span><span>.</span></div>
-  </div>
-</div>
-
 <div class="shaka-video-container" id="player-container">
-  <video id="video" autoplay muted playsinline preload="metadata"></video>
-  <div class="custom-watermark">LIVE · FANCODE</div>
-  <div id="quality-menu"></div>
+    <video id="video" autoplay muted playsinline preload="metadata"></video>
+    <div class="custom-watermark">LIVE · FANCODE</div>
+
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="quality-menu"></div>
 </div>
 
-<div id="error-screen">
-  <div class="error-card">
-    <div class="err-icon-wrap">
-      <svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-    </div>
-    <div class="err-title" id="err-title">Stream Not Found</div>
-    <div class="err-badge" id="err-badge">"Unknown"</div>
-    <div class="err-body" id="err-body">The requested stream is not available right now.</div>
-    <div class="err-retry" id="err-retry"><span class="retry-dot"></span><span>Retrying Automatically</span></div>
-    <a class="err-switch" id="err-switch" href="#">
-      <svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
-      Switch to Watch Now
-    </a>
-    <a href="https://wa.me/message/BOF76S5WFJVMN1" target="_blank" rel="noopener noreferrer" class="err-contact">
-      <svg viewBox="0 0 24 24"><path d="M9.993 15.674l-.398 5.604c.57 0 .817-.245 1.113-.54l2.67-2.557 5.53 4.047c1.014.558 1.734.264 1.987-.939l3.6-16.86c.3-1.4-.506-1.95-1.496-1.58L1.27 9.64c-1.37.53-1.35 1.29-.233 1.64l5.68 1.77 13.337-8.418c.59-.39 1.13-.175.69.215"/></svg>
-      Contact Support
-    </a>
-  </div>
-</div>
-
-<div class="popup-overlay visible" id="popup">
-  <div class="popup-wrap">
-    <div class="popup-box">
-      <div class="popup-title">Follow Us !!</div>
-      <div class="popup-text">
-        Join our WhatsApp channel<br>
-        <b>CRICKET NEWS POINT ™</b>
-        For Instant Updates &amp; Exclusive Links.
-      </div>
-      <a class="btn-popup btn-join" href="https://whatsapp.com/channel/0029VbDMpWVAe5VldaFI370o" target="_blank" rel="noopener noreferrer" id="popupJoin">JOIN NOW</a>
-      <button class="btn-popup btn-joined" id="popupSkip">Already Joined</button>
-    </div>
-  </div>
-</div>
+<div id="telegramModal" class="modal hidden"></div>
 
 <script>
-(function () {
-  'use strict';
+(function() {
+    const JSON_URL  = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/refs/heads/main/fancode.json';
+    const QUALITIES = ['1080p', '720p', '540p', '480p', '360p', '240p'];
+    const DEFAULT_Q = '720p';
+    const LANG_MAP  = { eng:'ENGLISH', hin:'HINDI', tam:'TAMIL', tel:'TELUGU', ben:'BENGALI', mar:'MARATHI' };
 
-  var JSON_URL = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/refs/heads/main/fancode.json';
-  var QUALITIES = ['1080p', '720p', '540p', '480p', '360p', '240p'];
-  var DEFAULT_Q = '720p';
-  var LANG_MAP = { eng: 'ENGLISH', hin: 'HINDI', tam: 'TAMIL', tel: 'TELUGU', ben: 'BENGALI', mar: 'MARATHI' };
-  var REGION_NAMES = { 1: 'Sri Lanka', 2: 'Nepal', 3: 'Bangladesh' };
+    const params    = new URLSearchParams(window.location.search);
+    const idParam   = params.get('id') || '';
+    const streamIdx = parseInt(params.get('s') || '0', 10);
+    const uscIdx    = idParam.indexOf('_');
+    const matchId   = uscIdx > -1 ? idParam.slice(0, uscIdx) : idParam;
+    const langCode  = uscIdx > -1 ? idParam.slice(uscIdx + 1) : 'eng';
+    const language  = LANG_MAP[langCode] || 'ENGLISH';
 
-  var params = new URLSearchParams(window.location.search);
-  var idParam = params.get('id') || '';
-  var streamIdx = parseInt(params.get('s') || '0', 10);
-  var uscIdx = idParam.indexOf('_');
-  var matchId = uscIdx > -1 ? idParam.slice(0, uscIdx) : idParam;
-  var langCode = uscIdx > -1 ? idParam.slice(uscIdx + 1) : 'eng';
-  var language = LANG_MAP[langCode] || 'ENGLISH';
+    const video     = document.getElementById('video');
+    const container = document.getElementById('player-container');
+    const loading   = document.getElementById('loading');
+    const qMenu     = document.getElementById('quality-menu');
 
-  var video = document.getElementById('video');
-  var container = document.getElementById('player-container');
-  var loadScreen = document.getElementById('loading-screen');
-  var errScreen = document.getElementById('error-screen');
-  var errTitle = document.getElementById('err-title');
-  var errBadge = document.getElementById('err-badge');
-  var errBody = document.getElementById('err-body');
-  var errRetry = document.getElementById('err-retry');
-  var errSwitch = document.getElementById('err-switch');
-  var qMenu = document.getElementById('quality-menu');
+    let player       = null;
+    let currentQ     = DEFAULT_Q;
+    let qStreams      = {};
+    let isQualityMode = false;
+    let userPaused    = false;
 
-  var shakaPlayer = null;
-  var currentQ = DEFAULT_Q;
-  var qStreams = {};
-  var isQualityMode = false;
-  var retryTimer = null;
-  var userPaused = false;
-  var autoResumeActive = false;
+    async function fetchStream() {
+        const res  = await fetch(JSON_URL + '?nc=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
 
-  document.getElementById('popupSkip').addEventListener('click', closePopup);
-  document.getElementById('popupJoin').addEventListener('click', closePopup);
-  function closePopup() {
-    var p = document.getElementById('popup');
-    p.style.opacity = '0';
-    p.style.transition = 'opacity .22s';
-    setTimeout(function () { p.style.display = 'none'; }, 240);
-  }
+        const list = Array.isArray(data) ? data :
+                     Array.isArray(data.matches) ? data.matches :
+                     Array.isArray(data.events)  ? data.events  :
+                     Array.isArray(data.data)     ? data.data    : [];
 
-  function showLoad() {
-    loadScreen.style.display = 'flex';
-    loadScreen.style.opacity = '1';
-  }
-  function hideLoad() {
-    loadScreen.style.opacity = '0';
-    setTimeout(function () { loadScreen.style.display = 'none'; }, 420);
-  }
+        const match = list.find(m => String(m.match_id) === String(matchId));
+        if (!match) throw new Error('Match not found: ' + matchId);
 
-  function showError(type, label) {
-    hideLoad();
-    clearTimeout(retryTimer);
-    errSwitch.classList.remove('show');
-    var region = REGION_NAMES[streamIdx];
-    if (type === 'regional') {
-      errTitle.textContent = 'Regional Stream Unavailable';
-      errBadge.textContent = (region || 'REGION').toUpperCase() + ' FEED';
-      errBody.innerHTML = 'This regional stream cannot be reached from your location.<br>Try Watch Now instead.';
-      errRetry.style.display = 'none';
-      errSwitch.href = 'fcplayer.html?id=' + idParam + '&s=0';
-      errSwitch.classList.add('show');
-    } else if (type === 'notfound') {
-      errTitle.textContent = 'Stream Not Found';
-      errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
-      errBody.innerHTML = 'This match is not available right now.<br>The feed may not have started yet.';
-      errRetry.style.display = 'flex';
-      retryTimer = setTimeout(start, 6000);
-    } else {
-      errTitle.textContent = 'Connection Trouble';
-      errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
-      errBody.innerHTML = 'Having trouble connecting to this stream.<br>Please check your internet connection.';
-      errRetry.style.display = 'flex';
-      retryTimer = setTimeout(start, 6000);
-    }
-    errScreen.classList.add('show');
-  }
-  function hideError() {
-    errScreen.classList.remove('show');
-    errSwitch.classList.remove('show');
-  }
+        if (streamIdx === 0) {
+            const autoLang = match.auto_streams &&
+                             (match.auto_streams[language] || match.auto_streams['ENGLISH']);
+            if (!autoLang?.streams) throw new Error('Auto streams not available');
+            isQualityMode = true;
+            return { type: 'quality', streams: autoLang.streams };
+        }
 
-  function fetchJSON(url) {
-    return fetch(url + '?nc=' + Date.now(), { cache: 'no-store' })
-      .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      });
-  }
-
-  function resolveStream(data) {
-    var list = Array.isArray(data) ? data :
-               Array.isArray(data.matches) ? data.matches :
-               Array.isArray(data.events) ? data.events :
-               Array.isArray(data.data) ? data.data : [];
-
-    var match = null;
-    for (var i = 0; i < list.length; i++) {
-      if (String(list[i].match_id) === String(matchId)) { match = list[i]; break; }
-    }
-    if (!match) return null;
-
-    if (streamIdx === 0) {
-      var autoLang = match.auto_streams &&
-                     (match.auto_streams[language] || match.auto_streams['ENGLISH']);
-      if (!autoLang || !autoLang.streams) return null;
-      return { type: 'quality', streams: autoLang.streams };
+        const s   = match.streams || {};
+        const url = streamIdx === 1 ? s.fancode_lk_cdn :
+                    streamIdx === 2 ? s.fancode_np_cdn  :
+                    streamIdx === 3 ? s.fancode_bd_cdn  : null;
+        if (!url) throw new Error('Regional stream not found');
+        return { type: 'single', url };
     }
 
-    var s = match.streams || {};
-    var url = streamIdx === 1 ? s.fancode_lk_cdn :
-              streamIdx === 2 ? s.fancode_np_cdn :
-              streamIdx === 3 ? s.fancode_bd_cdn : null;
-    return url ? { type: 'single', url: url } : null;
-  }
-
-  function buildQMenu(streams) {
-    var available = QUALITIES.filter(function (q) { return streams[q]; });
-    var html = '<div class="qm-header">Quality</div>';
-    available.forEach(function (q) {
-      html += '<div class="qm-opt' + (q === currentQ ? ' active' : '') + '" data-q="' + q + '">' +
-              q + '<span class="qm-dot"></span></div>';
-    });
-    qMenu.innerHTML = html;
-    qMenu.querySelectorAll('.qm-opt').forEach(function (opt) {
-      opt.addEventListener('click', function () {
-        var q = opt.dataset.q;
-        if (q !== currentQ) switchQuality(q);
-        qMenu.classList.remove('open');
-      });
-    });
-  }
-
-  function switchQuality(q) {
-    if (!qStreams[q] || !shakaPlayer) return;
-    currentQ = q;
-    var lbl = document.getElementById('qlabel');
-    if (lbl) lbl.textContent = q;
-    qMenu.querySelectorAll('.qm-opt').forEach(function (o) {
-      o.classList.toggle('active', o.dataset.q === q);
-    });
-    var wasPlaying = !video.paused;
-    shakaPlayer.load(qStreams[q]).then(function () {
-      if (wasPlaying) video.play().catch(function () {});
-    }).catch(function () {});
-  }
-
-  function injectQualityBtn() {
-    if (document.getElementById('quality-btn')) return;
-    var attempts = 0;
-    var iv = setInterval(function () {
-      attempts++;
-      var fsBtn = container.querySelector('.shaka-fullscreen-button') ||
-                  container.querySelector('[aria-label="Full screen"]') ||
-                  container.querySelector('[aria-label="Fullscreen"]');
-      if (fsBtn && fsBtn.parentNode) {
-        clearInterval(iv);
-        if (document.getElementById('quality-btn')) return;
-        var btn = document.createElement('button');
-        btn.id = 'quality-btn';
-        btn.setAttribute('aria-label', 'Quality');
-        btn.innerHTML = '<span id="qlabel">' + currentQ + '</span>';
-        btn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          qMenu.classList.toggle('open');
+    function buildQMenu(streams) {
+        const available = QUALITIES.filter(q => streams[q]);
+        let html = '<div class="qm-header">Quality</div>';
+        available.forEach(q => {
+            html += `<div class="qm-opt${q === currentQ ? ' active' : ''}" data-q="${q}">${q}<span class="qm-dot"></span></div>`;
         });
-        fsBtn.parentNode.insertBefore(btn, fsBtn);
-      }
-      if (attempts > 60) clearInterval(iv);
-    }, 80);
-  }
-
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest('#quality-btn') && !e.target.closest('#quality-menu')) {
-      qMenu.classList.remove('open');
-    }
-    if (e.target.closest('.shaka-play-button') && !video.paused) userPaused = true;
-  });
-
-  function setupAutoResume() {
-    if (autoResumeActive) return;
-    autoResumeActive = true;
-    video.addEventListener('pause', function () {
-      if (!video.ended && !userPaused) {
-        setTimeout(function () {
-          if (video.paused && !video.ended) video.play().catch(function () {});
-        }, 500);
-      }
-      setTimeout(function () { userPaused = false; }, 100);
-    });
-    video.addEventListener('play', function () { userPaused = false; });
-    setInterval(function () {
-      if (video.paused && !video.ended && !userPaused) video.play().catch(function () {});
-    }, 3000);
-  }
-
-  function playNative(streamUrl) {
-    if (shakaPlayer) { shakaPlayer.destroy().catch(function () {}); shakaPlayer = null; }
-    video.src = streamUrl;
-    video.muted = false;
-    video.play().catch(function () {
-      video.muted = true;
-      video.play().catch(function () {});
-      setTimeout(function () { video.muted = false; video.play().catch(function () {}); }, 800);
-    });
-  }
-
-  async function initPlayer(streamUrl) {
-    shaka.polyfill.installAll();
-
-    var hideTimer = setTimeout(hideLoad, 9000);
-    function onFirst() {
-      video.removeEventListener('playing', onFirst);
-      clearTimeout(hideTimer);
-      hideLoad();
-      hideError();
-    }
-    video.addEventListener('playing', onFirst);
-
-    if (!shaka.Player.isBrowserSupported()) {
-      playNative(streamUrl);
-      return;
+        qMenu.innerHTML = html;
+        qMenu.querySelectorAll('.qm-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const q = opt.dataset.q;
+                if (q !== currentQ) switchQuality(q);
+                qMenu.classList.remove('open');
+            });
+        });
     }
 
-    try {
-      if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
-      shakaPlayer = new shaka.Player();
-      await shakaPlayer.attach(video);
+    async function switchQuality(q) {
+        if (!qStreams[q] || !player) return;
+        currentQ = q;
+        const lbl = document.getElementById('qlabel');
+        if (lbl) lbl.textContent = q;
+        qMenu.querySelectorAll('.qm-opt').forEach(o => o.classList.toggle('active', o.dataset.q === q));
+        const wasPlaying = !video.paused;
+        try {
+            await player.load(qStreams[q]);
+            if (wasPlaying) video.play().catch(() => {});
+        } catch(e) { console.warn('Quality switch error:', e); }
+    }
 
-      var ui = new shaka.ui.Overlay(shakaPlayer, container, video);
-      ui.configure({
-        addBigPlayButton: true,
-        addSeekBar: true,
-        controlPanelElements: ['mute', 'play_pause', 'time_and_duration', 'spacer', 'picture_in_picture', 'fullscreen'],
-        seekBarColors: {
-          base: 'rgba(255,255,255,0.18)',
-          buffered: 'rgba(255,255,255,0.38)',
-          played: '#ff3b30'
+    function injectQualityBtn() {
+        if (document.getElementById('quality-btn')) return;
+        let attempts = 0;
+        const iv = setInterval(() => {
+            attempts++;
+            const fsBtn = container.querySelector('.shaka-fullscreen-button') ||
+                          container.querySelector('[aria-label="Full screen"]')  ||
+                          container.querySelector('[aria-label="Fullscreen"]');
+            if (fsBtn?.parentNode) {
+                clearInterval(iv);
+                if (document.getElementById('quality-btn')) return;
+                const btn = document.createElement('button');
+                btn.id = 'quality-btn';
+                btn.setAttribute('aria-label', 'Quality');
+                btn.innerHTML = `<span id="qlabel">${currentQ}</span>`;
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    qMenu.classList.toggle('open');
+                });
+                fsBtn.parentNode.insertBefore(btn, fsBtn);
+            }
+            if (attempts > 60) clearInterval(iv);
+        }, 80);
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#quality-btn') && !e.target.closest('#quality-menu')) {
+            qMenu.classList.remove('open');
         }
-      });
+        if (e.target.closest('.shaka-play-button') && !video.paused) userPaused = true;
+    });
 
-      shakaPlayer.configure({
-        streaming: {
-          bufferingGoal: 10,
-          rebufferingGoal: 2,
-          safeSeekOffset: 5,
-          lowLatencyMode: true
+    async function initPlayer(streamUrl) {
+        shaka.polyfill.installAll();
+
+        if (!shaka.Player.isBrowserSupported()) {
+            video.src = streamUrl;
+            video.muted = false;
+            video.play().catch(() => { video.muted = true; video.play(); });
+            video.addEventListener('playing', () => { loading.style.display = 'none'; }, { once: true });
+            setTimeout(() => { loading.style.display = 'none'; }, 6000);
+            return;
         }
-      });
 
-      if (isQualityMode) injectQualityBtn();
+        try {
+            player = new shaka.Player();
+            await player.attach(video);
 
-      await shakaPlayer.load(streamUrl);
+            const ui = new shaka.ui.Overlay(player, container, video);
+            ui.configure({
+                addBigPlayButton: true,
+                addSeekBar: true,
+                controlPanelElements: [
+                    'mute',
+                    'play_pause',
+                    'time_and_duration',
+                    'spacer',
+                    'picture_in_picture',
+                    'fullscreen'
+                ],
+                seekBarColors: {
+                    base:     'rgba(255,255,255,0.2)',
+                    buffered: 'rgba(255,255,255,0.4)',
+                    played:   '#ff3b30'
+                }
+            });
 
-      video.muted = false;
-      try {
-        await video.play();
-      } catch (e) {
-        video.muted = true;
-        await video.play().catch(function () {});
-        setTimeout(function () { video.muted = false; video.play().catch(function () {}); }, 800);
-      }
+            player.configure({
+                streaming: {
+                    bufferingGoal:   10,
+                    rebufferingGoal: 2,
+                    safeSeekOffset:  5,
+                    lowLatencyMode:  true
+                }
+            });
 
-    } catch (err) {
-      console.warn('Shaka failed, trying native HLS:', err);
-      playNative(streamUrl);
+            if (isQualityMode) injectQualityBtn();
+
+            await player.load(streamUrl);
+
+            video.muted = false;
+            try {
+                await video.play();
+            } catch (e) {
+                video.muted = true;
+                await video.play();
+                setTimeout(() => { video.muted = false; video.play().catch(() => {}); }, 1000);
+            }
+
+            video.addEventListener('playing', () => { loading.style.display = 'none'; }, { once: true });
+            setTimeout(() => { loading.style.display = 'none'; }, 6000);
+
+            let userPaused = false;
+            document.addEventListener('click', e => {
+                if (e.target.closest('.shaka-play-button') && !video.paused) userPaused = true;
+            });
+            video.addEventListener('pause', () => {
+                if (!video.ended && !userPaused) {
+                    setTimeout(() => { if (video.paused && !video.ended) video.play().catch(() => {}); }, 500);
+                }
+                setTimeout(() => { userPaused = false; }, 100);
+            });
+            video.addEventListener('play', () => { userPaused = false; });
+            setInterval(() => {
+                if (video.paused && !video.ended && !userPaused) video.play().catch(() => {});
+            }, 3000);
+
+        } catch (e) {
+            console.warn('Shaka error, falling back to native HLS:', e);
+            if (player) { player.destroy().catch(() => {}); player = null; }
+            video.src = streamUrl;
+            video.muted = false;
+            video.play().catch(() => {
+                video.muted = true;
+                video.play().catch(() => {});
+            });
+            video.addEventListener('playing', () => { loading.style.display = 'none'; }, { once: true });
+            setTimeout(() => { loading.style.display = 'none'; }, 6000);
+        }
     }
-  }
 
-  async function start() {
-    if (!matchId) { showError('notfound', 'No match ID in URL'); return; }
-    hideError();
-    showLoad();
-    clearTimeout(retryTimer);
+    async function start() {
+        loading.style.display = 'flex';
+        if (!matchId) { loading.style.display = 'none'; return; }
 
-    try {
-      var data = await fetchJSON(JSON_URL);
-      var result = resolveStream(data);
+        try {
+            const result = await fetchStream();
 
-      if (!result) {
-        if (REGION_NAMES[streamIdx]) showError('regional', matchId);
-        else showError('notfound', matchId);
-        return;
-      }
+            if (result.type === 'quality') {
+                qStreams = result.streams;
+                buildQMenu(result.streams);
+                const defaultUrl = result.streams[DEFAULT_Q] ||
+                                   result.streams['480p']    ||
+                                   Object.values(result.streams)[0];
+                await initPlayer(defaultUrl);
+            } else {
+                await initPlayer(result.url);
+            }
 
-      setupAutoResume();
-
-      if (result.type === 'quality') {
-        isQualityMode = true;
-        qStreams = result.streams;
-        buildQMenu(result.streams);
-        var defaultUrl = result.streams[DEFAULT_Q] ||
-                         result.streams['480p'] ||
-                         Object.values(result.streams)[0];
-        await initPlayer(defaultUrl);
-      } else {
-        isQualityMode = false;
-        await initPlayer(result.url);
-      }
-
-    } catch (err) {
-      console.error('start() error:', err);
-      showError('connection', matchId);
+        } catch (err) {
+            console.error('Error:', err);
+            loading.innerHTML = `<div style="font-size:13px;color:rgba(255,255,255,.45);text-align:center;padding:20px">${err.message || 'Stream unavailable'}</div>`;
+        }
     }
-  }
 
-  start();
+    document.addEventListener('DOMContentLoaded', start);
 })();
 </script>
+
+<script>(function(s){s.dataset.zone='10603308',s.src='https://llvpn.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
 </body>
 </html>
