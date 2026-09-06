@@ -1,1268 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-<meta name="color-scheme" content="dark">
-<meta name="format-detection" content="telephone=no">
-<meta name="referrer" content="no-referrer-when-downgrade">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>FanCode Live Player</title>
-<link rel="icon" href="https://livedakho.pages.dev/file_00000000d56c7208939f3cb5bb73adc0.png">
+    <meta charset="UTF-8">
+    <title>DILLZY</title>
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L7VPXZYQPN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-L7VPXZYQPN');
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-G5NE717HVD"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-G5NE717HVD');</script>
+        html, body {
+            width: 100%; height: 100%;
+            background: #000; overflow: hidden;
+            font-family: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Acme&family=Amaranth:wght@400;700&display=swap" rel="stylesheet">
+        .shaka-video-container {
+            position: fixed; inset: 0; background: #000;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-<style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
-html {
-  height: 100%;
-  height: -webkit-fill-available;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
+        .custom-watermark {
+            position: absolute; z-index: 40; pointer-events: none;
+            bottom: 80px; right: 20px; font-size: 11px; font-weight: 600;
+            color: rgba(255, 255, 255, 0.10); letter-spacing: 0.5px; text-transform: uppercase;
+        }
 
-body {
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  min-height: -webkit-fill-available;
-  background: #000;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
+        .loading-overlay {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            background: #000; color: #fff; z-index: 2000; pointer-events: none;
+        }
 
-.logo-btn {
-  position: fixed;
-  top: 10px; left: 10px;
-  z-index: 50;
-  display: flex; align-items: center;
-  text-decoration: none;
-  transition: opacity .2s;
-}
-.logo-btn:hover { opacity: .8; }
-.logo-btn img {
-  height: 36px; width: auto;
-  border-radius: 7px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,.8));
-}
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, .15);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin-bottom: 12px;
+        }
 
-#loading-screen {
-  position: fixed; inset: 0; z-index: 100;
-  background: #0a0a0a;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 22px;
-}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-.loader {
-  position: relative;
-  width: 58px; height: 58px;
-}
-.loader-ring {
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #ffcc00;
-  border-right-color: rgba(255,204,0,0.18);
-  animation: loader-spin 1s cubic-bezier(0.55,0.1,0.45,0.9) infinite;
-}
-.loader-ring-inner {
-  position: absolute; inset: 11px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #1bcc26;
-  border-right-color: rgba(27,204,38,0.16);
-  animation: loader-spin-rev .8s cubic-bezier(0.55,0.1,0.45,0.9) infinite;
-}
-.loader-core {
-  position: absolute; inset: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,204,0,0.55) 0%, rgba(255,204,0,0) 72%);
-  animation: loader-pulse 1.6s ease-in-out infinite;
-}
-@keyframes loader-spin { to { transform: rotate(360deg); } }
-@keyframes loader-spin-rev { to { transform: rotate(-360deg); } }
-@keyframes loader-pulse {
-  0%, 100% { opacity: .35; transform: scale(.82); }
-  50% { opacity: 1; transform: scale(1); }
-}
+        .shaka-controls-container { background: transparent !important; }
 
-.loading-text {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 7px;
-}
-.loading-label {
-  font-family: 'Amaranth', sans-serif;
-  font-size: 15.5px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  color: rgba(255,255,255,.88);
-}
-.loading-sub {
-  display: flex; align-items: center; gap: 3px;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  letter-spacing: .3px;
-  color: rgba(255,255,255,.32);
-}
-.loading-sub span {
-  opacity: .25;
-  animation: dot-fade 1.3s ease-in-out infinite;
-}
-.loading-sub span:nth-child(2) { animation-delay: .16s; }
-.loading-sub span:nth-child(3) { animation-delay: .32s; }
-@keyframes dot-fade {
-  0%, 100% { opacity: .25; }
-  50% { opacity: 1; }
-}
+        .shaka-bottom-controls {
+            padding: 10px 16px;
+            display: flex !important; flex-direction: column !important;
+        }
 
-#player-shell {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  background: #000;
-  z-index: 1;
-  visibility: hidden;
-  overflow: hidden;
-}
+        .shaka-seek-bar-container {
+            display: block !important; width: 100% !important; height: 8px !important;
+            margin: 0 0 10px 0 !important; padding: 0 !important; order: -1 !important; position: relative !important;
+        }
 
-#video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #000;
-  display: block;
-}
+        .shaka-seek-bar {
+            width: 100% !important; height: 8px !important;
+            border-radius: 50px; background: rgba(255, 255, 255, 0.15) !important; position: relative !important;
+        }
 
-#center-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .25s ease;
-}
-#center-overlay.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-.center-play-btn {
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  border: none;
-  background:
-    linear-gradient(155deg, rgba(255,255,255,.22), rgba(255,255,255,.02) 60%),
-    rgba(18,18,22,.44);
-  -webkit-backdrop-filter: blur(22px) saturate(200%);
-  backdrop-filter: blur(22px) saturate(200%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.34),
-    inset 0 -7px 12px rgba(0,0,0,.24),
-    0 14px 30px -10px rgba(0,0,0,.6),
-    0 0 0 1px rgba(255,255,255,.07);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  cursor: pointer;
-  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
-}
-.center-play-btn svg {
-  width: 22px; height: 22px;
-  margin-left: 3px;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,.4));
-}
-.center-play-btn:hover {
-  transform: scale(1.07);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.4),
-    inset 0 -7px 12px rgba(0,0,0,.24),
-    0 16px 34px -8px rgba(0,0,0,.65),
-    0 0 0 1px rgba(10,132,255,.4),
-    0 0 26px rgba(10,132,255,.28);
-}
-.center-play-btn:active { transform: scale(.9); }
+        .shaka-seek-bar .shaka-range-element {
+            width: 100% !important; height: 8px !important; border-radius: 50px;
+            background: transparent !important; position: relative !important;
+            -webkit-appearance: none !important; appearance: none !important; outline: none !important;
+        }
 
-#controls-bar {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  z-index: 4;
-  padding: 22px 16px 14px;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.75) 60%, rgba(0,0,0,.88) 100%);
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity .28s ease, transform .28s ease;
-  pointer-events: none;
-}
-#player-shell.controls-visible #controls-bar {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
+        .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #ff3b30; cursor: pointer;
+            box-shadow: 0 0 12px rgba(255, 59, 48, 0.6); border: 2px solid #fff;
+            margin-top: -5px; position: relative; z-index: 10;
+        }
 
-#progress-track {
-  position: relative;
-  width: 100%;
-  height: 4px;
-  border-radius: 4px;
-  background: rgba(255,255,255,.22);
-  margin-bottom: 14px;
-  cursor: pointer;
-}
-#progress-track.is-live-only { cursor: default; }
-#progress-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 0%;
-  border-radius: 4px;
-  background: #0A84FF;
-}
-#progress-thumb {
-  position: absolute;
-  top: 50%;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(10,132,255,.35);
-  transform: translate(-50%, -50%);
-  left: 0%;
-  transition: opacity .2s ease;
-}
-#progress-track.is-live-only #progress-thumb { opacity: 0; }
+        .shaka-seek-bar .shaka-range-element::-webkit-slider-runnable-track {
+            height: 8px !important; border-radius: 50px; background: transparent !important;
+        }
 
-#controls-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.player-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  color: rgba(255,255,255,.92);
-  width: 34px; height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  flex: none;
-  transition: background .18s ease, color .15s ease, transform .15s cubic-bezier(.34,1.56,.64,1);
-}
-.player-btn:hover { background: rgba(255,255,255,.13); transform: translateY(-1px); }
-.player-btn:active { transform: scale(.88); }
-.unmute-hint {
-  color: #0A84FF;
-  animation: unmute-glow 1.7s ease-in-out infinite;
-}
-@keyframes unmute-glow {
-  0%, 100% { background: rgba(10,132,255,.08); box-shadow: 0 0 0 0 rgba(10,132,255,.4); }
-  50% { background: rgba(10,132,255,.32); box-shadow: 0 0 0 7px rgba(10,132,255,0); }
-}
+        .shaka-seek-bar .shaka-range-element::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #ff3b30; cursor: pointer;
+            border: 2px solid #fff; box-shadow: 0 0 12px rgba(255, 59, 48, 0.6);
+        }
 
-.live-pill {
-  appearance: none;
-  border: none;
-  cursor: default;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .6px;
-  color: #ff5a5a;
-  padding: 4px 9px 4px 6px;
-  border-radius: 20px;
-  background: rgba(255,69,69,.14);
-  border: 1px solid rgba(255,69,69,.35);
-  flex: none;
-  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
-}
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #ff4545;
-  animation: live-blink 1.4s infinite;
-  flex: none;
-}
-@keyframes live-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .3; }
-}
-.live-pill.is-behind {
-  color: #ffb020;
-  background: rgba(255,176,32,.14);
-  border-color: rgba(255,176,32,.35);
-  cursor: pointer;
-}
-.live-pill.is-behind:hover { background: rgba(255,176,32,.24); transform: translateY(-1px); }
-.live-pill.is-behind:active { transform: scale(.92); }
-.live-pill.is-behind .live-dot {
-  background: #ffb020;
-  animation: none;
-  opacity: 1;
-}
-#livePillText { min-width: 0; }
+        .shaka-seek-bar .shaka-range-element::-moz-range-track {
+            height: 8px !important; border-radius: 50px; background: transparent !important;
+        }
 
-.controls-spacer { flex: 1; }
+        .shaka-current-time, .shaka-time-duration {
+            font-size: 14px; font-weight: 600; color: #fff; padding: 0 8px;
+        }
 
-#resizeBtn {
-  width: auto;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 15px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.12);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .6px;
-  color: rgba(255,255,255,.86);
-}
-#resizeBtn:hover { background: rgba(255,255,255,.16); }
+        .shaka-bottom-controls > div {
+            display: flex !important; align-items: center !important; gap: 4px !important;
+        }
 
-#qualityMenu {
-  position: absolute;
-  right: 16px;
-  bottom: 74px;
-  z-index: 5;
-  min-width: 158px;
-  background: linear-gradient(165deg, rgba(34,34,40,.92), rgba(18,18,22,.92));
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  max-height: 260px;
-  overflow-y: auto;
-  box-shadow: 0 20px 45px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
-  transform-origin: bottom right;
-  transform: scale(.9) translateY(6px);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
-}
-#qualityMenu.open {
-  transform: scale(1) translateY(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-.quality-menu-label {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.35);
-  padding: 6px 10px 8px;
-}
-.quality-option {
-  padding: 10px 12px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: rgba(255,255,255,.78);
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background .15s ease, color .15s ease;
-}
-.quality-option:hover { background: rgba(255,255,255,.09); color: #fff; }
-.quality-option.active { color: #0A84FF; font-weight: 700; background: rgba(10,132,255,.12); }
-.quality-option.active::after {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #0A84FF;
-  flex: none;
-}
+        .shaka-controls-container button,
+        .shaka-controls-container .shaka-play-button,
+        .shaka-controls-container .shaka-mute-button,
+        .shaka-controls-container .shaka-fullscreen-button,
+        .shaka-controls-container .shaka-pip-button,
+        .shaka-controls-container .shaka-overflow-menu-button,
+        .shaka-controls-container .shaka-settings-menu-button,
+        .shaka-controls-container .shaka-current-time,
+        .shaka-controls-container .shaka-time-duration,
+        .shaka-controls-container .shaka-volume-slider,
+        .shaka-controls-container .shaka-spacer,
+        .shaka-controls-container .shaka-seek-bar-container,
+        .shaka-controls-container .shaka-play-button-container {
+            box-shadow: none !important;
+            filter: drop-shadow(0 0 0 transparent) !important;
+            text-shadow: none !important;
+        }
 
-.popup-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.88);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  display: none;
-  align-items: center; justify-content: center;
-  padding: 20px;
-  z-index: 99999;
-}
-.popup-overlay.visible { display: flex; }
+        .shaka-controls-container { box-shadow: none !important; filter: none !important; }
+        .shaka-bottom-controls    { box-shadow: none !important; filter: none !important; }
 
-.popup-wrap {
-  position: relative;
-  width: 100%; max-width: 358px;
-  padding: 2px;
-  background: linear-gradient(145deg, rgba(255,204,0,0.8) 0%, rgba(255,224,80,0.4) 50%, rgba(255,204,0,0.8) 100%);
-  border-radius: 18px;
-  box-shadow: 0 0 50px rgba(255,204,0,0.14), 0 30px 70px rgba(0,0,0,0.72);
-  animation: popIn 0.42s cubic-bezier(0.175,0.885,0.32,1.275) both;
-}
-@keyframes popIn {
-  from { opacity:0; transform: scale(0.87) translateY(24px); }
-  to   { opacity:1; transform: scale(1)   translateY(0); }
-}
+        .shaka-overflow-menu, .shaka-settings-menu {
+            border-radius: 12px; backdrop-filter: blur(18px);
+            background: rgba(20, 20, 20, 0.92);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: none !important; filter: none !important;
+        }
 
-.popup-box {
-  background: linear-gradient(168deg, #1e1e26 0%, #0e0e13 100%);
-  border-radius: 16px;
-  padding: 34px 24px 26px;
-  text-align: center;
-}
+        .shaka-volume-slider { width: 60px; box-shadow: none !important; filter: none !important; }
 
-.popup-title {
-  color: #ffcc00;
-  font-family: 'Acme', sans-serif;
-  font-size: 30px;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-}
+        #telegramModal, .modal, .modal-content, #joinButton, #closeButton, .btn {
+            display: none !important; visibility: hidden !important; opacity: 0 !important;
+            pointer-events: none !important; width: 0 !important; height: 0 !important;
+            overflow: hidden !important; position: absolute !important; z-index: -9999 !important;
+            border: 0 !important; padding: 0 !important; margin: 0 !important;
+        }
 
-.popup-text {
-  color: #a0a0a8;
-  font-size: 14px;
-  line-height: 1.65;
-  margin-bottom: 24px;
-}
-.popup-text b {
-  color: #fff;
-  font-family: 'Amaranth', sans-serif;
-  font-size: 17px;
-  display: block;
-  margin-top: 7px;
-}
-
-.btn-popup {
-  width: 100%; padding: 14px; border: none;
-  border-radius: 13px;
-  font-family: 'Amaranth', sans-serif;
-  cursor: pointer;
-  transition: transform .18s, box-shadow .18s;
-  -webkit-user-select: none; user-select: none;
-  -webkit-appearance: none; appearance: none;
-  touch-action: manipulation;
-  text-decoration: none;
-  display: block;
-}
-.btn-popup:active { transform: scale(0.95); }
-
-.btn-join-main {
-  background: linear-gradient(90deg, #1bcc26, #17b823);
-  color: #fff;
-  font-size: 18px; font-weight: 700;
-  letter-spacing: 0.6px;
-  box-shadow: 0 5px 20px rgba(23,184,35,0.32);
-  margin-bottom: 9px;
-  line-height: 1;
-  padding: 14px;
-  text-align: center;
-}
-.btn-join-main:hover { box-shadow: 0 8px 26px rgba(23,184,35,0.42); }
-
-.btn-joined-main {
-  background: transparent;
-  color: #484850;
-  font-size: 12px; font-weight: 400;
-  width: auto; margin: 0 auto;
-  padding: 7px 14px;
-  text-align: center;
-}
-
-#error-screen {
-  position: fixed; inset: 0; z-index: 80;
-  background: #0d0d16;
-  display: none;
-  align-items: center; justify-content: center;
-  padding: 24px;
-}
-#error-screen.show { display: flex; }
-
-.error-card {
-  background: rgba(255,255,255,.04);
-  border: 1.5px solid rgba(255,255,255,.1);
-  border-radius: 20px;
-  padding: 52px 32px 42px;
-  max-width: 400px; width: 100%;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
-  animation: popIn .35s cubic-bezier(.34,1.45,.64,1);
-}
-.error-icon {
-  width: 72px; height: 72px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.15);
-  background: rgba(255,255,255,.05);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 22px;
-}
-.error-icon svg {
-  width: 36px; height: 36px;
-  stroke: rgba(255,255,255,.55); fill: none;
-  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-}
-.error-title {
-  font-family: 'Acme', sans-serif;
-  font-size: clamp(22px, 6vw, 28px);
-  font-weight: 800; color: #efefef;
-  margin-bottom: 12px;
-}
-.error-badge {
-  display: inline-block;
-  background: rgba(245,165,0,.12);
-  border: 1px solid rgba(245,165,0,.28);
-  color: #f5a500;
-  font-size: 13.5px; font-weight: 700;
-  padding: 4px 16px; border-radius: 20px;
-  margin-bottom: 14px; letter-spacing: .4px;
-}
-.error-body {
-  font-size: 14px; color: rgba(255,255,255,.38);
-  line-height: 1.8; margin-bottom: 14px;
-  font-family: Arial, sans-serif;
-}
-.error-retry-note {
-  display: flex; align-items: center; justify-content: center;
-  gap: 7px;
-  font-size: 12.5px; color: rgba(255,255,255,.34);
-  font-family: Arial, sans-serif;
-  letter-spacing: .3px;
-  margin-bottom: 30px;
-}
-.error-retry-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #f5a500;
-  animation: pulse 1.4s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.1); } }
-.error-contact-btn {
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 13px 30px; border-radius: 50px;
-  background: rgba(255,255,255,.09);
-  border: 1.5px solid rgba(255,255,255,.16);
-  color: #fff; cursor: pointer;
-  font-family: 'Amaranth', sans-serif;
-  font-size: 15px; font-weight: 700;
-  text-decoration: none; letter-spacing: .3px;
-  transition: background .2s, border-color .2s, transform .15s;
-}
-.error-contact-btn:hover {
-  background: rgba(255,255,255,.15);
-  border-color: rgba(255,255,255,.28);
-  transform: translateY(-1px);
-}
-.error-contact-btn svg { width:16px; height:16px; fill:#fff; flex-shrink:0; }
-
-.error-switch-btn {
-  display: none;
-  align-items: center; justify-content: center; gap: 9px;
-  width: 100%;
-  padding: 14px 20px; border-radius: 50px;
-  background: linear-gradient(90deg, #0A84FF, #38a4ff);
-  border: none;
-  color: #fff; cursor: pointer;
-  font-family: 'Amaranth', sans-serif;
-  font-size: 15.5px; font-weight: 700;
-  text-decoration: none; letter-spacing: .3px;
-  margin-bottom: 12px;
-  box-shadow: 0 8px 24px rgba(10,132,255,.34);
-  transition: transform .15s ease, box-shadow .2s ease;
-}
-.error-switch-btn.show { display: inline-flex; }
-.error-switch-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(10,132,255,.44); }
-.error-switch-btn:active { transform: scale(.97); }
-.error-switch-btn svg { width:17px; height:17px; fill:#fff; flex-shrink:0; }
-
-@media (hover: none) {
-  .logo-btn:hover { opacity: 1; }
-  .btn-join-main:hover { box-shadow: 0 5px 20px rgba(23,184,35,0.32); }
-  .error-contact-btn:hover { background: rgba(255,255,255,.09); transform: none; }
-  .error-switch-btn:hover { box-shadow: 0 8px 24px rgba(10,132,255,.34); transform: none; }
-  .player-btn:hover { background: transparent; }
-}
-</style>
+        @media (max-width: 700px) {
+            .custom-watermark { font-size: 9px; bottom: 70px; right: 14px; }
+            .shaka-seek-bar-container { height: 6px !important; }
+            .shaka-seek-bar { height: 6px !important; }
+            .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb { width: 14px; height: 14px; }
+        }
+    </style>
 </head>
 <body>
 
-<div style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;" aria-hidden="true">
-  <script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script>
-  <script type="text/javascript">sc_online_i(1735331,"ffffff","28054a");</script>
+<div class="shaka-video-container" id="player-container">
+    <video id="video" autoplay muted playsinline preload="metadata"></video>
+    <div class="custom-watermark">LIVE · FANCODE</div>
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
 </div>
 
-<a href="https://t.me/CnpTVOfficial" class="logo-btn" target="_blank" rel="noopener noreferrer">
-  <img src="https://livedakho.pages.dev/file_00000000d56c7208939f3cb5bb73adc0.png" alt="Logo" loading="eager">
-</a>
+<div id="telegramModal" class="modal hidden"></div>
 
-<div id="loading-screen">
-  <div class="loader">
-    <div class="loader-ring"></div>
-    <div class="loader-ring-inner"></div>
-    <div class="loader-core"></div>
-  </div>
-  <div class="loading-text">
-    <div class="loading-label">Connecting to Stream</div>
-    <div class="loading-sub">Fetching Live Stream<span>.</span><span>.</span><span>.</span></div>
-  </div>
-</div>
-
-<div id="player-shell">
-  <video id="video" playsinline webkit-playsinline muted autoplay preload="auto"></video>
-  <div id="center-overlay">
-    <button type="button" id="centerPlayBtn" class="center-play-btn" aria-label="Play"></button>
-  </div>
-  <div id="controls-bar">
-    <div id="progress-track">
-      <div id="progress-fill"></div>
-      <div id="progress-thumb"></div>
-    </div>
-    <div id="controls-row">
-      <button type="button" id="playPauseBtn" class="player-btn" aria-label="Play"></button>
-      <button type="button" id="muteBtn" class="player-btn" aria-label="Mute"></button>
-      <button type="button" class="live-pill" id="livePill"><span class="live-dot"></span><span id="livePillText">LIVE</span></button>
-      <span class="controls-spacer"></span>
-      <button type="button" id="resizeBtn" class="player-btn" aria-label="Resize">FIT</button>
-      <button type="button" id="qualityBtn" class="player-btn" aria-label="Quality"></button>
-      <button type="button" id="pipBtn" class="player-btn" aria-label="Picture in Picture"></button>
-      <button type="button" id="fullscreenBtn" class="player-btn" aria-label="Fullscreen"></button>
-    </div>
-  </div>
-  <div id="qualityMenu"></div>
-</div>
-
-<div class="popup-overlay" id="popup" role="dialog" aria-modal="true">
-  <div class="popup-wrap">
-    <div class="popup-box">
-      <div class="popup-title">Follow Us !!</div>
-      <div class="popup-text">
-        Join our WhatsApp channel<br>
-        <b>CRICKET NEWS POINT ™</b>
-        For Instant Updates &amp; Exclusive Links.
-      </div>
-      <a class="btn-popup btn-join-main" id="popupJoinBtn" target="_blank" rel="noopener noreferrer">JOIN NOW</a>
-      <button class="btn-popup btn-joined-main" id="popupSkipBtn">Already Joined</button>
-    </div>
-  </div>
-</div>
-
-<div id="error-screen">
-  <div class="error-card">
-    <div class="error-icon" id="error-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
-        <line x1="12" y1="2" x2="12" y2="12"/>
-      </svg>
-    </div>
-    <div class="error-title" id="error-title">Stream Not Found</div>
-    <div class="error-badge" id="error-badge">"Unknown"</div>
-    <div class="error-body" id="error-body">
-      The requested stream is not available right now.<br>
-      Please check the link or try again later.
-    </div>
-    <div class="error-retry-note" id="error-retry-note">
-      <span class="error-retry-dot"></span>
-      <span>Retrying Automatically</span>
-    </div>
-    <a href="#" class="error-switch-btn" id="error-switch-btn">
-      <svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
-      Switch to Watch Now
-    </a>
-    <a href="https://wa.me/message/BOF76S5WFJVMN1" target="_blank" rel="noopener noreferrer" class="error-contact-btn" id="error-contact-btn">
-      <svg viewBox="0 0 24 24">
-        <path d="M9.993 15.674l-.398 5.604c.57 0 .817-.245 1.113-.54l2.67-2.557 5.53 4.047c1.014.558 1.734.264 1.987-.939l3.6-16.86c.3-1.4-.506-1.95-1.496-1.58L1.27 9.64c-1.37.53-1.35 1.29-.233 1.64l5.68 1.77 13.337-8.418c.59-.39 1.13-.175.69.215"/>
-      </svg>
-      Contact Support
-    </a>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
 <script>
-(function () {
-  'use strict';
+(function() {
 
-  var WORLD_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/refs/heads/main/fancode.json';
-  var LANG_MAP = { eng:'ENGLISH', hin:'HINDI', tam:'TAMIL', tel:'TELUGU', ben:'BENGALI', mar:'MARATHI' };
-  var AUTO_QUALITIES = ['1080p','720p','540p','480p','360p','240p'];
-  var DEFAULT_Q = '720p';
-  var CONTACT_LINK = 'https://whatsapp.com/channel/0029VaeylYYBPzjVNomWuZ0T';
-  var WA_CHANNEL = 'https://whatsapp.com/channel/0029VbDMpWVAe5VldaFI370o';
-  var FETCH_TIMEOUT_MS = 8000;
-  var RETRY_DELAY_MS = 6000;
-  var PLAYBACK_SAFETY_MS = 15000;
-  var CONTROLS_HIDE_MS = 3200;
-  var UNMUTE_HINT_MS = 4500;
+    var JSON_URL  = 'https://raw.githubusercontent.com/kajju27/Fancode-Events-Json/refs/heads/main/fancode.json';
+    var LANG_MAP  = { eng:'ENGLISH', hin:'HINDI', tam:'TAMIL', tel:'TELUGU', ben:'BENGALI', mar:'MARATHI' };
+    var QUAL_PREF = ['720p', '1080p', '480p', '540p', '360p', '240p'];
 
-  var video = document.getElementById('video');
-  var playerShell = document.getElementById('player-shell');
-  var loadScreen = document.getElementById('loading-screen');
-  var errScreen = document.getElementById('error-screen');
-  var errIcon = document.getElementById('error-icon');
-  var errTitle = document.getElementById('error-title');
-  var errBadge = document.getElementById('error-badge');
-  var errBody = document.getElementById('error-body');
-  var errRetryNote = document.getElementById('error-retry-note');
-  var errSwitchBtn = document.getElementById('error-switch-btn');
-  var contactBtn = document.getElementById('error-contact-btn');
-  var popup = document.getElementById('popup');
-  var joinBtn = document.getElementById('popupJoinBtn');
-  var skipBtn = document.getElementById('popupSkipBtn');
+    var params   = new URLSearchParams(window.location.search);
+    var idParam  = params.get('id') || '';
+    var uscIdx   = idParam.indexOf('_');
+    var matchId  = uscIdx > -1 ? idParam.slice(0, uscIdx) : idParam;
+    var langCode = uscIdx > -1 ? idParam.slice(uscIdx + 1) : 'eng';
 
-  var centerOverlay = document.getElementById('center-overlay');
-  var centerPlayBtn = document.getElementById('centerPlayBtn');
-  var playPauseBtn = document.getElementById('playPauseBtn');
-  var muteBtn = document.getElementById('muteBtn');
-  var resizeBtn = document.getElementById('resizeBtn');
-  var qualityBtn = document.getElementById('qualityBtn');
-  var qualityMenu = document.getElementById('qualityMenu');
-  var pipBtn = document.getElementById('pipBtn');
-  var fullscreenBtn = document.getElementById('fullscreenBtn');
-  var progressTrack = document.getElementById('progress-track');
-  var progressFill = document.getElementById('progress-fill');
-  var progressThumb = document.getElementById('progress-thumb');
-  var livePill = document.getElementById('livePill');
-  var livePillText = document.getElementById('livePillText');
+    var video     = document.getElementById('video');
+    var container = document.getElementById('player-container');
+    var loading   = document.getElementById('loading');
 
-  var ICON_PLAY = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>';
-  var ICON_PAUSE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
-  var ICON_VOLUME = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a9 9 0 0 1 0 12"/></svg>';
-  var ICON_MUTE = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>';
-  var ICON_PIP = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12.5" y="11.5" width="7" height="5" rx="1" fill="currentColor" stroke="none"/></svg>';
-  var ICON_FS_ENTER = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/><path d="M15 20h5v-5"/></svg>';
-  var ICON_FS_EXIT = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>';
-  var ICON_GEAR = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2.6-1.5L14 2h-4l-.5 2.4a7.6 7.6 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.3-1a7.6 7.6 0 0 0 2.6 1.5L10 22h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.3 1 2-3.4z"/></svg>';
-  var ICON_ALERT = '<svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>';
-  var ICON_GEO_BLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/><line x1="4.5" y1="4.5" x2="19.5" y2="19.5"/></svg>';
+    var shakaPlayer = null;
+    var userPaused  = false;
 
-  var REGION_NAMES = { 1: 'Sri Lanka', 2: 'Nepal', 3: 'Bangladesh' };
-  var LIVE_EDGE_TOLERANCE = 60;
-
-  contactBtn.href = CONTACT_LINK;
-  joinBtn.href = WA_CHANNEL;
-  centerPlayBtn.innerHTML = ICON_PLAY;
-  playPauseBtn.innerHTML = ICON_PLAY;
-  muteBtn.innerHTML = ICON_MUTE;
-  qualityBtn.innerHTML = ICON_GEAR;
-  pipBtn.innerHTML = ICON_PIP;
-  fullscreenBtn.innerHTML = ICON_FS_ENTER;
-
-  popup.classList.add('visible');
-
-  function closePopup() {
-    popup.style.opacity = '0';
-    popup.style.transition = 'opacity .2s';
-    setTimeout(function () { popup.style.display = 'none'; }, 220);
-  }
-
-  joinBtn.addEventListener('click', function () {
-    setTimeout(closePopup, 300);
-  });
-
-  skipBtn.addEventListener('click', closePopup);
-
-  var loaderHidden = false;
-  var safetyTimer = null;
-  var hls = null;
-  var currentMatchId = null;
-  var currentStreamIndex = null;
-  var resizeModes = ['fit', 'fill', 'normal'];
-  var resizeIndex = 0;
-  var controlsTimer = null;
-  var retryTimer = null;
-  var isMultiUrlMode = false;
-  var multiUrlStreams = {};
-  var currentMultiUrl = null;
-  var currentLangCode = 'eng';
-
-  function hideLoader() {
-    if (loaderHidden) return;
-    loaderHidden = true;
-    loadScreen.style.transition = 'opacity .35s';
-    loadScreen.style.opacity = '0';
-    playerShell.style.visibility = 'visible';
-    setTimeout(function () { loadScreen.style.display = 'none'; }, 370);
-  }
-
-  function showError(type, label) {
-    clearTimeout(safetyTimer);
-    loadScreen.style.display = 'none';
-    playerShell.style.visibility = 'hidden';
-
-    var region = REGION_NAMES[currentStreamIndex];
-
-    if (type === 'regional' && region) {
-      errIcon.innerHTML = ICON_GEO_BLOCK;
-      errTitle.textContent = 'Regional Stream Unavailable';
-      errBadge.textContent = region.toUpperCase() + ' FEED';
-      errBody.innerHTML = 'This is the ' + region + ' relay, and it looks like it cannot be reached from your current location.<br>It is meant for viewers inside ' + region + '. Try Watch Now instead.';
-      errRetryNote.style.display = 'none';
-      errSwitchBtn.href = 'fcplayer.html?id=' + currentMatchId + '_eng&s=0';
-      errSwitchBtn.classList.add('show');
-    } else if (type === 'notfound') {
-      errIcon.innerHTML = ICON_ALERT;
-      errTitle.textContent = 'Stream Not Found';
-      errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
-      errBody.innerHTML = 'This match link is not available right now.<br>It may have already ended, or the live feed has not started yet.';
-      errRetryNote.style.display = 'flex';
-      errSwitchBtn.classList.remove('show');
-      scheduleRetry();
-    } else {
-      errIcon.innerHTML = ICON_ALERT;
-      errTitle.textContent = 'Connection Trouble';
-      errBadge.textContent = label ? '"' + label + '"' : '"Unknown"';
-      errBody.innerHTML = 'Having trouble connecting to this stream right now.<br>Please check your internet connection.';
-      errRetryNote.style.display = 'flex';
-      errSwitchBtn.classList.remove('show');
-      scheduleRetry();
+    function fetchJSON(url) {
+        return new Promise(function(resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.timeout = 10000;
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState !== 4) return;
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try { resolve(JSON.parse(xhr.responseText)); }
+                    catch(e) { reject(new Error('JSON parse error')); }
+                } else {
+                    reject(new Error('HTTP ' + xhr.status));
+                }
+            };
+            xhr.onerror   = function() { reject(new Error('Network error')); };
+            xhr.ontimeout = function() { reject(new Error('Timeout')); };
+            xhr.send();
+        });
     }
 
-    errScreen.classList.add('show');
-  }
+    function resolveUrl(data) {
+        var list = Array.isArray(data) ? data :
+                   Array.isArray(data.matches) ? data.matches :
+                   Array.isArray(data.events)  ? data.events  :
+                   Array.isArray(data.data)     ? data.data    : [];
 
-  function hideError() {
-    errScreen.classList.remove('show');
-    errSwitchBtn.classList.remove('show');
-    clearTimeout(retryTimer);
-  }
+        var match = null;
+        for (var i = 0; i < list.length; i++) {
+            if (String(list[i].match_id) === String(matchId)) { match = list[i]; break; }
+        }
+        if (!match || !match.auto_streams) return null;
 
-  function scheduleRetry() {
-    clearTimeout(retryTimer);
-    retryTimer = setTimeout(function () {
-      attemptLoad(currentMatchId, currentStreamIndex, currentLangCode);
-    }, RETRY_DELAY_MS);
-  }
-
-  function tryLandscape() {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function () {});
-    }
-  }
-  function exitLandscape() {
-    if (screen.orientation && screen.orientation.unlock) {
-      try { screen.orientation.unlock(); } catch (e) {}
-    }
-  }
-  function onFSChange() {
-    var fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-    if (fsEl) { tryLandscape(); } else { exitLandscape(); }
-    updateFullscreenIcon();
-  }
-  document.addEventListener('fullscreenchange', onFSChange);
-  document.addEventListener('webkitfullscreenchange', onFSChange);
-  document.addEventListener('mozfullscreenchange', onFSChange);
-  document.addEventListener('MSFullscreenChange', onFSChange);
-  video.addEventListener('webkitbeginfullscreen', tryLandscape);
-  video.addEventListener('webkitendfullscreen', exitLandscape);
-
-  function freshUrl(url) {
-    var sep = url.indexOf('?') === -1 ? '?' : '&';
-    return url + sep + 'nocache=' + Date.now();
-  }
-
-  function fetchJSON(url) {
-    var controller = new AbortController();
-    var timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
-    return fetch(freshUrl(url), { cache: 'no-store', signal: controller.signal }).then(function (r) {
-      clearTimeout(timer);
-      if (!r.ok) throw new Error('bad response');
-      return r.json();
-    }).catch(function (err) {
-      clearTimeout(timer);
-      throw err;
-    });
-  }
-
-  function resolveStreamUrl(matchId, streamIndex, langCode) {
-    return fetchJSON(WORLD_SOURCE).then(function (data) {
-      var list = Array.isArray(data) ? data :
-                 Array.isArray(data.matches) ? data.matches :
-                 Array.isArray(data.events) ? data.events : [];
-      var match = null;
-      for (var i = 0; i < list.length; i++) {
-        if (String(list[i].match_id) === String(matchId)) { match = list[i]; break; }
-      }
-      if (!match) return null;
-      if (streamIndex === 0) {
-        var lang = LANG_MAP[langCode] || 'ENGLISH';
-        var autoLang = match.auto_streams && (match.auto_streams[lang] || match.auto_streams['ENGLISH']);
+        var lang     = LANG_MAP[langCode] || match.language || 'ENGLISH';
+        var autoLang = match.auto_streams[lang];
+        if (!autoLang || !autoLang.streams) {
+            var keys = Object.keys(match.auto_streams);
+            if (!keys.length) return null;
+            autoLang = match.auto_streams[keys[0]];
+        }
         if (!autoLang || !autoLang.streams) return null;
-        return { type: 'quality', streams: autoLang.streams };
-      }
-      var s = match.streams || {};
-      var url = streamIndex === 1 ? s.fancode_lk_cdn :
-                streamIndex === 2 ? s.fancode_np_cdn :
-                streamIndex === 3 ? s.fancode_bd_cdn : null;
-      return url ? { type: 'single', url: url } : null;
-    });
-  }
 
-  function buildQualityMenuFromUrls(streams) {
-    var available = AUTO_QUALITIES.filter(function (q) { return streams[q]; });
-    if (!available.length) { qualityBtn.style.display = 'none'; return; }
-    qualityBtn.style.display = '';
-    var html = '<div class="quality-menu-label">Quality</div>';
-    available.forEach(function (q) {
-      var isActive = (currentMultiUrl === streams[q]);
-      html += '<div class="quality-option' + (isActive ? ' active' : '') + '" data-url="' + streams[q] + '" data-q="' + q + '">' + q + '</div>';
-    });
-    qualityMenu.innerHTML = html;
-  }
-
-  function destroyHls() {
-    if (hls) {
-      hls.destroy();
-      hls = null;
-    }
-    video.removeAttribute('src');
-    video.load();
-  }
-
-  function attemptPlay() {
-    var p = video.play();
-    if (p && p.catch) {
-      p.catch(function () {});
-    }
-  }
-
-  function handleFatalError() {
-    destroyHls();
-    var type = REGION_NAMES[currentStreamIndex] ? 'regional' : 'connection';
-    showError(type, currentMatchId + '_' + currentStreamIndex);
-  }
-
-  function buildQualityMenu(levels) {
-    if (!levels || !levels.length) {
-      qualityBtn.style.display = 'none';
-      return;
-    }
-    qualityBtn.style.display = '';
-    var items = [];
-    for (var i = 0; i < levels.length; i++) {
-      items.push({ idx: i, height: levels[i].height || 0 });
-    }
-    items.sort(function (a, b) { return b.height - a.height; });
-    var html = '<div class="quality-menu-label">Quality</div>';
-    html += '<div class="quality-option active" data-level="-1">Auto</div>';
-    for (var j = 0; j < items.length; j++) {
-      html += '<div class="quality-option" data-level="' + items[j].idx + '">' + items[j].height + 'p</div>';
-    }
-    qualityMenu.innerHTML = html;
-  }
-
-  function playStream(url) {
-    clearTimeout(safetyTimer);
-    hideError();
-    destroyHls();
-    qualityBtn.style.display = 'none';
-
-    if (window.Hls && window.Hls.isSupported()) {
-      hls = new window.Hls({
-        enableWorker: true,
-        maxBufferLength: 30,
-        backBufferLength: 60,
-        liveSyncDurationCount: 3
-      });
-      hls.on(window.Hls.Events.MANIFEST_PARSED, function (event, data) {
-        if (!isMultiUrlMode) { buildQualityMenu(data.levels); }
-        attemptPlay();
-      });
-      hls.on(window.Hls.Events.ERROR, function (event, data) {
-        if (data.fatal) { handleFatalError(); }
-      });
-      hls.loadSource(url);
-      hls.attachMedia(video);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = url;
-      video.addEventListener('loadedmetadata', attemptPlay, { once: true });
-    } else {
-      handleFatalError();
-      return;
-    }
-
-    safetyTimer = setTimeout(handleFatalError, PLAYBACK_SAFETY_MS);
-  }
-
-  function attemptLoad(matchId, streamIndex, langCode) {
-    currentMatchId = matchId;
-    currentStreamIndex = streamIndex;
-    currentLangCode = langCode || 'eng';
-    resolveStreamUrl(matchId, streamIndex, currentLangCode).then(function (result) {
-      if (!result) {
-        showError('notfound', matchId + '_' + streamIndex);
-        return;
-      }
-      if (result.type === 'quality') {
-        isMultiUrlMode = true;
-        multiUrlStreams = result.streams;
-        var defaultUrl = result.streams[DEFAULT_Q] ||
-                         result.streams['480p'] ||
-                         Object.values(result.streams)[0];
-        currentMultiUrl = defaultUrl;
-        playStream(defaultUrl);
-        buildQualityMenuFromUrls(result.streams);
-      } else {
-        isMultiUrlMode = false;
-        multiUrlStreams = {};
-        currentMultiUrl = null;
-        playStream(result.url);
-      }
-    }).catch(function () {
-      showError('connection', matchId + '_' + streamIndex);
-    });
-  }
-
-  function updatePlayIcon() {
-    var icon = video.paused ? ICON_PLAY : ICON_PAUSE;
-    playPauseBtn.innerHTML = icon;
-    centerPlayBtn.innerHTML = icon;
-    centerOverlay.classList.toggle('show', video.paused);
-  }
-
-  function togglePlay() {
-    if (video.paused) { attemptPlay(); } else { video.pause(); }
-  }
-
-  playPauseBtn.addEventListener('click', togglePlay);
-  centerPlayBtn.addEventListener('click', togglePlay);
-
-  function updateMuteIcon() {
-    muteBtn.innerHTML = (video.muted || video.volume === 0) ? ICON_MUTE : ICON_VOLUME;
-  }
-
-  muteBtn.addEventListener('click', function () {
-    video.muted = !video.muted;
-    if (!video.muted && video.volume === 0) { video.volume = 1; }
-    muteBtn.classList.remove('unmute-hint');
-    updateMuteIcon();
-  });
-
-  function applyResizeMode() {
-    var mode = resizeModes[resizeIndex];
-    if (mode === 'fit') { video.style.objectFit = 'contain'; resizeBtn.textContent = 'FIT'; }
-    else if (mode === 'fill') { video.style.objectFit = 'cover'; resizeBtn.textContent = 'FILL'; }
-    else { video.style.objectFit = 'fill'; resizeBtn.textContent = 'NORMAL'; }
-  }
-  resizeBtn.addEventListener('click', function () {
-    resizeIndex = (resizeIndex + 1) % resizeModes.length;
-    applyResizeMode();
-  });
-  applyResizeMode();
-
-  qualityBtn.addEventListener('click', function () {
-    qualityMenu.classList.toggle('open');
-  });
-  qualityMenu.addEventListener('click', function (e) {
-    var opt = e.target.closest('.quality-option');
-    if (!opt) return;
-    qualityMenu.classList.remove('open');
-    if (isMultiUrlMode) {
-      var url = opt.getAttribute('data-url');
-      if (url && url !== currentMultiUrl) {
-        currentMultiUrl = url;
-        playStream(url);
-        buildQualityMenuFromUrls(multiUrlStreams);
-      }
-      return;
-    }
-    if (!hls) return;
-    hls.currentLevel = parseInt(opt.getAttribute('data-level'), 10);
-    var all = qualityMenu.querySelectorAll('.quality-option');
-    for (var i = 0; i < all.length; i++) { all[i].classList.remove('active'); }
-    opt.classList.add('active');
-  });
-
-  function updatePipAvailability() {
-    var standard = document.pictureInPictureEnabled && !video.disablePictureInPicture;
-    var iosMode = typeof video.webkitSupportsPresentationMode === 'function' && video.webkitSupportsPresentationMode('picture-in-picture');
-    if (!standard && !iosMode) { pipBtn.style.display = 'none'; }
-  }
-  pipBtn.addEventListener('click', function () {
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture().catch(function () {});
-      return;
-    }
-    if (video.requestPictureInPicture) {
-      video.requestPictureInPicture().catch(function () {
-        if (typeof video.webkitSetPresentationMode === 'function') {
-          video.webkitSetPresentationMode('picture-in-picture');
+        for (var j = 0; j < QUAL_PREF.length; j++) {
+            if (autoLang.streams[QUAL_PREF[j]]) return autoLang.streams[QUAL_PREF[j]];
         }
-      });
-    } else if (typeof video.webkitSetPresentationMode === 'function') {
-      video.webkitSetPresentationMode(video.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture');
+        return null;
     }
-  });
 
-  function isFullscreen() {
-    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-  }
-  function requestFs(el) {
-    if (el.requestFullscreen) return el.requestFullscreen();
-    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
-    if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
-    if (el.msRequestFullscreen) return el.msRequestFullscreen();
-    return Promise.reject(new Error('unsupported'));
-  }
-  function exitFs() {
-    if (document.exitFullscreen) return document.exitFullscreen();
-    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-    if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
-    if (document.msExitFullscreen) return document.msExitFullscreen();
-    return Promise.resolve();
-  }
-  function updateFullscreenIcon() {
-    fullscreenBtn.innerHTML = isFullscreen() ? ICON_FS_EXIT : ICON_FS_ENTER;
-  }
-  fullscreenBtn.addEventListener('click', function () {
-    if (isFullscreen()) {
-      exitFs();
-      return;
+    function showMsg(msg) {
+        loading.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.5);text-align:center;padding:24px;pointer-events:auto">' + msg + '</div>';
     }
-    var req = requestFs(playerShell);
-    if (req && req.catch) {
-      req.catch(function () {
-        if (typeof video.webkitEnterFullscreen === 'function') {
-          video.webkitEnterFullscreen();
+
+    function setupAutoResume() {
+        document.addEventListener('click', function(e) {
+            if (e.target.closest && e.target.closest('.shaka-play-button') && !video.paused) userPaused = true;
+        });
+        video.addEventListener('pause', function() {
+            if (!video.ended && !userPaused) {
+                setTimeout(function() { if (video.paused && !video.ended) video.play().catch(function(){}); }, 500);
+            }
+            setTimeout(function() { userPaused = false; }, 100);
+        });
+        video.addEventListener('play', function() { userPaused = false; });
+        setInterval(function() {
+            if (video.paused && !video.ended && !userPaused) video.play().catch(function(){});
+        }, 3000);
+    }
+
+    function hideLoading() {
+        loading.style.display = 'none';
+    }
+
+    function playNative(streamUrl) {
+        if (shakaPlayer) { shakaPlayer.destroy().catch(function(){}); shakaPlayer = null; }
+        video.src = streamUrl;
+        video.muted = false;
+        video.play().catch(function() {
+            video.muted = true;
+            video.play().catch(function(){});
+            setTimeout(function() { video.muted = false; video.play().catch(function(){}); }, 1000);
+        });
+    }
+
+    async function initPlayer(streamUrl) {
+        shaka.polyfill.installAll();
+
+        video.addEventListener('playing', function onPlaying() {
+            video.removeEventListener('playing', onPlaying);
+            hideLoading();
+        });
+        setTimeout(hideLoading, 6000);
+
+        if (!shaka.Player.isBrowserSupported()) {
+            playNative(streamUrl);
+            return;
         }
-      });
+
+        try {
+            shakaPlayer = new shaka.Player();
+            await shakaPlayer.attach(video);
+
+            var ui = new shaka.ui.Overlay(shakaPlayer, container, video);
+            ui.configure({
+                addBigPlayButton: true,
+                addSeekBar: true,
+                controlPanelElements: [
+                    'mute',
+                    'play_pause',
+                    'time_and_duration',
+                    'spacer',
+                    'picture_in_picture',
+                    'fullscreen'
+                ],
+                seekBarColors: {
+                    base:     'rgba(255,255,255,0.2)',
+                    buffered: 'rgba(255,255,255,0.4)',
+                    played:   '#ff3b30'
+                }
+            });
+
+            shakaPlayer.configure({
+                streaming: {
+                    bufferingGoal:   10,
+                    rebufferingGoal: 2,
+                    safeSeekOffset:  5,
+                    lowLatencyMode:  true
+                }
+            });
+
+            await shakaPlayer.load(streamUrl);
+
+            video.muted = false;
+            try {
+                await video.play();
+            } catch(e) {
+                video.muted = true;
+                await video.play();
+                setTimeout(function() { video.muted = false; video.play().catch(function(){}); }, 1000);
+            }
+
+        } catch(err) {
+            console.warn('Shaka failed, falling back to native HLS:', err);
+            playNative(streamUrl);
+        }
     }
-  });
 
-  function showControls() {
-    playerShell.classList.add('controls-visible');
-    clearTimeout(controlsTimer);
-    if (!video.paused) {
-      controlsTimer = setTimeout(function () {
-        playerShell.classList.remove('controls-visible');
-        qualityMenu.classList.remove('open');
-      }, CONTROLS_HIDE_MS);
-    }
-  }
+    document.addEventListener('DOMContentLoaded', function() {
+        loading.style.display = 'flex';
+        setupAutoResume();
 
-  video.addEventListener('click', showControls);
-  playerShell.addEventListener('mousemove', showControls);
-  playerShell.addEventListener('touchstart', showControls, { passive: true });
+        if (!matchId) { showMsg('No match ID in URL'); return; }
 
-  function updateProgress() {
-    if (!video.duration || !isFinite(video.duration)) {
-      progressFill.style.width = '100%';
-      progressTrack.classList.add('is-live-only');
-      return;
-    }
-    progressTrack.classList.remove('is-live-only');
-    var ratio = video.currentTime / video.duration;
-    progressFill.style.width = (ratio * 100) + '%';
-    progressThumb.style.left = (ratio * 100) + '%';
-  }
-
-  function seekFromEvent(e) {
-    if (!video.duration || !isFinite(video.duration)) return;
-    var rect = progressTrack.getBoundingClientRect();
-    var clientX = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
-    var ratio = (clientX - rect.left) / rect.width;
-    ratio = Math.min(1, Math.max(0, ratio));
-    video.currentTime = ratio * video.duration;
-  }
-  progressTrack.addEventListener('click', seekFromEvent);
-
-  function getLiveEdge() {
-    if (hls && typeof hls.liveSyncPosition === 'number' && isFinite(hls.liveSyncPosition)) {
-      return hls.liveSyncPosition;
-    }
-    if (video.seekable && video.seekable.length) {
-      return video.seekable.end(video.seekable.length - 1);
-    }
-    if (isFinite(video.duration)) { return video.duration; }
-    return null;
-  }
-
-  function formatBehind(seconds) {
-    var s = Math.max(0, Math.round(seconds));
-    var m = Math.floor(s / 60);
-    var r = s % 60;
-    return '-' + m + ':' + (r < 10 ? '0' + r : r);
-  }
-
-  function updateLiveStatus() {
-    if (video.duration && isFinite(video.duration)) {
-      livePill.classList.remove('is-behind');
-      livePillText.textContent = 'LIVE';
-      return;
-    }
-    var edge = getLiveEdge();
-    var behind = (edge !== null) ? (edge - video.currentTime) : 0;
-    if (behind <= LIVE_EDGE_TOLERANCE) {
-      livePill.classList.remove('is-behind');
-      livePillText.textContent = 'LIVE';
-    } else {
-      livePill.classList.add('is-behind');
-      livePillText.textContent = formatBehind(behind);
-    }
-  }
-
-  livePill.addEventListener('click', function () {
-    var edge = getLiveEdge();
-    if (edge !== null) { video.currentTime = edge; }
-  });
-
-  video.addEventListener('playing', function () {
-    clearTimeout(safetyTimer);
-    hideLoader();
-    showControls();
-  });
-  video.addEventListener('play', updatePlayIcon);
-  video.addEventListener('pause', updatePlayIcon);
-  video.addEventListener('volumechange', updateMuteIcon);
-  video.addEventListener('timeupdate', updateProgress);
-  video.addEventListener('timeupdate', updateLiveStatus);
-  video.addEventListener('progress', updateProgress);
-  video.addEventListener('progress', updateLiveStatus);
-  video.addEventListener('loadedmetadata', updatePipAvailability);
-
-  muteBtn.classList.add('unmute-hint');
-  setTimeout(function () { muteBtn.classList.remove('unmute-hint'); }, UNMUTE_HINT_MS);
-
-  function getUrlParams() {
-    var params = new URLSearchParams(window.location.search);
-    var idParam = params.get('id');
-    var streamParam = params.get('s');
-    if (!idParam || streamParam === null) { return null; }
-    var underscoreIndex = idParam.indexOf('_');
-    if (underscoreIndex === -1) { return null; }
-    var matchId = idParam.slice(0, underscoreIndex);
-    var langCode = idParam.slice(underscoreIndex + 1) || 'eng';
-    var streamIndex = parseInt(streamParam, 10);
-    if (isNaN(streamIndex)) { return null; }
-    return { matchId: matchId, langCode: langCode, streamIndex: streamIndex };
-  }
-
-  var parsed = getUrlParams();
-  if (parsed) {
-    attemptLoad(parsed.matchId, parsed.streamIndex, parsed.langCode);
-  } else {
-    showError('notfound', 'Invalid Link');
-  }
+        fetchJSON(JSON_URL)
+            .then(function(data) {
+                var url = resolveUrl(data);
+                if (!url) { showMsg('Stream not available'); return; }
+                initPlayer(url);
+            })
+            .catch(function(err) {
+                console.error('Fetch error:', err);
+                showMsg('Could not load stream data.<br>' + (err.message || ''));
+            });
+    });
 
 })();
 </script>
+
+<script>(function(s){s.dataset.zone='10603308',s.src='https://llvpn.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
 </body>
 </html>
