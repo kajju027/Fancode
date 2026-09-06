@@ -17,158 +17,54 @@
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html, body {
-            width: 100%; height: 100%;
-            background: #000; overflow: hidden;
-            font-family: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        .shaka-video-container {
-            position: fixed; inset: 0; background: #000;
-            display: flex; align-items: center; justify-content: center;
-        }
-
+        html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .shaka-video-container { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; }
         video { width: 100%; height: 100%; object-fit: contain; background: #000; }
-
-        .custom-watermark {
-            position: absolute; z-index: 40; pointer-events: none;
-            bottom: 80px; right: 20px; font-size: 11px; font-weight: 600;
-            color: rgba(255, 255, 255, 0.10); letter-spacing: 0.5px; text-transform: uppercase;
-        }
-
-        .loading-overlay {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
-            background: #000; color: #fff; z-index: 2000; pointer-events: none;
-        }
-
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, .15);
-            border-top: 4px solid #3b82f6;
-            border-radius: 50%; width: 40px; height: 40px;
-            animation: spin 1s linear infinite; margin-bottom: 12px;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+        .custom-watermark { position: absolute; z-index: 40; pointer-events: none; bottom: 80px; right: 20px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.10); letter-spacing: 0.5px; text-transform: uppercase; }
+        #overlay { position: absolute; inset: 0; background: #000; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; padding: 24px; pointer-events: none; }
+        .spinner { border: 4px solid rgba(255,255,255,.15); border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #err-box { display: none; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 22px 20px; max-width: 360px; width: 100%; text-align: center; }
+        #err-box .err-title { font-size: 15px; font-weight: 600; color: #ff6b6b; margin-bottom: 10px; }
+        #err-box .err-detail { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.7; word-break: break-all; }
         .shaka-controls-container { background: transparent !important; }
-
-        .shaka-bottom-controls {
-            padding: 10px 16px;
-            display: flex !important; flex-direction: column !important;
-        }
-
-        .shaka-seek-bar-container {
-            display: block !important; width: 100% !important; height: 8px !important;
-            margin: 0 0 10px 0 !important; padding: 0 !important; order: -1 !important; position: relative !important;
-        }
-
-        .shaka-seek-bar {
-            width: 100% !important; height: 8px !important;
-            border-radius: 50px; background: rgba(255, 255, 255, 0.15) !important; position: relative !important;
-        }
-
-        .shaka-seek-bar .shaka-range-element {
-            width: 100% !important; height: 8px !important; border-radius: 50px;
-            background: transparent !important; position: relative !important;
-            -webkit-appearance: none !important; appearance: none !important; outline: none !important;
-        }
-
-        .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none;
-            width: 18px; height: 18px; border-radius: 50%;
-            background: #ff3b30; cursor: pointer;
-            box-shadow: 0 0 12px rgba(255, 59, 48, 0.6); border: 2px solid #fff;
-            margin-top: -5px; position: relative; z-index: 10;
-        }
-
-        .shaka-seek-bar .shaka-range-element::-webkit-slider-runnable-track {
-            height: 8px !important; border-radius: 50px; background: transparent !important;
-        }
-
-        .shaka-seek-bar .shaka-range-element::-moz-range-thumb {
-            width: 18px; height: 18px; border-radius: 50%;
-            background: #ff3b30; cursor: pointer;
-            border: 2px solid #fff; box-shadow: 0 0 12px rgba(255, 59, 48, 0.6);
-        }
-
-        .shaka-seek-bar .shaka-range-element::-moz-range-track {
-            height: 8px !important; border-radius: 50px; background: transparent !important;
-        }
-
-        .shaka-current-time, .shaka-time-duration {
-            font-size: 14px; font-weight: 600; color: #fff; padding: 0 8px;
-        }
-
-        .shaka-bottom-controls > div {
-            display: flex !important; align-items: center !important; gap: 4px !important;
-        }
-
-        .shaka-controls-container button,
-        .shaka-controls-container .shaka-play-button,
-        .shaka-controls-container .shaka-mute-button,
-        .shaka-controls-container .shaka-fullscreen-button,
-        .shaka-controls-container .shaka-pip-button,
-        .shaka-controls-container .shaka-overflow-menu-button,
-        .shaka-controls-container .shaka-settings-menu-button,
-        .shaka-controls-container .shaka-current-time,
-        .shaka-controls-container .shaka-time-duration,
-        .shaka-controls-container .shaka-volume-slider,
-        .shaka-controls-container .shaka-spacer,
-        .shaka-controls-container .shaka-seek-bar-container,
-        .shaka-controls-container .shaka-play-button-container {
-            box-shadow: none !important;
-            filter: drop-shadow(0 0 0 transparent) !important;
-            text-shadow: none !important;
-        }
-
+        .shaka-bottom-controls { padding: 10px 16px; display: flex !important; flex-direction: column !important; }
+        .shaka-seek-bar-container { display: block !important; width: 100% !important; height: 8px !important; margin: 0 0 10px 0 !important; padding: 0 !important; order: -1 !important; position: relative !important; }
+        .shaka-seek-bar { width: 100% !important; height: 8px !important; border-radius: 50px; background: rgba(255,255,255,.15) !important; position: relative !important; }
+        .shaka-seek-bar .shaka-range-element { width: 100% !important; height: 8px !important; border-radius: 50px; background: transparent !important; position: relative !important; -webkit-appearance: none !important; appearance: none !important; outline: none !important; }
+        .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #ff3b30; cursor: pointer; box-shadow: 0 0 12px rgba(255,59,48,.6); border: 2px solid #fff; margin-top: -5px; position: relative; z-index: 10; }
+        .shaka-seek-bar .shaka-range-element::-webkit-slider-runnable-track { height: 8px !important; border-radius: 50px; background: transparent !important; }
+        .shaka-seek-bar .shaka-range-element::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #ff3b30; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 12px rgba(255,59,48,.6); }
+        .shaka-seek-bar .shaka-range-element::-moz-range-track { height: 8px !important; border-radius: 50px; background: transparent !important; }
+        .shaka-current-time, .shaka-time-duration { font-size: 14px; font-weight: 600; color: #fff; padding: 0 8px; }
+        .shaka-bottom-controls > div { display: flex !important; align-items: center !important; gap: 4px !important; }
+        .shaka-controls-container button, .shaka-controls-container .shaka-play-button, .shaka-controls-container .shaka-mute-button, .shaka-controls-container .shaka-fullscreen-button, .shaka-controls-container .shaka-pip-button, .shaka-controls-container .shaka-overflow-menu-button, .shaka-controls-container .shaka-settings-menu-button, .shaka-controls-container .shaka-current-time, .shaka-controls-container .shaka-time-duration, .shaka-controls-container .shaka-volume-slider, .shaka-controls-container .shaka-spacer, .shaka-controls-container .shaka-seek-bar-container, .shaka-controls-container .shaka-play-button-container { box-shadow: none !important; filter: drop-shadow(0 0 0 transparent) !important; text-shadow: none !important; }
         .shaka-controls-container { box-shadow: none !important; filter: none !important; }
-        .shaka-bottom-controls    { box-shadow: none !important; filter: none !important; }
-
-        .shaka-overflow-menu, .shaka-settings-menu {
-            border-radius: 12px; backdrop-filter: blur(18px);
-            background: rgba(20, 20, 20, 0.92);
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: none !important; filter: none !important;
-        }
-
+        .shaka-bottom-controls { box-shadow: none !important; filter: none !important; }
+        .shaka-overflow-menu, .shaka-settings-menu { border-radius: 12px; backdrop-filter: blur(18px); background: rgba(20,20,20,.92); border: 1px solid rgba(255,255,255,.08); box-shadow: none !important; filter: none !important; }
         .shaka-volume-slider { width: 60px; box-shadow: none !important; filter: none !important; }
-
-        #telegramModal, .modal, .modal-content, #joinButton, #closeButton, .btn {
-            display: none !important; visibility: hidden !important; opacity: 0 !important;
-            pointer-events: none !important; width: 0 !important; height: 0 !important;
-            overflow: hidden !important; position: absolute !important; z-index: -9999 !important;
-            border: 0 !important; padding: 0 !important; margin: 0 !important;
-        }
-
-        @media (max-width: 700px) {
-            .custom-watermark { font-size: 9px; bottom: 70px; right: 14px; }
-            .shaka-seek-bar-container { height: 6px !important; }
-            .shaka-seek-bar { height: 6px !important; }
-            .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb { width: 14px; height: 14px; }
-        }
+        #telegramModal, .modal, .modal-content, #joinButton, #closeButton, .btn { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important; overflow: hidden !important; position: absolute !important; z-index: -9999 !important; border: 0 !important; padding: 0 !important; margin: 0 !important; }
+        @media (max-width: 700px) { .custom-watermark { font-size: 9px; bottom: 70px; right: 14px; } .shaka-seek-bar-container { height: 6px !important; } .shaka-seek-bar { height: 6px !important; } .shaka-seek-bar .shaka-range-element::-webkit-slider-thumb { width: 14px; height: 14px; } }
     </style>
 </head>
 <body>
-
 <div class="shaka-video-container" id="player-container">
     <video id="video" autoplay muted playsinline preload="metadata"></video>
     <div class="custom-watermark">LIVE · FANCODE</div>
-    <div id="loading" class="loading-overlay">
-        <div class="spinner"></div>
+    <div id="overlay">
+        <div class="spinner" id="spinner"></div>
+        <div id="err-box">
+            <div class="err-title" id="err-title"></div>
+            <div class="err-detail" id="err-detail"></div>
+        </div>
     </div>
 </div>
-
 <div id="telegramModal" class="modal hidden"></div>
-
 <script>
-(function() {
-
-    var JSON_URL  = 'https://raw.githubusercontent.com/kajju27/Fancode-Events-Json/refs/heads/main/fancode.json';
+(function () {
+    var JSON_URL  = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
     var LANG_MAP  = { eng:'ENGLISH', hin:'HINDI', tam:'TAMIL', tel:'TELUGU', ben:'BENGALI', mar:'MARATHI' };
-    var QUAL_PREF = ['720p', '1080p', '480p', '540p', '360p', '240p'];
+    var QUAL_PREF = ['720p','1080p','480p','540p','360p','240p'];
 
     var params   = new URLSearchParams(window.location.search);
     var idParam  = params.get('id') || '';
@@ -178,27 +74,44 @@
 
     var video     = document.getElementById('video');
     var container = document.getElementById('player-container');
-    var loading   = document.getElementById('loading');
-
+    var overlay   = document.getElementById('overlay');
+    var spinner   = document.getElementById('spinner');
+    var errBox    = document.getElementById('err-box');
+    var errTitle  = document.getElementById('err-title');
+    var errDetail = document.getElementById('err-detail');
     var shakaPlayer = null;
     var userPaused  = false;
 
+    function showError(title, detail) {
+        spinner.style.display = 'none';
+        errBox.style.display  = 'block';
+        errTitle.textContent  = title;
+        errDetail.innerHTML   = detail || '';
+        overlay.style.pointerEvents = 'auto';
+    }
+
+    function hideOverlay() {
+        overlay.style.opacity    = '0';
+        overlay.style.transition = 'opacity .4s';
+        setTimeout(function () { overlay.style.display = 'none'; }, 420);
+    }
+
     function fetchJSON(url) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
             xhr.timeout = 10000;
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState !== 4) return;
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try { resolve(JSON.parse(xhr.responseText)); }
-                    catch(e) { reject(new Error('JSON parse error')); }
+                    catch (e) { reject(new Error('JSON parse failed: ' + e.message)); }
                 } else {
-                    reject(new Error('HTTP ' + xhr.status));
+                    reject(new Error('HTTP ' + xhr.status + ' — ' + url));
                 }
             };
-            xhr.onerror   = function() { reject(new Error('Network error')); };
-            xhr.ontimeout = function() { reject(new Error('Timeout')); };
+            xhr.onerror   = function () { reject(new Error('Network error (XHR onerror)')); };
+            xhr.ontimeout = function () { reject(new Error('Request timed out after 10s')); };
             xhr.send();
         });
     }
@@ -209,59 +122,51 @@
                    Array.isArray(data.events)  ? data.events  :
                    Array.isArray(data.data)     ? data.data    : [];
 
+        if (!list.length) throw new Error('JSON has no match list (checked data, data.matches, data.events, data.data)');
+
         var match = null;
         for (var i = 0; i < list.length; i++) {
             if (String(list[i].match_id) === String(matchId)) { match = list[i]; break; }
         }
-        if (!match || !match.auto_streams) return null;
+        if (!match) throw new Error('match_id "' + matchId + '" not found in JSON (' + list.length + ' matches checked)');
+        if (!match.auto_streams || !Object.keys(match.auto_streams).length) throw new Error('auto_streams is empty for match ' + matchId);
 
         var lang     = LANG_MAP[langCode] || match.language || 'ENGLISH';
         var autoLang = match.auto_streams[lang];
         if (!autoLang || !autoLang.streams) {
             var keys = Object.keys(match.auto_streams);
-            if (!keys.length) return null;
+            if (!keys.length) throw new Error('No language keys found in auto_streams');
             autoLang = match.auto_streams[keys[0]];
+            lang     = keys[0];
         }
-        if (!autoLang || !autoLang.streams) return null;
+        if (!autoLang.streams || !Object.keys(autoLang.streams).length) throw new Error('streams object empty for language "' + lang + '"');
 
         for (var j = 0; j < QUAL_PREF.length; j++) {
             if (autoLang.streams[QUAL_PREF[j]]) return autoLang.streams[QUAL_PREF[j]];
         }
-        return null;
-    }
-
-    function showMsg(msg) {
-        loading.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.5);text-align:center;padding:24px;pointer-events:auto">' + msg + '</div>';
+        throw new Error('No usable quality URL found (checked: ' + QUAL_PREF.join(', ') + ')');
     }
 
     function setupAutoResume() {
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (e.target.closest && e.target.closest('.shaka-play-button') && !video.paused) userPaused = true;
         });
-        video.addEventListener('pause', function() {
-            if (!video.ended && !userPaused) {
-                setTimeout(function() { if (video.paused && !video.ended) video.play().catch(function(){}); }, 500);
-            }
-            setTimeout(function() { userPaused = false; }, 100);
+        video.addEventListener('pause', function () {
+            if (!video.ended && !userPaused) setTimeout(function () { if (video.paused && !video.ended) video.play().catch(function () {}); }, 500);
+            setTimeout(function () { userPaused = false; }, 100);
         });
-        video.addEventListener('play', function() { userPaused = false; });
-        setInterval(function() {
-            if (video.paused && !video.ended && !userPaused) video.play().catch(function(){});
-        }, 3000);
-    }
-
-    function hideLoading() {
-        loading.style.display = 'none';
+        video.addEventListener('play', function () { userPaused = false; });
+        setInterval(function () { if (video.paused && !video.ended && !userPaused) video.play().catch(function () {}); }, 3000);
     }
 
     function playNative(streamUrl) {
-        if (shakaPlayer) { shakaPlayer.destroy().catch(function(){}); shakaPlayer = null; }
+        if (shakaPlayer) { shakaPlayer.destroy().catch(function () {}); shakaPlayer = null; }
         video.src = streamUrl;
         video.muted = false;
-        video.play().catch(function() {
+        video.play().catch(function () {
             video.muted = true;
-            video.play().catch(function(){});
-            setTimeout(function() { video.muted = false; video.play().catch(function(){}); }, 1000);
+            video.play().catch(function (e) { showError('Playback failed', 'Native HLS error: ' + e.message); });
+            setTimeout(function () { video.muted = false; video.play().catch(function () {}); }, 1000);
         });
     }
 
@@ -270,9 +175,9 @@
 
         video.addEventListener('playing', function onPlaying() {
             video.removeEventListener('playing', onPlaying);
-            hideLoading();
+            hideOverlay();
         });
-        setTimeout(hideLoading, 6000);
+        setTimeout(hideOverlay, 8000);
 
         if (!shaka.Player.isBrowserSupported()) {
             playNative(streamUrl);
@@ -287,69 +192,45 @@
             ui.configure({
                 addBigPlayButton: true,
                 addSeekBar: true,
-                controlPanelElements: [
-                    'mute',
-                    'play_pause',
-                    'time_and_duration',
-                    'spacer',
-                    'picture_in_picture',
-                    'fullscreen'
-                ],
-                seekBarColors: {
-                    base:     'rgba(255,255,255,0.2)',
-                    buffered: 'rgba(255,255,255,0.4)',
-                    played:   '#ff3b30'
-                }
+                controlPanelElements: ['mute','play_pause','time_and_duration','spacer','picture_in_picture','fullscreen'],
+                seekBarColors: { base:'rgba(255,255,255,0.2)', buffered:'rgba(255,255,255,0.4)', played:'#ff3b30' }
             });
-
-            shakaPlayer.configure({
-                streaming: {
-                    bufferingGoal:   10,
-                    rebufferingGoal: 2,
-                    safeSeekOffset:  5,
-                    lowLatencyMode:  true
-                }
-            });
+            shakaPlayer.configure({ streaming: { bufferingGoal:10, rebufferingGoal:2, safeSeekOffset:5, lowLatencyMode:true } });
 
             await shakaPlayer.load(streamUrl);
-
             video.muted = false;
-            try {
-                await video.play();
-            } catch(e) {
+            try { await video.play(); }
+            catch (e) {
                 video.muted = true;
                 await video.play();
-                setTimeout(function() { video.muted = false; video.play().catch(function(){}); }, 1000);
+                setTimeout(function () { video.muted = false; video.play().catch(function () {}); }, 1000);
             }
-
-        } catch(err) {
-            console.warn('Shaka failed, falling back to native HLS:', err);
+        } catch (err) {
+            console.warn('Shaka failed:', err);
+            try {
+                if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+            } catch (e) {}
             playNative(streamUrl);
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        loading.style.display = 'flex';
+    document.addEventListener('DOMContentLoaded', function () {
         setupAutoResume();
-
-        if (!matchId) { showMsg('No match ID in URL'); return; }
+        if (!matchId) { showError('Missing match ID', 'URL must include ?id=MATCHID_LANG&s=0<br>Example: ?id=143540_eng&s=0'); return; }
 
         fetchJSON(JSON_URL)
-            .then(function(data) {
-                var url = resolveUrl(data);
-                if (!url) { showMsg('Stream not available'); return; }
+            .then(function (data) {
+                var url;
+                try { url = resolveUrl(data); }
+                catch (e) { showError('Stream not available', e.message); return; }
                 initPlayer(url);
             })
-            .catch(function(err) {
-                console.error('Fetch error:', err);
-                showMsg('Could not load stream data.<br>' + (err.message || ''));
+            .catch(function (err) {
+                showError('Failed to load data', err.message);
             });
     });
-
 })();
 </script>
-
 <script>(function(s){s.dataset.zone='10603308',s.src='https://llvpn.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-
 </body>
 </html>
