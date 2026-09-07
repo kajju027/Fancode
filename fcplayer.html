@@ -389,55 +389,71 @@ vid.addEventListener('play', function(){ uPaused=false; });
 setInterval(function(){ if(vid.paused&&!vid.ended&&!uPaused) vid.play().catch(function(){}); }, 3500);
 
 /* ── Shaka stream loader ── */
-async function loadStream(url){
+async function tryShaka(url){
+  if(shakaPlayer){ try{ await shakaPlayer.destroy(); }catch(e){} shakaPlayer=null; }
+  shakaPlayer = new shaka.Player();
+  await shakaPlayer.attach(vid);
+  shakaPlayer.configure({ streaming:{ bufferingGoal:10, rebufferingGoal:2, safeSeekOffset:5, lowLatencyMode:true } });
+  shakaPlayer.getNetworkingEngine().registerRequestFilter(function(t,req){
+    req.allowCrossSiteCredentials = true;
+  });
+  await shakaPlayer.load(url);
+}
+
+async function loadStream(url, fallbackUrls){
   hasError = false;
+  fallbackUrls = fallbackUrls || [];
 
   shaka.polyfill.installAll();
 
-  if(shakaPlayer){
-    try{ await shakaPlayer.destroy(); } catch(e){}
-    shakaPlayer = null;
-  }
+  var allUrls = [url].concat(fallbackUrls.filter(function(u){ return u && u !== url; }));
+  var lastErr = null;
 
-  if(!shaka.Player.isBrowserSupported()){
-    vid.src = url;
-    vid.muted = false;
-    vid.play().catch(function(){ vid.muted=true; vid.play().catch(function(){}); setTimeout(function(){ vid.muted=false; vid.play().catch(function(){}); },1000); });
-    return;
-  }
-
-  try{
-    shakaPlayer = new shaka.Player();
-    await shakaPlayer.attach(vid);
-
-    shakaPlayer.configure({
-      streaming:{
-        bufferingGoal: 10,
-        rebufferingGoal: 2,
-        safeSeekOffset: 5,
-        lowLatencyMode: true
+  if(shaka.Player.isBrowserSupported()){
+    for(var i=0; i<allUrls.length; i++){
+      var u = allUrls[i];
+      if(!u) continue;
+      try{
+        await tryShaka(u);
+        lastErr = null;
+        break;
+      } catch(err){
+        var httpStatus = (err.data && err.data[1]) ? err.data[1] : '';
+        console.warn('Shaka failed url['+i+']:', u, 'code:', err.code, 'HTTP:', httpStatus, err);
+        lastErr = 'Shaka Error ' + (err.code||'?') + (httpStatus ? ' (HTTP '+httpStatus+')' : '') + '\nURL tried: ...'+u.slice(-60);
+        if(shakaPlayer){ try{ await shakaPlayer.destroy(); }catch(e){} shakaPlayer=null; }
       }
-    });
-
-    await shakaPlayer.load(url);
-
-    vid.muted = false;
-    try{ await vid.play(); }
-    catch(e){
-      vid.muted = true;
-      await vid.play();
-      setTimeout(function(){ vid.muted=false; vid.play().catch(function(){}); }, 1000);
     }
-  } catch(err){
-    console.warn('Shaka load failed:', err);
-    showErr('Playback Error', err.message || String(err));
+  } else {
+    lastErr = 'shaka_unsupported';
+  }
+
+  if(lastErr){
+    if(lastErr === 'shaka_unsupported' || allUrls.length){
+      var nativeUrl = allUrls[0] || url;
+      if(vid.canPlayType('application/vnd.apple.mpegurl')){
+        vid.src = nativeUrl;
+        vid.muted = false;
+        vid.play().catch(function(){ vid.muted=true; vid.play().catch(function(){}); setTimeout(function(){ vid.muted=false; vid.play().catch(function(){}); },1000); });
+        lastErr = null;
+      }
+    }
+  }
+
+  if(lastErr){
+    showErr('Playback Error', lastErr);
     return;
   }
 
-  var onP = function(){
-    vid.removeEventListener('playing', onP);
-    hideOverlay();
-  };
+  vid.muted = false;
+  try{ await vid.play(); }
+  catch(e){
+    vid.muted = true;
+    await vid.play().catch(function(){});
+    setTimeout(function(){ vid.muted=false; vid.play().catch(function(){}); }, 1000);
+  }
+
+  var onP = function(){ vid.removeEventListener('playing',onP); hideOverlay(); };
   vid.addEventListener('playing', onP);
   setTimeout(function(){ if(!hasError) hideOverlay(); }, 8000);
 }
@@ -465,22 +481,24 @@ function resolve(data){
   if(!list.length) throw new Error('No matches in JSON');
   var m = null;
   for(var i=0;i<list.length;i++) if(String(list[i].match_id)===String(matchId)){m=list[i];break;}
-  if(!m) throw new Error('match_id "'+matchId+'" not found ('+list.length+' matches total)');
+  if(!m) throw new Error('match_id "'+matchId+'" not found ('+list.length+' matches in JSON)');
+
+  var s = m.streams || {};
+  var fallbacks = [s.primary, s.fancode_cdn, s.fancode_lk_cdn, s.fancode_bd_cdn, s.fancode_np_cdn].filter(Boolean);
 
   if(si === 0){
     var as = m.auto_streams || {};
     var asKeys = Object.keys(as);
-    if(!asKeys.length) throw new Error('auto_streams is empty — match is UPCOMING or stream not started yet');
+    if(!asKeys.length) throw new Error('auto_streams is empty — match UPCOMING or stream not started');
     var lang = LANG_MAP[langCode] || m.language || asKeys[0];
     var al = as[lang] || as[asKeys[0]];
-    if(!al || !al.streams || !Object.keys(al.streams).length) throw new Error('No stream URLs found in auto_streams');
-    return {type:'multi', streams:al.streams};
+    if(!al || !al.streams || !Object.keys(al.streams).length) throw new Error('Stream URLs empty in auto_streams');
+    return {type:'multi', streams:al.streams, fallbacks:fallbacks};
   }
 
-  var s = m.streams || {};
   var u = si===1?s.fancode_lk_cdn : si===2?s.fancode_np_cdn : si===3?s.fancode_bd_cdn : null;
   if(!u) throw new Error('Regional stream (s='+si+') not available');
-  return {type:'single', url:u};
+  return {type:'single', url:u, fallbacks:fallbacks};
 }
 
 /* ── boot ── */
@@ -495,14 +513,14 @@ function resolve(data){
     if(r.type === 'multi'){
       qStreams = r.streams;
       var url = r.streams['720p']||r.streams['1080p']||r.streams['480p']||r.streams['540p']||r.streams['360p']||r.streams['240p'];
-      if(!url){ showErr('No stream URL', 'All quality URLs are empty'); return; }
+      if(!url){ showErr('No stream URL', 'All quality URLs are empty for this match'); return; }
       currentQ = Q_ORDER.find(function(q){ return r.streams[q]===url; }) || '720p';
       qlbl.textContent = currentQ;
       buildQMenu(r.streams);
-      loadStream(url);
+      loadStream(url, r.fallbacks);
     } else {
       bq.style.display = 'none';
-      loadStream(r.url);
+      loadStream(r.url, r.fallbacks);
     }
   }).catch(function(e){ showErr('Data fetch failed', e.message); });
 })();
