@@ -4,477 +4,739 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FanCode Live — Match Board</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Acme&family=Amaranth:wght@400;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-
 :root{
-  --bg:#02060c;
-  --card:#0d1117;
-  --card-2:#141b24;
-  --border:#1f2733;
-  --muted:#8b949e;
-  --text:#f0f6fc;
-  --gold:#ffd700;
-  --accent-live:#198754;
-  --accent-live-shadow:rgba(25,135,84,0.4);
-  --accent-upcoming:#dc3545;
-  --accent-upcoming-dark:#a31a25;
-  --accent-upcoming-shadow:rgba(220,53,69,0.4);
+  --bg:#05080f;
+  --surface:#0c1220;
+  --surface-2:#121b2e;
+  --border:rgba(255,255,255,0.07);
+  --border-hover:rgba(100,180,255,0.28);
+  --text:#eef2ff;
+  --muted:#6b7a99;
+  --muted-2:#8892aa;
+  --gold:#f4c430;
+  --live:#00e676;
+  --live-bg:rgba(0,230,118,0.10);
+  --live-border:rgba(0,230,118,0.30);
+  --upcoming:#ff6b35;
+  --upcoming-bg:rgba(255,107,53,0.10);
+  --upcoming-border:rgba(255,107,53,0.30);
+  --accent:#3d8bff;
+  --accent-glow:rgba(61,139,255,0.20);
+  --radius-card:16px;
+  --radius-btn:10px;
+  --radius-badge:20px;
+  --font-display:'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body:'Inter', system-ui, sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+  --header-h:68px;
 }
 
-*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body{ margin:0; padding:0; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+html,body{ margin:0; padding:0; min-height:100vh; }
+
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:'Momo Trust Display', 'Segoe UI', Arial, sans-serif;
+  font-family:var(--font-body);
   -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  position:relative;
+  overflow-x:hidden;
 }
-*{ user-select:none; }
-button, input{ font-family:inherit; }
-img{ -webkit-user-drag:none; }
-a{ color:inherit; text-decoration:none; }
 
-.app{ max-width:1360px; margin:0 auto; padding:0 20px 60px; }
+#bgLayer{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background-size:cover;
+  background-position:center top;
+  background-repeat:no-repeat;
+  transition:opacity 1.2s ease;
+  pointer-events:none;
+}
+#bgLayer::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(4,7,16,0.72);
+}
+
+.app{
+  position:relative;
+  z-index:1;
+  max-width:1380px;
+  margin:0 auto;
+  padding:0 20px 80px;
+}
 
 header{
-  position:sticky; top:0; z-index:40;
-  display:flex; align-items:center; justify-content:space-between;
-  gap:16px; flex-wrap:wrap;
-  padding:16px 4px;
-  background:rgba(2,6,12,0.88);
-  -webkit-backdrop-filter:blur(10px);
-  backdrop-filter:blur(10px);
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:0 0;
+  height:var(--header-h);
+  background:rgba(5,8,15,0.82);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
-  margin-bottom:26px;
+  margin-bottom:30px;
 }
-.brand{ display:flex; flex-direction:column; gap:4px; }
-.title{
-  font-size:23px;
-  font-weight:900;
-  color:#ff4b4b;
-  letter-spacing:1px;
+
+.brand{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.site-title{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-.3px;
   line-height:1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.site-title span.dot{
+  display:inline-block;
+  width:8px; height:8px;
+  border-radius:50%;
+  background:#ff4444;
+  animation:livePulse 2s infinite;
+  flex:none;
+}
+@keyframes livePulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(255,68,68,.6); }
+  50%{ box-shadow:0 0 0 5px rgba(255,68,68,0); }
 }
 .last-update{
-  font-size:11.5px;
+  font-family:var(--font-mono);
+  font-size:10px;
   color:var(--muted);
   letter-spacing:.4px;
 }
+
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.lang-select{
+  appearance:none;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:12px;
+  padding:8px 28px 8px 12px;
+  border-radius:var(--radius-btn);
+  cursor:pointer;
+  outline:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath stroke='%236b7a99' stroke-width='1.5' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  max-width:140px;
+  transition:border-color .2s;
+}
+.lang-select:focus{ border-color:var(--accent); }
+
 .join-btn{
-  appearance:none; border:none; cursor:pointer;
-  display:flex; align-items:center; gap:8px;
-  background:#0d6efd;
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:linear-gradient(135deg,#0050cc,#0d6efd);
   color:#fff;
+  font-family:var(--font-display);
   font-weight:700;
   font-size:13px;
-  letter-spacing:.5px;
-  padding:11px 18px;
-  border-radius:10px;
-  box-shadow:0 4px 15px rgba(13,110,253,.35);
-  transition:filter .2s ease, transform .15s ease;
+  letter-spacing:.2px;
+  padding:10px 18px;
+  border-radius:var(--radius-btn);
+  box-shadow:0 4px 18px rgba(13,110,253,.30);
+  transition:filter .2s, transform .15s;
+  white-space:nowrap;
 }
-.join-btn:hover{ filter:brightness(1.1); }
+.join-btn:hover{ filter:brightness(1.12); }
 .join-btn:active{ transform:scale(.96); }
 
 .controls{
-  display:flex; justify-content:flex-end;
-  margin-bottom:22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:24px;
+  flex-wrap:wrap;
 }
+
+.section-label{
+  font-family:var(--font-display);
+  font-size:18px;
+  font-weight:700;
+  color:var(--text);
+  letter-spacing:-.2px;
+}
+
 .search-wrap{
   position:relative;
-  width:100%; max-width:340px;
+  width:100%;
+  max-width:320px;
 }
 .search-wrap svg{
-  position:absolute; left:13px; top:50%; transform:translateY(-50%);
-  opacity:.5; pointer-events:none;
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:.4;
+  pointer-events:none;
 }
 .search-wrap input{
   width:100%;
-  background:var(--card);
+  background:var(--surface);
   border:1px solid var(--border);
   color:var(--text);
+  font-family:var(--font-body);
   font-size:13px;
-  letter-spacing:.3px;
   padding:11px 14px 11px 38px;
-  border-radius:10px;
+  border-radius:var(--radius-btn);
   outline:none;
-  transition:border-color .2s ease;
+  transition:border-color .2s;
 }
 .search-wrap input::placeholder{ color:var(--muted); }
-.search-wrap input:focus{ border-color:rgba(120,180,255,.55); }
+.search-wrap input:focus{ border-color:rgba(100,180,255,.50); }
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-  gap:25px;
+  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+  gap:20px;
 }
 
 .loading-state, .empty-state{
   grid-column:1/-1;
   text-align:center;
-  padding:60px 20px;
+  padding:70px 20px;
   color:var(--muted);
-  font-size:13.5px;
-  letter-spacing:.5px;
+  font-size:13px;
   border:1px dashed var(--border);
-  border-radius:14px;
+  border-radius:var(--radius-card);
+  font-family:var(--font-mono);
+  letter-spacing:.4px;
 }
 
 .card{
-  background:var(--card);
+  background:var(--surface);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:var(--radius-card);
   overflow:hidden;
-  box-shadow:0 10px 26px -14px rgba(0,0,0,.7);
-  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-  display:flex; flex-direction:column;
+  display:flex;
+  flex-direction:column;
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  box-shadow:0 4px 24px -8px rgba(0,0,0,.60);
 }
 .card:hover{
-  transform:translateY(-3px);
-  border-color:rgba(120,180,255,.32);
-  box-shadow:0 18px 34px -16px rgba(0,0,0,.8);
+  transform:translateY(-4px);
+  border-color:var(--border-hover);
+  box-shadow:0 12px 40px -12px rgba(0,0,0,.80);
 }
 
 .thumb-wrap{
   position:relative;
   width:100%;
-  height:180px;
+  height:190px;
   background:#000;
-  display:flex; align-items:center; justify-content:center;
   overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .thumb-wrap img{
-  width:100%; height:100%;
-  object-fit:contain;
+  width:100%;
+  height:100%;
+  object-fit:cover;
   display:block;
+  transition:transform .4s ease;
 }
+.card:hover .thumb-wrap img{
+  transform:scale(1.03);
+}
+
 .lang-badge{
-  position:absolute; top:10px; left:10px;
-  display:flex; align-items:center; gap:5px;
-  background:rgba(0,0,0,.72);
+  position:absolute;
+  top:10px;
+  left:10px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:rgba(0,0,0,.76);
   border:1px solid var(--gold);
   color:var(--gold);
-  font-size:10.5px;
-  font-weight:700;
-  letter-spacing:.6px;
-  padding:5px 10px;
-  border-radius:20px;
+  font-family:var(--font-mono);
+  font-size:9.5px;
+  font-weight:500;
+  letter-spacing:.7px;
+  padding:4px 10px;
+  border-radius:var(--radius-badge);
 }
-.lang-badge svg{ flex:none; }
+
+.status-badge{
+  position:absolute;
+  top:10px;
+  right:10px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:rgba(0,0,0,.60);
+  font-family:var(--font-mono);
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.8px;
+  padding:4px 9px;
+  border-radius:var(--radius-badge);
+}
+.status-badge.live{ color:var(--live); border:1px solid var(--live-border); background:var(--live-bg); }
+.status-badge.upcoming{ color:var(--upcoming); border:1px solid var(--upcoming-border); background:var(--upcoming-bg); }
+.status-badge.completed{ color:#aab0be; border:1px solid rgba(170,176,190,.20); }
+
+.status-dot{
+  width:5px; height:5px;
+  border-radius:50%;
+  background:currentColor;
+  flex:none;
+}
+.status-badge.live .status-dot{ animation:dotBlink 1.6s infinite; }
+@keyframes dotBlink{
+  0%,100%{ opacity:1; }
+  50%{ opacity:.3; }
+}
 
 .meta{
   padding:16px 18px 18px;
-  display:flex; flex-direction:column; gap:9px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
   flex:1;
   text-align:center;
 }
 .teams{
-  font-size:17px;
+  font-family:var(--font-display);
+  font-size:16px;
   font-weight:800;
-  letter-spacing:.3px;
-  text-transform:uppercase;
-  line-height:1.28;
+  letter-spacing:-.1px;
+  line-height:1.3;
 }
 .event{
-  font-size:13px;
-  color:var(--muted);
+  font-size:12.5px;
+  color:var(--muted-2);
   letter-spacing:.2px;
 }
-
-.status-badge{
-  position:absolute; top:10px; right:10px;
-  display:flex; align-items:center; gap:5px;
-  background:rgba(0,0,0,.55);
-  font-size:9.5px;
-  font-weight:700;
-  letter-spacing:.6px;
-  padding:4px 9px;
-  border-radius:20px;
-  opacity:.9;
-}
-.status-badge.live{ color:#7fd9a0; border:1px solid rgba(25,135,84,.4); }
-.status-badge.upcoming{ color:#e8a0a5; border:1px solid rgba(163,26,37,.4); }
-.status-badge.completed{ color:#c8ccd1; border:1px solid rgba(248,249,250,.2); }
-.status-dot-mini{ width:5px; height:5px; border-radius:50%; background:currentColor; flex:none; }
-.status-badge.live .status-dot-mini{ animation:miniPulse 1.8s infinite; }
-@keyframes miniPulse{
-  0%,100%{ opacity:1; }
-  50%{ opacity:.4; }
-}
-
 .card-time{
-  font-size:11px;
+  font-family:var(--font-mono);
+  font-size:10.5px;
   color:var(--muted);
   letter-spacing:.3px;
 }
 
-.actions{ margin-top:auto; display:flex; flex-direction:column; gap:9px; padding-top:4px; }
+.actions{
+  margin-top:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding-top:4px;
+}
 
 .btn{
-  appearance:none; border:none; cursor:pointer;
+  appearance:none;
+  border:none;
+  cursor:pointer;
   width:100%;
-  font-weight:800;
-  font-size:13.5px;
-  letter-spacing:.6px;
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.3px;
   padding:12px 14px;
-  border-radius:10px;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:filter .2s ease, transform .15s ease;
+  border-radius:var(--radius-btn);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  transition:filter .2s, transform .15s;
 }
 .btn:active{ transform:scale(.97); }
+
 .btn-watch-now{
-  background:var(--accent-live);
-  color:#fff;
-  box-shadow:0 4px 15px var(--accent-live-shadow);
+  background:linear-gradient(135deg,#00b85c,#00e676);
+  color:#001a0d;
 }
-.btn-watch-now:hover{ filter:brightness(1.1); }
+.btn-watch-now:hover{ filter:brightness(1.08); }
 .btn-watch-now.is-disabled{
-  background:#2a2f38; color:var(--muted); box-shadow:none; cursor:not-allowed;
+  background:var(--surface-2);
+  color:var(--muted);
+  cursor:not-allowed;
+  filter:none;
 }
+
 .btn-upcoming{
-  background:var(--accent-upcoming);
+  background:linear-gradient(135deg,#cc4400,#ff6b35);
   color:#fff;
-  box-shadow:0 4px 15px var(--accent-upcoming-shadow);
 }
-.btn-upcoming:hover{ filter:brightness(1.1); }
+.btn-upcoming:hover{ filter:brightness(1.08); }
+
 .btn-completed{
-  background:#f8f9fa;
-  color:#000;
-  box-shadow:0 4px 15px rgba(248,249,250,.2);
+  background:rgba(255,255,255,0.08);
+  color:var(--muted-2);
+  border:1px solid var(--border);
 }
 
 .btn-ww{
-  background:rgba(120,180,255,.06);
-  color:#9cc7ff;
-  border:1px solid rgba(120,180,255,.3);
+  background:rgba(61,139,255,.08);
+  color:#7eb8ff;
+  border:1px solid rgba(61,139,255,.25);
+  font-size:12.5px;
 }
-.btn-ww:hover{ background:rgba(120,180,255,.13); }
-.btn-ww .chev{ margin-left:auto; transition:transform .3s ease; }
-.btn-ww.open{ background:rgba(120,180,255,.13); }
+.btn-ww:hover{ background:rgba(61,139,255,.14); }
+.btn-ww .chev{ margin-left:auto; transition:transform .28s ease; }
+.btn-ww.open{ background:rgba(61,139,255,.14); }
 .btn-ww.open .chev{ transform:rotate(180deg); }
 
 .ww-panel-wrap{
   display:grid;
   grid-template-rows:0fr;
   opacity:0;
-  transition:grid-template-rows .38s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+  transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1), opacity .28s ease;
 }
-.ww-panel-wrap.open{ grid-template-rows:1fr; opacity:1; margin-top:1px; }
-.ww-panel-inner{ overflow:hidden; display:flex; flex-direction:column; gap:7px; }
+.ww-panel-wrap.open{ grid-template-rows:1fr; opacity:1; margin-top:2px; }
+.ww-panel-inner{ overflow:hidden; display:flex; flex-direction:column; gap:6px; }
+
 .ww-row{
-  display:flex; align-items:center; gap:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
   padding:10px 12px;
-  background:var(--card-2);
+  background:var(--surface-2);
   border:1px solid var(--border);
   border-radius:9px;
   cursor:pointer;
-  transition:background .2s ease, border-color .2s ease, transform .15s ease;
+  transition:background .2s, border-color .2s, transform .15s;
 }
 .ww-row:hover{
-  background:rgba(120,180,255,.08);
-  border-color:rgba(120,180,255,.32);
-  transform:translateX(2px);
+  background:rgba(61,139,255,.08);
+  border-color:rgba(61,139,255,.28);
+  transform:translateX(3px);
 }
-.ww-flag{ font-size:16px; line-height:1; flex:none; }
-.ww-name{ font-size:12px; font-weight:700; flex:1; text-align:left; letter-spacing:.2px; }
-.ww-code{ font-size:10px; font-weight:700; letter-spacing:.5px; color:var(--muted); }
-.ww-row:hover .ww-code{ color:#9cc7ff; }
+.ww-flag{ font-size:16px; flex:none; }
+.ww-name{ font-size:12px; font-weight:600; flex:1; text-align:left; }
+.ww-code{
+  font-family:var(--font-mono);
+  font-size:9.5px;
+  color:var(--muted);
+  letter-spacing:.5px;
+}
 
 footer{
-  margin-top:50px;
-  padding-top:26px;
+  margin-top:60px;
+  padding-top:28px;
   border-top:1px solid var(--border);
-  display:flex; flex-direction:column; align-items:center; gap:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
   text-align:center;
 }
-footer .note{
-  font-size:11.5px;
-  letter-spacing:1px;
+.footer-note{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  letter-spacing:.8px;
   color:var(--muted);
-  font-weight:700;
 }
-.visitor-counter-box{
-  display:flex; align-items:center; gap:12px;
-  padding:9px 18px;
-  background:var(--card);
+
+.visitor-counter{
+  display:inline-flex;
+  align-items:center;
+  gap:0;
+  background:var(--surface);
   border:1px solid var(--border);
-  border-radius:10px;
+  border-radius:12px;
+  overflow:hidden;
 }
-.vc-item{ display:flex; flex-direction:column; align-items:center; gap:2px; }
-.vc-value{
-  font-size:15px; font-weight:800; color:var(--text);
-  letter-spacing:.5px; font-variant-numeric:tabular-nums;
-  font-family:'Segoe UI', Arial, sans-serif;
+.vc-cell{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:10px 22px;
+  gap:4px;
 }
-.vc-label{ font-size:8.5px; letter-spacing:.8px; color:var(--muted); text-transform:uppercase; }
-.vc-sep{ width:1px; height:22px; background:var(--border); }
+.vc-cell:not(:last-child){
+  border-right:1px solid var(--border);
+}
+.vc-num{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:800;
+  color:var(--text);
+  line-height:1;
+  letter-spacing:-.5px;
+}
+.vc-tag{
+  font-family:var(--font-mono);
+  font-size:8.5px;
+  color:var(--muted);
+  letter-spacing:.9px;
+  text-transform:uppercase;
+}
 
 .popup-overlay{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.86);
-  -webkit-backdrop-filter:blur(14px);
-  backdrop-filter:blur(14px);
-  display:flex; align-items:center; justify-content:center;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
   padding:20px;
-  z-index:99999;
+  z-index:9999;
 }
 .popup-overlay.hidden{ display:none; }
-.popup-wrap{
+
+.popup-card{
   position:relative;
-  width:100%; max-width:358px;
-  padding:2px;
-  background:linear-gradient(145deg, rgba(255,204,0,.8) 0%, rgba(255,224,80,.4) 50%, rgba(255,204,0,.8) 100%);
-  border-radius:18px;
-  box-shadow:0 0 50px rgba(255,204,0,.14), 0 30px 70px rgba(0,0,0,.72);
-  animation:popIn .42s cubic-bezier(.175,.885,.32,1.275) both;
-}
-@keyframes popIn{
-  from{ opacity:0; transform:scale(.87) translateY(24px); }
-  to{ opacity:1; transform:scale(1) translateY(0); }
-}
-.popup-box{
-  background:linear-gradient(168deg, #1e1e26 0%, #0e0e13 100%);
-  border-radius:16px;
-  padding:34px 24px 26px;
+  width:100%;
+  max-width:360px;
+  background:var(--surface);
+  border:1px solid rgba(244,196,48,.25);
+  border-radius:20px;
+  padding:36px 26px 28px;
   text-align:center;
+  box-shadow:0 0 60px rgba(244,196,48,.08), 0 30px 80px rgba(0,0,0,.70);
+  animation:slideUp .40s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes slideUp{
+  from{ opacity:0; transform:translateY(30px) scale(.93); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+.popup-icon{
+  font-size:46px;
+  line-height:1;
+  margin-bottom:14px;
+  display:block;
 }
 .popup-title{
-  color:#ffcc00;
-  font-family:'Acme', sans-serif;
-  font-size:30px;
-  letter-spacing:.5px;
-  margin-bottom:12px;
+  font-family:var(--font-display);
+  font-size:26px;
+  font-weight:800;
+  color:#fff;
+  margin-bottom:10px;
+  letter-spacing:-.3px;
 }
-.popup-text{
-  color:#a0a0a8;
+.popup-sub{
   font-size:14px;
-  line-height:1.65;
-  margin-bottom:24px;
-  font-family:'Segoe UI', Arial, sans-serif;
+  color:var(--muted-2);
+  line-height:1.6;
+  margin-bottom:8px;
 }
-.popup-text b{
-  color:#fff;
-  font-family:'Amaranth', sans-serif;
+.popup-channel{
+  font-family:var(--font-display);
   font-size:17px;
-  display:block;
-  margin-top:7px;
-}
-.btn-popup{
-  width:100%; padding:14px; border:none;
-  border-radius:13px;
-  font-family:'Amaranth', sans-serif;
-  cursor:pointer;
-  transition:transform .18s, box-shadow .18s;
-  appearance:none;
-  touch-action:manipulation;
-  text-decoration:none;
+  font-weight:700;
+  color:var(--gold);
+  margin-bottom:22px;
   display:block;
 }
-.btn-popup:active{ transform:scale(.95); }
-.btn-join-main{
-  background:linear-gradient(90deg, #1bcc26, #17b823);
+.btn-join-tg{
+  display:block;
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  background:linear-gradient(135deg,#17a32a,#1ccc32);
   color:#fff;
-  font-size:18px; font-weight:700;
-  letter-spacing:.6px;
-  box-shadow:0 5px 20px rgba(23,184,35,.32);
-  margin-bottom:9px;
-  line-height:1;
-  text-align:center;
+  font-family:var(--font-display);
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:.2px;
+  text-decoration:none;
+  margin-bottom:10px;
+  box-shadow:0 6px 22px rgba(28,204,50,.28);
+  transition:filter .2s, transform .15s;
 }
-.btn-join-main:hover{ box-shadow:0 8px 26px rgba(23,184,35,.42); }
-.btn-joined-main{
+.btn-join-tg:hover{ filter:brightness(1.08); }
+.btn-join-tg:active{ transform:scale(.96); }
+.btn-skip{
+  appearance:none;
+  border:none;
   background:transparent;
-  color:#484850;
-  font-size:12px; font-weight:400;
-  width:auto; margin:0 auto;
-  padding:7px 14px;
-  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  cursor:pointer;
+  padding:8px 16px;
+  font-family:var(--font-body);
+  transition:color .2s;
 }
+.btn-skip:hover{ color:var(--muted-2); }
 
-button:focus-visible, .ww-row:focus-visible, input:focus-visible{
-  outline:2px solid #6cb2ff;
+.error-banner{
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:200;
+  background:rgba(20,26,48,.95);
+  border:1px solid rgba(255,100,100,.30);
+  color:#ff8a8a;
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.4px;
+  padding:10px 20px;
+  border-radius:999px;
+  box-shadow:0 4px 20px rgba(0,0,0,.50);
+  display:none;
+  white-space:nowrap;
+}
+.error-banner.visible{ display:block; }
+
+button:focus-visible,
+.ww-row:focus-visible,
+input:focus-visible,
+.lang-select:focus-visible{
+  outline:2px solid var(--accent);
   outline-offset:2px;
 }
 
-@media (prefers-reduced-motion: reduce){
+@media (prefers-reduced-motion:reduce){
   *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
 }
 
-@media (max-width:450px){
-  .title{ font-size:19px; }
-  .join-btn{ padding:9px 14px; font-size:12px; }
-  .controls{ justify-content:stretch; }
+@media (max-width:600px){
+  .thumb-wrap{ height:210px; }
+  .thumb-wrap img{ object-fit:cover; object-position:center; }
+  .grid{ grid-template-columns:1fr; gap:16px; }
+  .site-title{ font-size:18px; }
+  .join-btn{ padding:9px 13px; font-size:12px; }
+  .section-label{ font-size:15px; }
+  .controls{ flex-direction:column; align-items:stretch; }
   .search-wrap{ max-width:100%; }
+  .lang-select{ max-width:100%; }
 }
 
+@media (max-width:400px){
+  .header-right{ gap:7px; }
+  .lang-select{ font-size:11px; padding:7px 24px 7px 10px; max-width:110px; }
+}
 </style>
 </head>
-
 <body>
+
+<div id="bgLayer"></div>
+<div id="errorBanner" class="error-banner"></div>
 
 <div class="app">
 
   <header>
     <div class="brand">
-      <div class="title">FANCODE LIVE</div>
-      <div class="last-update" id="lastUpdate">LAST UPDATE: LOADING...</div>
+      <div class="site-title">
+        <span class="dot"></span>FanCode Live
+      </div>
+      <div class="last-update" id="lastUpdate">Syncing...</div>
     </div>
-    <button type="button" class="join-btn" id="joinTelegramBtn">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.5L2.7 11.9c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14c.3-1.3-.5-1.9-1.8-1.8z"/></svg>
-      JOIN TELEGRAM
-    </button>
+    <div class="header-right">
+      <select class="lang-select" id="langSelect" title="Select language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="bn">বাংলা</option>
+        <option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option>
+        <option value="ml">മലയാളം</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="mr">मराठी</option>
+        <option value="gu">ગુજરાતી</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+        <option value="or">ଓଡ଼ିଆ</option>
+        <option value="as">অসমীয়া</option>
+        <option value="ur">اردو</option>
+        <option value="kok">कोंकणी</option>
+        <option value="mai">मैथिली</option>
+        <option value="sa">संस्कृतम्</option>
+        <option value="sd">سنڌي</option>
+        <option value="ne">नेपाली</option>
+        <option value="bho">भोजपुरी</option>
+        <option value="raj">राजस्थानी</option>
+        <option value="doi">डोगरी</option>
+        <option value="ks">کٲشُر</option>
+        <option value="mni">মৈতৈলোন্</option>
+        <option value="sat">ᱥᱟᱱᱛᱟᱲᱤ</option>
+      </select>
+      <button type="button" class="join-btn" id="joinTelegramBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.5L2.7 11.9c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14c.3-1.3-.5-1.9-1.8-1.8z"/></svg>
+        Join Telegram
+      </button>
+    </div>
   </header>
 
   <div class="controls">
+    <div class="section-label" id="sectionLabel">Matches</div>
     <div class="search-wrap">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input type="text" id="searchInput" placeholder="SEARCH TEAM OR EVENT...">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search team or tournament…">
     </div>
   </div>
 
   <div id="matchesGrid" class="grid">
-    <div class="loading-state">LOADING MATCHES...</div>
+    <div class="loading-state">Loading matches…</div>
   </div>
 
   <footer>
-    <div class="note">SAYAN OAI | ALL RIGHTS RESERVED</div>
-    <div class="visitor-counter-box" id="visitorCounter">
-      <div class="vc-item"><span class="vc-value" id="vcTotal">—</span><span class="vc-label">Visits</span></div>
-      <div class="vc-sep"></div>
-      <div class="vc-item"><span class="vc-value" id="vcUnique">—</span><span class="vc-label">Unique</span></div>
+    <div class="footer-note">SAYAN OAI &nbsp;·&nbsp; ALL RIGHTS RESERVED</div>
+    <div class="visitor-counter" id="visitorCounter">
+      <div class="vc-cell">
+        <span class="vc-num" id="vcTotal">—</span>
+        <span class="vc-tag">Visits</span>
+      </div>
+      <div class="vc-cell">
+        <span class="vc-num" id="vcUnique">—</span>
+        <span class="vc-tag">Unique</span>
+      </div>
     </div>
   </footer>
 
 </div>
 
 <div class="popup-overlay hidden" id="telegramModal">
-  <div class="popup-wrap">
-    <div class="popup-box">
-      <div class="popup-title">Follow Us !!</div>
-      <div class="popup-text">
-        Join our Telegram channel<br>
-        <b>FANCODE LIVE</b>
-        For instant match links and live updates.
-      </div>
-      <a class="btn-popup btn-join-main" id="joinButton" target="_blank" rel="noopener noreferrer" href="https://t.me/+JSkwy86_04M2Zjdl">JOIN NOW</a>
-      <button class="btn-popup btn-joined-main" id="closeButton" type="button">Already Joined</button>
-    </div>
+  <div class="popup-card">
+    <span class="popup-icon">📡</span>
+    <div class="popup-title">Stay Updated</div>
+    <div class="popup-sub">Get instant match links and live alerts on our Telegram channel.</div>
+    <span class="popup-channel">Cricket News Point</span>
+    <a class="btn-join-tg" id="joinButton" href="https://t.me/+JSkwy86_04M2Zjdl" target="_blank" rel="noopener noreferrer">Join Now</a>
+    <button class="btn-skip" id="closeButton" type="button">Already a member</button>
   </div>
 </div>
 
 <script>
 const CNPTV_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json';
-const WORLD_SOURCE  = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
-const PLAYER_PAGE   = 'fcplayer.html';
+const WORLD_SOURCE = 'https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fancode.json';
+const PLAYER_PAGE = 'fcplayer.html';
 const TELEGRAM_LINK = 'https://t.me/+JSkwy86_04M2Zjdl';
-const FALLBACK_IMG  = 'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+const FALLBACK_IMG = 'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
 const HIT_COUNTER_URL = 'https://sayan-prime.pages.dev/api/hit?key=Fancode';
 const REFRESH_INTERVAL_MS = 60000;
+
+const BG_MOBILE_NIGHT = 'https://wallpapercat.com/w/full/8/c/c/57325-2160x3840-mobile-4k-milky-way-background.jpg';
+const BG_DESKTOP_NIGHT = 'https://wallpapercat.com/w/full/4/e/9/185978-3840x2160-desktop-4k-moon-background-photo.jpg';
+const BG_MOBILE_ERROR = 'https://wallpapercat.com/w/full/4/e/0/5828024.jpg';
+const BG_DESKTOP_ERROR = 'https://wallpapercat.com/w/full/c/7/e/5823589-2920x1640-desktop-hd-boy-programmer-wallpaper-image.jpg';
 
 const LANG_CODE_MAP = {
   ENGLISH:'eng', HINDI:'hin', BANGLA:'ban', BENGALI:'ban', TAMIL:'tam',
@@ -482,23 +744,156 @@ const LANG_CODE_MAP = {
   GUJARATI:'guj', URDU:'urd', ODIA:'ori', ASSAMESE:'asm', BHOJPURI:'bho'
 };
 
-const ICON_GLOBE = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
-const ICON_WW    = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
-const ICON_CHEV  = '<svg class="chev" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>';
+const ICON_GLOBE = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
+const ICON_WW = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.7 3.8 6 3.8 9s-1.4 6.3-3.8 9c-2.4-2.7-3.8-6-3.8-9s1.4-6.3 3.8-9z"/></svg>';
+const ICON_CHEV = '<svg class="chev" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>';
 
-const grid       = document.getElementById('matchesGrid');
+const TRANSLATIONS = {
+  en: {
+    loading:'Loading matches…', noResults:'No matches found.', lastUpdate:'Last update',
+    watchNow:'Watch Now', upcoming:'Upcoming', thankYou:'Thank You',
+    worldWide:'World Wide Stream', searchPlaceholder:'Search team or tournament…',
+    sectionLabel:'Matches', errorMsg:'SERVICE UNAVAILABLE — PLEASE REFRESH',
+    unavailable:'Unavailable', timeTBA:'Time TBA'
+  },
+  hi: {
+    loading:'मैच लोड हो रहे हैं…', noResults:'कोई मैच नहीं मिला।', lastUpdate:'अंतिम अपडेट',
+    watchNow:'अभी देखें', upcoming:'आगामी', thankYou:'धन्यवाद',
+    worldWide:'वर्ल्डवाइड स्ट्रीम', searchPlaceholder:'टीम या टूर्नामेंट खोजें…',
+    sectionLabel:'मैच', errorMsg:'सेवा अनुपलब्ध — कृपया रीफ्रेश करें',
+    unavailable:'अनुपलब्ध', timeTBA:'समय TBA'
+  },
+  bn: {
+    loading:'ম্যাচ লোড হচ্ছে…', noResults:'কোনো ম্যাচ পাওয়া যায়নি।', lastUpdate:'শেষ আপডেট',
+    watchNow:'এখনই দেখুন', upcoming:'আসন্ন', thankYou:'ধন্যবাদ',
+    worldWide:'ওয়ার্ল্ডওয়াইড স্ট্রিম', searchPlaceholder:'টিম বা টুর্নামেন্ট খুঁজুন…',
+    sectionLabel:'ম্যাচ', errorMsg:'সার্ভিস অনুপলব্ধ — রিফ্রেশ করুন',
+    unavailable:'অনুপলব্ধ', timeTBA:'সময় TBA'
+  },
+  ta: {
+    loading:'போட்டிகள் ஏற்றப்படுகின்றன…', noResults:'போட்டிகள் இல்லை.', lastUpdate:'கடைசி புதுப்பிப்பு',
+    watchNow:'இப்போது பாருங்கள்', upcoming:'வரவிருக்கும்', thankYou:'நன்றி',
+    worldWide:'உலக ஸ்ட்ரீம்', searchPlaceholder:'அணி அல்லது தொடரைத் தேடுங்கள்…',
+    sectionLabel:'போட்டிகள்', errorMsg:'சேவை இல்லை — புதுப்பிக்கவும்',
+    unavailable:'கிடைக்கவில்லை', timeTBA:'நேரம் TBA'
+  },
+  te: {
+    loading:'మ్యాచ్‌లు లోడ్ అవుతున్నాయి…', noResults:'మ్యాచ్‌లు కనుగొనబడలేదు.', lastUpdate:'చివరి నవీకరణ',
+    watchNow:'ఇప్పుడు చూడండి', upcoming:'రాబోయే', thankYou:'ధన్యవాదాలు',
+    worldWide:'వరల్డ్‌వైడ్ స్ట్రీమ్', searchPlaceholder:'జట్టు లేదా టోర్నమెంట్ వెతుకండి…',
+    sectionLabel:'మ్యాచ్‌లు', errorMsg:'సేవ అందుబాటులో లేదు — రిఫ్రెష్ చేయండి',
+    unavailable:'అందుబాటులో లేదు', timeTBA:'సమయం TBA'
+  },
+  ml: {
+    loading:'മത്സരങ്ങൾ ലോഡ് ചെയ്യുന്നു…', noResults:'മത്സരങ്ങൾ കണ്ടെത്തിയില്ല.', lastUpdate:'അവസാന അപ്ഡേറ്റ്',
+    watchNow:'ഇപ്പോൾ കാണുക', upcoming:'വരാനിരിക്കുന്ന', thankYou:'നന്ദി',
+    worldWide:'വേൾഡ്‌വൈഡ് സ്ട്രീം', searchPlaceholder:'ടീം അല്ലെങ്കിൽ ടൂർണ്ണമെന്റ് തിരയുക…',
+    sectionLabel:'മത്സരങ്ങൾ', errorMsg:'സേവനം ലഭ്യമല്ല — പുതുക്കുക',
+    unavailable:'ലഭ്യമല്ല', timeTBA:'സമയം TBA'
+  },
+  kn: {
+    loading:'ಪಂದ್ಯಗಳು ಲೋಡ್ ಆಗುತ್ತಿದೆ…', noResults:'ಪಂದ್ಯಗಳು ಕಂಡುಬಂದಿಲ್ಲ.', lastUpdate:'ಕೊನೆಯ ನವೀಕರಣ',
+    watchNow:'ಈಗ ವೀಕ್ಷಿಸಿ', upcoming:'ಮುಂಬರುವ', thankYou:'ಧನ್ಯವಾದಗಳು',
+    worldWide:'ವರ್ಲ್ಡ್‌ವೈಡ್ ಸ್ಟ್ರೀಮ್', searchPlaceholder:'ತಂಡ ಅಥವಾ ಟೂರ್ನಮೆಂಟ್ ಹುಡುಕಿ…',
+    sectionLabel:'ಪಂದ್ಯಗಳು', errorMsg:'ಸೇವೆ ಲಭ್ಯವಿಲ್ಲ — ರಿಫ್ರೆಶ್ ಮಾಡಿ',
+    unavailable:'ಲಭ್ಯವಿಲ್ಲ', timeTBA:'ಸಮಯ TBA'
+  },
+  mr: {
+    loading:'सामने लोड होत आहेत…', noResults:'कोणतेही सामने आढळले नाहीत.', lastUpdate:'शेवटचे अपडेट',
+    watchNow:'आता पहा', upcoming:'आगामी', thankYou:'धन्यवाद',
+    worldWide:'वर्ल्डवाइड स्ट्रीम', searchPlaceholder:'संघ किंवा स्पर्धा शोधा…',
+    sectionLabel:'सामने', errorMsg:'सेवा उपलब्ध नाही — रीफ्रेश करा',
+    unavailable:'अनुपलब्ध', timeTBA:'वेळ TBA'
+  },
+  gu: {
+    loading:'મેચ લોડ થઈ રહ્યા છે…', noResults:'કોઈ મેચ મળ્યો નથી.', lastUpdate:'છેલ્લો અપડેટ',
+    watchNow:'હવે જુઓ', upcoming:'આગામી', thankYou:'આભાર',
+    worldWide:'વર્લ્ડ વાઈડ સ્ટ્રીમ', searchPlaceholder:'ટીમ અથવા ટૂર્નામેન્ટ શોધો…',
+    sectionLabel:'મેચ', errorMsg:'સેવા અનુપલબ્ધ — રીફ્રેશ કરો',
+    unavailable:'અનુપલબ્ધ', timeTBA:'સમય TBA'
+  },
+  pa: {
+    loading:'ਮੈਚ ਲੋਡ ਹੋ ਰਹੇ ਹਨ…', noResults:'ਕੋਈ ਮੈਚ ਨਹੀਂ ਮਿਲਿਆ।', lastUpdate:'ਆਖਰੀ ਅਪਡੇਟ',
+    watchNow:'ਹੁਣੇ ਦੇਖੋ', upcoming:'ਆਉਣ ਵਾਲਾ', thankYou:'ਧੰਨਵਾਦ',
+    worldWide:'ਵਰਲਡ ਵਾਈਡ ਸਟ੍ਰੀਮ', searchPlaceholder:'ਟੀਮ ਜਾਂ ਟੂਰਨਾਮੈਂਟ ਖੋਜੋ…',
+    sectionLabel:'ਮੈਚ', errorMsg:'ਸੇਵਾ ਉਪਲਬਧ ਨਹੀਂ — ਰੀਫ੍ਰੈਸ਼ ਕਰੋ',
+    unavailable:'ਉਪਲਬਧ ਨਹੀਂ', timeTBA:'ਸਮਾਂ TBA'
+  }
+};
+const DEFAULT_TRANS = TRANSLATIONS.en;
+function t(key){ return (TRANSLATIONS[currentLang] || DEFAULT_TRANS)[key] || DEFAULT_TRANS[key] || key; }
+
+const grid = document.getElementById('matchesGrid');
 const lastUpdateEl = document.getElementById('lastUpdate');
-const searchInput  = document.getElementById('searchInput');
+const searchInput = document.getElementById('searchInput');
+const sectionLabel = document.getElementById('sectionLabel');
+const errorBanner = document.getElementById('errorBanner');
+const bgLayer = document.getElementById('bgLayer');
+const langSelect = document.getElementById('langSelect');
 
 let allMatches = [];
 let lastUpdatedAt = null;
 let lastWorldSnapshot = null;
 let openPanels = new Set();
+let currentLang = localStorage.getItem('fc_lang') || 'en';
+let hasError = false;
+
+langSelect.value = currentLang;
+langSelect.addEventListener('change', () => {
+  currentLang = langSelect.value;
+  localStorage.setItem('fc_lang', currentLang);
+  applyTranslations();
+  if(allMatches.length) renderGrid(filterMatches());
+});
+
+function applyTranslations(){
+  searchInput.placeholder = t('searchPlaceholder');
+  sectionLabel.textContent = t('sectionLabel');
+  document.documentElement.lang = currentLang;
+}
+
+function isNightIST(){
+  const now = new Date();
+  const istMs = now.getTime() + (now.getTimezoneOffset() * 60000) + (5.5 * 3600000);
+  const istDate = new Date(istMs);
+  const h = istDate.getHours();
+  return h >= 22 || h < 5;
+}
+
+const isMobile = () => window.matchMedia('(max-width:767px)').matches;
+
+function applyBackground(isError){
+  hasError = isError;
+  const mobile = isMobile();
+  let url = '';
+  if(isError){
+    url = mobile ? BG_MOBILE_ERROR : BG_DESKTOP_ERROR;
+  } else if(isNightIST()){
+    url = mobile ? BG_MOBILE_NIGHT : BG_DESKTOP_NIGHT;
+  }
+  if(url){
+    bgLayer.style.backgroundImage = `url('${url}')`;
+    bgLayer.style.opacity = '1';
+  } else {
+    bgLayer.style.opacity = '0';
+    setTimeout(() => { bgLayer.style.backgroundImage = ''; }, 1200);
+  }
+}
+
+function showErrorBanner(msg){
+  errorBanner.textContent = msg;
+  errorBanner.classList.add('visible');
+}
+function hideErrorBanner(){
+  errorBanner.classList.remove('visible');
+}
+
+window.addEventListener('resize', () => applyBackground(hasError));
 
 function esc(str){
-  return String(str == null ? '' : str).replace(/[&<>"']/g, s => ({
-    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
-  }[s]));
+  return String(str == null ? '' : str).replace(/[&<>"']/g, s =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])
+  );
 }
 
 function langToCode(rawLang, isLive){
@@ -507,8 +902,7 @@ function langToCode(rawLang, isLive){
     if(isLive){ lang = 'ENGLISH'; } else { return null; }
   }
   if(LANG_CODE_MAP[lang]) return LANG_CODE_MAP[lang];
-  const short = lang.slice(0,3).toLowerCase();
-  return short || 'eng';
+  return lang.slice(0,3).toLowerCase() || 'eng';
 }
 
 function langLabel(rawLang){
@@ -524,10 +918,10 @@ function parseMatchTime(str){
                    august:7,september:8,october:9,november:10,december:11};
   const m = String(str).match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\s+(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
   if(!m){ const d = new Date(str); return isNaN(d) ? null : d; }
-  let [, day, monthName, year, hour, min, ampm] = m;
+  let [,day,monthName,year,hour,min,ampm] = m;
   const month = months[monthName.toLowerCase()];
   if(month === undefined){ const d = new Date(str); return isNaN(d) ? null : d; }
-  day = +day; year = +year; hour = +hour; min = +min;
+  day=+day; year=+year; hour=+hour; min=+min;
   if(ampm){
     ampm = ampm.toUpperCase();
     if(ampm === 'PM' && hour < 12) hour += 12;
@@ -540,28 +934,28 @@ function parseUpdatedAt(str){
   if(!str) return null;
   const m = String(str).match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(\d{1,2}):(\d{2}):(\d{2})\s*(am|pm)/i);
   if(!m){ const d = new Date(str); return isNaN(d) ? null : d; }
-  let day = +m[1], month = +m[2], year = +m[3], hour = +m[4], min = +m[5], sec = +m[6];
+  let day=+m[1],month=+m[2],year=+m[3],hour=+m[4],min=+m[5],sec=+m[6];
   const ampm = m[7].toLowerCase();
   if(ampm === 'pm' && hour < 12) hour += 12;
   if(ampm === 'am' && hour === 12) hour = 0;
-  return new Date(year, month - 1, day, hour, min, sec);
+  return new Date(year, month-1, day, hour, min, sec);
 }
 
 function formatMatchTime(date){
-  if(!date) return 'TIME TBA';
-  const datePart = date.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }).toUpperCase();
+  if(!date) return t('timeTBA');
+  const datePart = date.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}).toUpperCase();
   let h = date.getHours();
-  const mm = String(date.getMinutes()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2,'0');
   const ap = h >= 12 ? 'PM' : 'AM';
   h = h % 12; if(h === 0) h = 12;
   return `${datePart}, ${h}:${mm} ${ap}`;
 }
 
 function formatAbsoluteIST(date){
-  if(!date) return 'UNAVAILABLE';
-  const datePart = date.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }).toUpperCase();
+  if(!date) return t('unavailable');
+  const datePart = date.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}).toUpperCase();
   let h = date.getHours();
-  const mm = String(date.getMinutes()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2,'0');
   const ap = h >= 12 ? 'PM' : 'AM';
   h = h % 12; if(h === 0) h = 12;
   return `${datePart}, ${h}:${mm} ${ap} IST`;
@@ -579,31 +973,27 @@ function renderCard(m){
   let actionsHtml = '';
 
   if(m.status === 'LIVE'){
-    statusHtml = `<span class="status-badge live"><span class="status-dot-mini"></span>LIVE</span>`;
-
+    statusHtml = `<span class="status-badge live"><span class="status-dot"></span>LIVE</span>`;
     const canWatch = m.cnptvUrl && m.langCode;
-    const watchAttrs = canWatch
-      ? `data-url="${esc(buildPlayerUrl(m.id, m.langCode, 0))}"`
-      : 'disabled';
-
+    const watchAttrs = canWatch ? `data-url="${esc(buildPlayerUrl(m.id,m.langCode,0))}"` : 'disabled';
     const wwOptions = [
-      { key:'lk', flag:'🇱🇰', name:'Only Sri Lanka User',  url:m.lk, idx:1 },
-      { key:'np', flag:'🇳🇵', name:'Only Nepal User',      url:m.np, idx:2 },
-      { key:'bd', flag:'🇧🇩', name:'Only Bangladesh User', url:m.bd, idx:3 }
+      {key:'lk',flag:'🇱🇰',name:'Sri Lanka',url:m.lk,idx:1},
+      {key:'np',flag:'🇳🇵',name:'Nepal',url:m.np,idx:2},
+      {key:'bd',flag:'🇧🇩',name:'Bangladesh',url:m.bd,idx:3}
     ].filter(o => o.url);
     const hasAnyWW = m.langCode && wwOptions.length > 0;
     const isOpen = openPanels.has(String(m.id));
 
     actionsHtml = `
-      <button type="button" class="btn btn-watch-now ${canWatch ? '' : 'is-disabled'}" ${watchAttrs}>WATCH NOW</button>
+      <button type="button" class="btn btn-watch-now ${canWatch?'':'is-disabled'}" ${watchAttrs}>${t('watchNow')}</button>
       ${hasAnyWW ? `
-      <button type="button" class="btn btn-ww ${isOpen ? 'open' : ''}" data-target="ww-${m.id}">
-        ${ICON_WW} WORLD WIDE STREAM ${ICON_CHEV}
+      <button type="button" class="btn btn-ww ${isOpen?'open':''}" data-target="ww-${m.id}">
+        ${ICON_WW} ${t('worldWide')} ${ICON_CHEV}
       </button>
-      <div class="ww-panel-wrap ${isOpen ? 'open' : ''}" id="ww-${m.id}">
+      <div class="ww-panel-wrap ${isOpen?'open':''}" id="ww-${m.id}">
         <div class="ww-panel-inner">
           ${wwOptions.map(o => `
-            <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id, m.langCode, o.idx))}">
+            <div class="ww-row" tabindex="0" data-url="${esc(buildPlayerUrl(m.id,m.langCode,o.idx))}">
               <span class="ww-flag">${o.flag}</span>
               <span class="ww-name">${o.name}</span>
               <span class="ww-code">${o.key.toUpperCase()}</span>
@@ -612,18 +1002,18 @@ function renderCard(m){
       </div>` : ''}
     `;
   } else if(m.status === 'COMPLETED'){
-    statusHtml = `<span class="status-badge completed"><span class="status-dot-mini"></span>COMPLETED</span>`;
-    actionsHtml = `<a class="btn btn-completed" href="${TELEGRAM_LINK}" target="_blank" rel="noopener noreferrer">THANK YOU</a>`;
+    statusHtml = `<span class="status-badge completed"><span class="status-dot"></span>Ended</span>`;
+    actionsHtml = `<a class="btn btn-completed" href="${TELEGRAM_LINK}" target="_blank" rel="noopener noreferrer">${t('thankYou')}</a>`;
   } else {
-    statusHtml = `<span class="status-badge upcoming"><span class="status-dot-mini"></span>UPCOMING</span>`;
-    actionsHtml = `<button type="button" class="btn btn-upcoming" data-upcoming-time="${esc(timeLabel)}">UPCOMING</button>`;
+    statusHtml = `<span class="status-badge upcoming"><span class="status-dot"></span>Soon</span>`;
+    actionsHtml = `<button type="button" class="btn btn-upcoming" data-upcoming-time="${esc(timeLabel)}">${t('upcoming')}</button>`;
   }
 
   return `
     <article class="card" data-match-id="${esc(m.id)}">
       <div class="thumb-wrap">
         <img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
-        ${langTag ? `<span class="lang-badge">${ICON_GLOBE}${esc(langTag)}</span>` : ''}
+        ${langTag ? `<span class="lang-badge">${ICON_GLOBE} ${esc(langTag)}</span>` : ''}
         ${statusHtml}
       </div>
       <div class="meta">
@@ -637,17 +1027,11 @@ function renderCard(m){
 }
 
 function attachHandlers(){
-  grid.addEventListener('click', (e) => {
+  grid.addEventListener('click', e => {
     const watchBtn = e.target.closest('.btn-watch-now');
-    if(watchBtn && watchBtn.dataset.url){
-      window.location.href = watchBtn.dataset.url;
-      return;
-    }
+    if(watchBtn && watchBtn.dataset.url){ window.location.href = watchBtn.dataset.url; return; }
     const row = e.target.closest('.ww-row');
-    if(row && row.dataset.url){
-      window.location.href = row.dataset.url;
-      return;
-    }
+    if(row && row.dataset.url){ window.location.href = row.dataset.url; return; }
     const wwBtn = e.target.closest('.btn-ww');
     if(wwBtn){
       const matchId = wwBtn.closest('.card').dataset.matchId;
@@ -662,32 +1046,28 @@ function attachHandlers(){
     }
     const upcomingBtn = e.target.closest('.btn-upcoming');
     if(upcomingBtn){
-      alert('This match is scheduled to start at:\n' + upcomingBtn.dataset.upcomingTime);
+      alert('Match scheduled:\n' + upcomingBtn.dataset.upcomingTime);
     }
   });
 
-  grid.addEventListener('keydown', (e) => {
+  grid.addEventListener('keydown', e => {
     if(e.key !== 'Enter' && e.key !== ' ') return;
     const row = e.target.closest('.ww-row');
-    if(row && row.dataset.url){
-      e.preventDefault();
-      window.location.href = row.dataset.url;
-    }
+    if(row && row.dataset.url){ e.preventDefault(); window.location.href = row.dataset.url; }
   });
 
-  searchInput.addEventListener('input', () => {
-    const q = searchInput.value.trim().toLowerCase();
-    if(!q){ renderGrid(allMatches); return; }
-    const filtered = allMatches.filter(m =>
-      m.title.toLowerCase().includes(q) || m.tournament.toLowerCase().includes(q)
-    );
-    renderGrid(filtered);
-  });
+  searchInput.addEventListener('input', () => renderGrid(filterMatches()));
+}
+
+function filterMatches(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q) return allMatches;
+  return allMatches.filter(m => m.title.toLowerCase().includes(q) || m.tournament.toLowerCase().includes(q));
 }
 
 function renderGrid(matches){
   if(!matches.length){
-    grid.innerHTML = `<div class="empty-state">No matches found.</div>`;
+    grid.innerHTML = `<div class="empty-state">${t('noResults')}</div>`;
     return;
   }
   grid.innerHTML = matches.map(renderCard).join('');
@@ -696,14 +1076,12 @@ function renderGrid(matches){
 function buildMatches(cnptvData, worldData){
   const cnptvMap = {};
   (cnptvData.matches || []).forEach(m => { cnptvMap[m.match_id] = m; });
-
   const matches = (worldData.matches || []).map(m => {
     const status = String(m.status || '').toUpperCase();
     const isLive = status === 'LIVE';
     const cnptv = cnptvMap[m.match_id];
     const cnptvUrl = cnptv && cnptv.cnptv_cdn ? cnptv.cnptv_cdn : null;
     const streams = m.streams || {};
-
     return {
       id: m.match_id,
       title: m.title || 'Match',
@@ -720,52 +1098,45 @@ function buildMatches(cnptvData, worldData){
       bd: streams.fancode_bd_cdn || null
     };
   });
-
-  matches.sort((a, b) => {
+  matches.sort((a,b) => {
     if(a.isLive !== b.isLive) return a.isLive ? -1 : 1;
     const at = a.time ? a.time.getTime() : Infinity;
     const bt = b.time ? b.time.getTime() : Infinity;
     return at - bt;
   });
-
   return matches;
 }
 
 async function refresh(isFirstLoad){
   try{
     const [cnptvData, worldData] = await Promise.all([
-      fetch(CNPTV_SOURCE, { cache:'no-store' }).then(r => r.json()).catch(() => ({ matches: [] })),
-      fetch(WORLD_SOURCE, { cache:'no-store' }).then(r => r.json())
+      fetch(CNPTV_SOURCE,{cache:'no-store'}).then(r => r.json()).catch(() => ({matches:[]})),
+      fetch(WORLD_SOURCE,{cache:'no-store'}).then(r => r.json())
     ]);
-
     lastUpdatedAt = parseUpdatedAt(worldData.updatedAt) || new Date();
-
     const snapshot = JSON.stringify(worldData.matches || []);
     if(!isFirstLoad && snapshot === lastWorldSnapshot){
-      lastUpdateEl.textContent = 'LAST UPDATE: ' + formatAbsoluteIST(lastUpdatedAt);
+      lastUpdateEl.textContent = `${t('lastUpdate')}: ${formatAbsoluteIST(lastUpdatedAt)}`;
       return;
     }
     lastWorldSnapshot = snapshot;
-
     allMatches = buildMatches(cnptvData, worldData);
-    const q = searchInput.value.trim().toLowerCase();
-    if(q){
-      renderGrid(allMatches.filter(m => m.title.toLowerCase().includes(q) || m.tournament.toLowerCase().includes(q)));
-    } else {
-      renderGrid(allMatches);
-    }
-    lastUpdateEl.textContent = 'LAST UPDATE: ' + formatAbsoluteIST(lastUpdatedAt);
+    renderGrid(filterMatches());
+    lastUpdateEl.textContent = `${t('lastUpdate')}: ${formatAbsoluteIST(lastUpdatedAt)}`;
+    hideErrorBanner();
+    applyBackground(false);
   } catch(err){
-    console.error('FanCode board failed to load:', err);
     if(isFirstLoad){
-      grid.innerHTML = `<div class="empty-state">Couldn't load the match board. Try refreshing.</div>`;
-      lastUpdateEl.textContent = 'LAST UPDATE: UNAVAILABLE';
+      grid.innerHTML = `<div class="empty-state">${t('loading')}</div>`;
+      lastUpdateEl.textContent = `${t('lastUpdate')}: ${t('unavailable')}`;
+      applyBackground(true);
+      showErrorBanner(t('errorMsg'));
     }
   }
 }
 
 function loadVisitorCounter(){
-  fetch(HIT_COUNTER_URL, { cache:'no-store' })
+  fetch(HIT_COUNTER_URL,{cache:'no-store'})
     .then(r => r.json())
     .then(data => {
       document.getElementById('vcTotal').textContent = data.total_formatted != null ? data.total_formatted : '—';
@@ -773,14 +1144,17 @@ function loadVisitorCounter(){
     })
     .catch(() => {
       const box = document.getElementById('visitorCounter');
-      if(box){ box.style.display = 'none'; }
+      if(box) box.style.display = 'none';
     });
 }
 
+applyTranslations();
+applyBackground(false);
 attachHandlers();
 refresh(true);
 loadVisitorCounter();
 setInterval(() => refresh(false), REFRESH_INTERVAL_MS);
+setInterval(() => applyBackground(hasError), 5 * 60 * 1000);
 
 document.getElementById('joinTelegramBtn').addEventListener('click', () => {
   window.open(TELEGRAM_LINK, '_blank');
@@ -793,14 +1167,13 @@ window.addEventListener('load', () => {
   }
 });
 document.getElementById('joinButton').addEventListener('click', () => {
-  sessionStorage.setItem('fc_telegram_joined', 'yes');
+  sessionStorage.setItem('fc_telegram_joined','yes');
   telegramModal.classList.add('hidden');
 });
 document.getElementById('closeButton').addEventListener('click', () => {
-  sessionStorage.setItem('fc_telegram_joined', 'yes');
+  sessionStorage.setItem('fc_telegram_joined','yes');
   telegramModal.classList.add('hidden');
 });
 </script>
-
 </body>
 </html>
